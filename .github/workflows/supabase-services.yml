@@ -1,0 +1,90 @@
+name: Supabase services
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/supabase-services.yml"
+      - "supabase/config.toml"
+      - "supabase/functions/**"
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SUPABASE_PROJECT_REF: ncqqilfkgdvnkgsiheok
+  SUPABASE_PUBLISHABLE_KEY: sb_publishable_F2O5TS614N3ktjdq_oO1ug_7dWLEJAW
+
+jobs:
+  deploy-functions:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+      TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      RU_STREAM_STATUS_URL: ${{ secrets.RU_STREAM_STATUS_URL }}
+      RU_STREAM_STATUS_TOKEN: ${{ secrets.RU_STREAM_STATUS_TOKEN }}
+    steps:
+      - name: Keep deployment idle during scheduled synchronization
+        if: github.event_name == 'schedule'
+        run: echo "Scheduled run only refreshes Steam data."
+      - name: Check deployment access
+        if: github.event_name != 'schedule'
+        id: access
+        shell: bash
+        run: |
+          if [[ -z "$SUPABASE_ACCESS_TOKEN" ]]; then
+            echo "::notice::SUPABASE_ACCESS_TOKEN is not configured; function deployment was skipped."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.access.outputs.available == 'true'
+      - uses: supabase/setup-cli@v1
+        if: steps.access.outputs.available == 'true'
+        with:
+          version: 2.110.0
+      - name: Update function secrets
+        if: steps.access.outputs.available == 'true'
+        shell: bash
+        run: |
+          args=()
+          [[ -n "$TWITCH_CLIENT_ID" ]] && args+=("TWITCH_CLIENT_ID=$TWITCH_CLIENT_ID")
+          [[ -n "$TWITCH_CLIENT_SECRET" ]] && args+=("TWITCH_CLIENT_SECRET=$TWITCH_CLIENT_SECRET")
+          [[ -n "$CRON_SECRET" ]] && args+=("CRON_SECRET=$CRON_SECRET")
+          [[ -n "$RU_STREAM_STATUS_URL" ]] && args+=("RU_STREAM_STATUS_URL=$RU_STREAM_STATUS_URL")
+          [[ -n "$RU_STREAM_STATUS_TOKEN" ]] && args+=("RU_STREAM_STATUS_TOKEN=$RU_STREAM_STATUS_TOKEN")
+          if (( ${#args[@]} )); then
+            supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" "${args[@]}"
+          fi
+      - name: Deploy Edge Functions
+        if: steps.access.outputs.available == 'true'
+        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF"
+
+  sync-steam-games:
+    needs: deploy-functions
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Refresh stale Steam data
+        shell: bash
+        run: |
+          if [[ -z "$CRON_SECRET" ]]; then
+            echo "::error::CRON_SECRET is not configured; automatic Steam synchronization cannot run."
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error \
+            --retry 2 \
+            --request POST \
+            "https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1/steam-game" \
+            --header "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            --header "Content-Type: application/json" \
+            --header "x-cron-secret: ${CRON_SECRET}" \
+            --data '{"action":"sync-stale"}'

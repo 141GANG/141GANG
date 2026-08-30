@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="#040404" name="theme-color"/>
+<meta content="ПРЕДЛОЖКА141 — каталог игр для будущих стримов Глеба Орлова (Sasavot) с данными из Steam." name="description"/>
+<title>ПРЕДЛОЖКА141 — SASAVOT</title>
+<style>body.standalone-view{min-height:100vh;overflow:auto}body.standalone-view .tier-panel,body.standalone-view .auction-panel,body.standalone-view .admin-portal{position:relative;inset:auto;min-height:100vh}</style>
+<link href="./assets/images/figma/favicon.svg" rel="icon" type="image/svg+xml"/>
+<link href="./assets/vendor/lenis.css" rel="stylesheet"/>
+<script defer src="./assets/vendor/lenis.min.js"></script>
+<script defer src="./assets/js/public/smooth-scroll.js?v=3.2"></script>
+<link href="./assets/css/public/fonts.css?v=3.1" rel="stylesheet"/>
+<link href="./assets/css/public/variables.css?v=3.2" rel="stylesheet"/>
+<link href="./assets/css/public/base.css?v=3.0" rel="stylesheet"/><link href="./assets/css/public/header-hero.css" rel="stylesheet"/><link href="./assets/css/public/catalog.css" rel="stylesheet"/><link href="./assets/css/public/modal.css" rel="stylesheet"/><link href="./assets/css/public/gang.css?v=3.2" rel="stylesheet"/><link href="./assets/css/public/auction.css?v=4.4" rel="stylesheet"/><link href="./assets/css/public/responsive.css" rel="stylesheet"/><link href="./assets/css/public/admin-portal.css?v=1.1" rel="stylesheet"/><link href="./assets/css/public/suggestions.css?v=3.1" rel="stylesheet"/><link href="./assets/css/public/media-submissions.css?v=4.1" rel="stylesheet"/><link href="./assets/css/public/figma-refresh.css?v=3.8" rel="stylesheet"/><link href="./assets/css/public/site-auth.css?v=1.0" rel="stylesheet"/><link href="./assets/css/public/figma-redesign.css?v=2.4" rel="stylesheet"/></head>
+<style>body.standalone-view> :not(.site-header):not(.tier-panel):not(.auction-panel):not(.admin-portal):not(.gang-panel):not(.suggestions-panel):not(.media-panel):not(.site-auth-panel){display:none!important}body.standalone-view{min-height:100vh;overflow:auto}body.standalone-view .site-header{position:relative;display:block}body.standalone-view .tier-panel,body.standalone-view .auction-panel,body.standalone-view .admin-portal{position:relative;inset:auto;min-height:100vh}body.standalone-view .tier-panel,body.standalone-view .auction-panel,body.standalone-view .gang-panel,body.standalone-view .suggestions-panel,body.standalone-view .media-panel,body.standalone-view .site-auth-panel{position:fixed}body.standalone-view .tier-panel[hidden],body.standalone-view .auction-panel[hidden],body.standalone-view .admin-portal[hidden]{display:block!important}</style>
+<body><a class="skip-link" href="#catalog">Перейти к каталогу</a><div aria-label="Загрузка сайта" aria-live="polite" class="site-loader" id="siteLoader" role="status">
+<div class="loader-content">
+<div aria-hidden="true" class="loader-visual">
+<img alt="" class="loader-brand" src="./assets/images/figma/141gang.svg"/>
+<span class="loader-line"></span>
+</div>
+</div>
+</div>
+
+
+<header class="site-header">
+<div class="shell nav">
+<a aria-label="141 Gang — на главную" class="brand" href="#top"><img alt="141 Gang" class="brand-logo" src="./assets/images/figma/141gang.svg"/></a>
+<nav aria-label="Основная навигация" class="nav-center">
+<button aria-controls="gangPanel" aria-expanded="false" class="nav-link gang-trigger" id="gangOpen" type="button"><i aria-hidden="true"></i>141 Gang</button>
+<a class="nav-link" href="#catalog">Каталог</a>
+<div class="nav-menu-wrap">
+<button aria-controls="servicesMenu" aria-expanded="false" class="nav-link nav-menu-toggle" id="servicesToggle" type="button">Сервисы<img alt="" aria-hidden="true" src="./assets/images/figma/chevron.svg"/></button>
+<div aria-label="Сервисы" class="nav-dropdown" hidden id="servicesMenu">
+<a class="tier-list-trigger" href="./tier-list.html">Тир-лист</a>
+<a class="auction-trigger" href="./auction.html">Аукцион</a>
+</div>
+</div>
+<a aria-label="Открыть локальное управление сайтом" class="nav-link admin-portal-trigger" href="./admin.html" id="adminPortalOpen" title="Локальное управление">Управление</a>
+</nav>
+<button aria-controls="siteAuthPanel" aria-expanded="false" class="account-auth-trigger" id="siteAuthOpen" type="button">Войти</button>
+<div class="status connection-status" hidden title="Подключение к каталогу"><span class="status-dot" id="statusDot"></span><span id="statusText">Подключение…</span></div>
+</div>
+</header>
+<main id="top">
+<section class="shell hero">
+<h1><span>141 Gang</span><span>Предложка</span></h1>
+<div class="hero-intro">
+<p>Здесь собраны игры, которые могут однажды появиться на стримах Sasavot. Каталог обновляется автором проекта, а следующую историю Глеб выбирает сам.</p>
+<button aria-controls="contentMenuPanel" aria-label="Перейти к выбору контента" class="content-menu-toggle" id="contentMenuToggle" type="button"><span>Предложить контент</span><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button>
+</div>
+<div aria-hidden="true" class="hero-data-registry">
+<strong id="totalCount">0</strong><strong id="upcomingCount">0</strong><strong id="nearestDate">—</strong>
+<div id="nextRelease" tabindex="-1"><span id="nextLabel"></span><span id="nextTitle"></span><span id="nextDateText"></span><span id="nextCountdown"></span><span hidden id="nextCoop"></span></div>
+<div id="heroHighlights"><button disabled id="quickLatest" type="button"></button><button disabled id="quickNearest" type="button"></button></div>
+</div>
+</section>
+<section aria-labelledby="contentMenuToggle" class="content-menu-panel" id="contentMenuPanel">
+<div class="shell content-menu">
+<button aria-controls="adminPortal" aria-expanded="false" class="content-menu-card proposal-desk-trigger" data-proposal-tab="games" type="button"><span>Предложить<br/>игру</span><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button>
+<button aria-controls="adminPortal" aria-expanded="false" class="content-menu-card content-menu-card-media proposal-desk-trigger" data-proposal-tab="media" type="button"><span>Предложить<br/>фото/видео</span><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button>
+<button aria-controls="featurePanel" aria-expanded="false" class="content-menu-card coming-soon-trigger" data-coming-description="Здесь появится отправка других форматов контента для будущих стримов." data-coming-kicker="Другой контент" data-coming-title="СКОРО" type="button"><span>Другой<br/>контент</span><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button>
+</div>
+</section>
+<section class="catalog-section" id="catalog">
+<span aria-hidden="true" class="catalog-compact-sentinel"></span>
+<div class="shell catalog-shell">
+<div class="catalog-toolbar reveal">
+<div class="toolbar-title"><h2><span>Каталог</span><span>предложений</span></h2><p class="visually-hidden" id="catalogSubtitle">Загрузка каталога…</p></div>
+<div class="controls">
+<label class="search-wrap" for="searchInput"><img alt="" aria-hidden="true" src="./assets/images/figma/search.svg"/><input autocomplete="off" class="search" id="searchInput" placeholder="Поиск" type="search"/></label>
+<div aria-label="Статус релиза" class="filters release-filters" role="group">
+<button class="filter-btn active" data-filter="all" type="button"><span>Все</span><small data-filter-count="all">0</small></button>
+<button class="filter-btn" data-filter="upcoming" type="button"><span>Скоро</span><small data-filter-count="upcoming">0</small></button>
+<button class="filter-btn" data-filter="released" type="button"><span>Вышли</span><small data-filter-count="released">0</small></button>
+<button class="filter-btn" data-filter="unknown" type="button"><span>Без даты</span><small data-filter-count="unknown">0</small></button>
+</div>
+<div class="catalog-menu-wrap">
+<button aria-controls="libraryFiltersMenu" aria-expanded="false" class="catalog-menu-toggle" id="libraryFiltersToggle" type="button">Фильтры<img alt="" aria-hidden="true" src="./assets/images/figma/chevron.svg"/></button>
+<div class="catalog-dropdown catalog-filter-menu" hidden id="libraryFiltersMenu">
+<div class="catalog-dropdown-title">Моя библиотека</div>
+<button class="filter-btn" data-library-filter="favorite" type="button"><span>Избранные</span><i aria-hidden="true"></i></button>
+<button class="filter-btn" data-library-filter="completed" type="button"><span>Пройдено</span><i aria-hidden="true"></i></button>
+<button class="filter-btn" data-library-filter="dropped" type="button"><span>Дропнуто</span><i aria-hidden="true"></i></button>
+<button class="filter-btn" data-library-filter="ignored" type="button"><span>Неинтересно</span><i aria-hidden="true"></i></button>
+<button class="catalog-filter-reset" id="libraryFiltersReset" type="button">Сбросить</button>
+</div>
+</div>
+<div class="catalog-menu-wrap">
+<button aria-controls="catalogSortMenu" aria-expanded="false" class="catalog-menu-toggle" id="catalogSortToggle" type="button">Сортировка<img alt="" aria-hidden="true" src="./assets/images/figma/chevron.svg"/></button>
+<div class="catalog-dropdown catalog-sort-menu" hidden id="catalogSortMenu">
+<div class="catalog-dropdown-title">Дата выхода</div>
+<button class="active" data-sort-value="release-newest" type="button">Сначала новые</button>
+<button data-sort-value="release-oldest" type="button">Сначала старые</button>
+<div class="catalog-dropdown-title">По рейтингу</div>
+<button data-sort-value="rating-desc" type="button">По убыванию</button>
+<button data-sort-value="rating-asc" type="button">По возрастанию</button>
+</div>
+<label class="visually-hidden" for="publicCatalogSort">Сортировка каталога</label><select class="visually-hidden" id="publicCatalogSort"><option value="release-newest">Сначала новые</option><option value="release-oldest">Сначала старые</option><option value="rating-desc">Рейтинг по убыванию</option><option value="rating-asc">Рейтинг по возрастанию</option></select>
+</div>
+</div>
+</div>
+<div aria-live="polite" class="catalog-stream" id="gameGrid"><div class="message"><strong>Загружаем каталог</strong>Подключаемся к базе игр…</div></div>
+</div>
+</section>
+</main>
+<div aria-hidden="true" class="gang-panel" hidden="" id="gangPanel">
+<div class="gang-backdrop" data-gang-close=""></div>
+<section aria-labelledby="gangTitle" aria-modal="true" class="gang-dialog" role="dialog">
+<header class="gang-head">
+<div><span class="gang-kicker">В эфире и вне эфира</span><h2 id="gangTitle">141 GANG</h2><p>Стримеры и участники сообщества в одном месте.</p></div>
+<button aria-label="Закрыть 141 GANG" class="gang-close" id="gangClose" type="button">×</button>
+</header>
+<div aria-live="polite" class="gang-status" id="gangStatus">Проверяем, кто сейчас в эфире…</div>
+<div class="gang-grid" id="gangGrid"></div>
+<div aria-hidden="true" class="gang-detectors" id="gangDetectors"></div>
+</section>
+</div>
+<div aria-hidden="true" class="auction-panel" hidden="" id="auctionPanel">
+<div class="auction-backdrop" data-auction-close=""></div>
+<section aria-labelledby="auctionTitle" aria-modal="true" class="auction-dialog" role="dialog">
+<button aria-label="Закрыть окно" class="auction-close" id="auctionClose" type="button">×</button>
+<div class="auction-workspace" id="auctionWorkspace">
+<h2 class="visually-hidden" id="auctionTitle">Центр аукциона</h2>
+<aside class="auction-sidebar">
+  <strong>141</strong>
+  <nav aria-label="Разделы аукциона" class="auction-tabs">
+    <button aria-label="Лоты и таймер" class="active" data-auction-tab="manage" id="auctionManageTab" type="button"><span>⌁</span><b>Лоты</b></button>
+    <button aria-label="Колесо розыгрыша" data-auction-tab="wheel" type="button"><span>◉</span><b>Колесо</b></button>
+    <button aria-label="История аукционов" data-auction-tab="history" type="button"><span>▥</span><b>История</b></button>
+    <button aria-label="Правила аукциона" data-auction-tab="rules" type="button"><span>≡</span><b>Правила</b></button>
+    <button aria-label="Настройки аукциона" data-auction-tab="settings" type="button"><span>⚙</span><b>Настройки</b></button>
+    <button aria-label="Оверлей трансляции" data-auction-tab="overlay" type="button"><span>◫</span><b>Оверлей</b></button>
+  </nav>
+  <span class="auction-storage-badge" id="auctionAccessBadge"><i aria-hidden="true"></i> Только просмотр</span>
+</aside>
+<main class="auction-content"><section class="auction-tab-panel" data-auction-panel="wheel" hidden><header class="auction-wheel-toolbar"><div class="auction-bank"><span>Общий банк</span><strong id="auctionTotal">0 ₽</strong></div><div><span>Участников</span><strong id="auctionCount">0</strong></div><label class="auction-hide"><input id="auctionHideEliminated" type="checkbox"> Скрыть выбывших</label><button aria-label="Открыть быстрые настройки" aria-expanded="false" class="auction-settings-toggle" id="auctionSettingsToggle" title="Быстрые настройки" type="button">⚙</button></header><div class="auction-layout"><section class="auction-board"><div aria-live="polite" class="auction-list" id="auctionList"></div></section>
+<aside class="auction-wheel-panel"><div class="auction-pointer" aria-hidden="true"></div><div class="auction-wheel" id="auctionWheel"><div><b>141</b><span>Аукцион</span></div></div><button class="auction-spin" disabled id="auctionSpin" type="button">Прокрутить колесо</button><p aria-live="polite" class="auction-result" id="auctionResult">Колесо готово к розыгрышу</p><section class="auction-winner-card" hidden id="auctionWinnerCard"><span>Победитель</span><h3 id="auctionWinnerName">—</h3><div class="auction-winner-stats"><p>Шанс лота <strong id="auctionWinnerChance">0%</strong></p><p>Лоты не дороже <strong id="auctionWinnerCumulative">0%</strong></p></div><div><button id="auctionWinnerConfirm" type="button">Подтвердить</button><button id="auctionWinnerReroll" type="button">Реролл</button><button id="auctionWinnerRemove" type="button">Исключить</button></div></section><div class="auction-quick-settings" hidden id="auctionSettings"><span>Быстрые настройки</span><label><input id="auctionQuickHide" type="checkbox"> Скрыть выбывших</label><label><input id="auctionQuickChances" type="checkbox"> Показывать шансы</label><button data-open-auction-settings type="button">Все настройки →</button></div></aside></div></section>
+<section class="auction-tab-panel auction-settings-page" data-auction-panel="settings" hidden><header class="auction-page-head"><div><span>Персонализация</span><h3>Настройки аукциона</h3><p>Параметры сохраняются на этом устройстве и применяются сразу.</p></div><button id="auctionSettingsReset" type="button">Сбросить</button></header><div class="auction-settings-grid">
+<section class="auction-settings-card"><h4>◷ Таймер</h4><div class="auction-setting-row"><div><strong>Начальное время</strong><span>Устанавливается при сбросе таймера</span></div><label class="auction-number"><input id="auctionInitialMinutes" min="1" max="360" type="number" value="60"><span>мин.</span></label></div><div class="auction-setting-row"><div><strong>Показывать общее время</strong><span>Таймер остаётся видимым на экране рулетки</span></div><label class="auction-switch"><input id="auctionShowTimer" type="checkbox"><i></i></label></div></section>
+<section class="auction-settings-card"><h4>◉ Рулетка</h4><div class="auction-setting-row"><div><strong>Режим розыгрыша</strong><span>Определить победителя или исключать по одному</span></div><div class="auction-segment"><label><input checked name="auctionMode" type="radio" value="winner"><span>Победитель</span></label><label><input name="auctionMode" type="radio" value="elimination"><span>Выбывание</span></label></div></div><div class="auction-setting-row"><div><strong>Длительность вращения</strong><span>От 1 секунды, без верхнего ограничения</span></div><label class="auction-number"><input id="auctionSpinDuration" min="1" step="1" type="number" value="6"><span>сек.</span></label></div><div class="auction-setting-row"><div><strong>Случайная длительность</strong><span>Делает момент остановки менее предсказуемым</span></div><label class="auction-switch"><input id="auctionRandomDuration" type="checkbox"><i></i></label></div><div class="auction-random-range" hidden id="auctionRandomRange"><label>От, сек. <input id="auctionSpinMin" min="1" step="1" type="number" value="4"></label><label>До, сек. <input id="auctionSpinMax" min="1" step="1" type="number" value="10"></label></div></section>
+<section class="auction-settings-card"><h4>◌ Внешний вид</h4><div class="auction-setting-row"><div><strong>Основной цвет</strong><span>Акцент интерфейса и выбранного лота</span></div><div class="auction-colors" id="auctionAccentColors"><button aria-label="Красный" class="active" data-color="#e33b28" style="--swatch:#e33b28"></button><button aria-label="Оранжевый" data-color="#ee9c2d" style="--swatch:#ee9c2d"></button><button aria-label="Синий" data-color="#228be6" style="--swatch:#228be6"></button><button aria-label="Зелёный" data-color="#4dbb78" style="--swatch:#4dbb78"></button><button aria-label="Фиолетовый" data-color="#9c74df" style="--swatch:#9c74df"></button></div></div><div class="auction-setting-row"><div><strong>Показывать общий банк</strong><span>Скрывает сумму банка на экране рулетки</span></div><label class="auction-switch"><input checked id="auctionShowBank" type="checkbox"><i></i></label></div><div class="auction-setting-row"><div><strong>Показывать шансы на победу</strong><span>Скрыть проценты для большей интриги</span></div><label class="auction-switch"><input checked id="auctionShowChances" type="checkbox"><i></i></label></div><div class="auction-setting-row"><div><strong>Компактный список</strong><span>Больше участников помещается без прокрутки</span></div><label class="auction-switch"><input id="auctionCompactList" type="checkbox"><i></i></label></div><div class="auction-setting-row"><div><strong>Автоматически скрывать выбывших</strong><span>Убирает исключённые лоты из списка</span></div><label class="auction-switch"><input id="auctionAutoHide" type="checkbox"><i></i></label></div></section></div></section><section class="auction-tab-panel active" data-auction-panel="manage"><div class="auction-setup-notice" hidden id="auctionSetupNotice"></div><nav aria-label="Инструменты управления" class="auction-manage-tabs" hidden><button class="active" data-manage-view="lots" type="button">▤ Лоты</button><button data-manage-view="rules" type="button">▤ Правила</button></nav><div class="auction-manage-view active" data-manage-panel="lots"><div class="auction-manage-grid"><section class="auction-admin" id="auctionAdmin"><header><div><span>Управление лотами</span><p>Сумма лота определяет его вес и шанс на колесе.</p></div><div class="auction-admin-actions"><button aria-label="Сохранить аукцион" id="auctionSave" title="Сохранить" type="button">⌑</button><button aria-label="Добавить лот" class="auction-admin-toggle" id="auctionAdminToggle" title="Добавить лот" type="button">＋</button></div></header><form class="auction-form" id="auctionForm"><input id="auctionItemTitle" maxlength="120" placeholder="Название нового лота" required><input id="auctionItemAmount" min="1" placeholder="Сумма, ₽" required step="1" type="number"><button type="submit">Добавить лот</button></form><div class="auction-manage-search"><input id="auctionSearch" placeholder="Поиск среди лотов..." type="search"><button id="auctionNew" type="button">Новый аукцион</button></div><div class="auction-manage-list" id="auctionManageList"></div></section>
+<aside class="auction-side-column"><section class="auction-timer"><span>До завершения аукциона</span><strong id="auctionTimer">00:00:00</strong><div class="auction-timer-actions"><button aria-label="Запустить или поставить на паузу" id="auctionTimerToggle" title="Запуск / пауза" type="button">▶</button><button aria-label="Сбросить таймер" id="auctionTimerReset" title="Сбросить" type="button">↻</button></div><label>Величина изменения <span class="auction-step-field"><input id="auctionTimerStep" min="1" type="number" value="10"><select id="auctionTimerUnit"><option value="1">секунд</option><option value="60">минут</option></select></span></label><div><button aria-label="Убавить время" id="auctionTimerSubtract" title="Убавить" type="button">−</button><button aria-label="Прибавить время" id="auctionTimerAdd" title="Прибавить" type="button">+</button></div></section><section class="auction-history"><header><span>Последние изменения</span><button aria-label="Очистить журнал" id="auctionHistoryClear" title="Очистить журнал" type="button">×</button></header><div id="auctionHistory"></div></section></aside></div></div><section class="auction-manage-view auction-rules" data-manage-panel="rules"><header><div><span>Блокнот аукциона</span><h3>Правила</h3><p>Текст сохраняется автоматически на этом устройстве.</p></div><span aria-live="polite" id="auctionRulesStatus">Сохранено</span></header><div class="auction-editor-toolbar" aria-label="Форматирование правил"><button data-editor-command="undo" title="Отменить" type="button">↶</button><button data-editor-command="redo" title="Повторить" type="button">↷</button><button data-editor-command="formatBlock" data-editor-value="h2" title="Заголовок" type="button">H</button><button data-editor-command="bold" title="Жирный" type="button"><b>B</b></button><button data-editor-command="italic" title="Курсив" type="button"><i>I</i></button><button data-editor-command="insertUnorderedList" title="Маркированный список" type="button">☷</button><button data-editor-command="insertOrderedList" title="Нумерованный список" type="button">1.</button><button data-editor-clear title="Очистить оформление" type="button">Tx</button></div><div aria-label="Текст правил аукциона" class="auction-rules-editor" contenteditable="true" id="auctionRulesEditor" role="textbox"><h2>Правила аукциона</h2><p>Нажмите сюда, чтобы составить правила для участников.</p><ul><li>Опишите порядок проведения розыгрыша.</li><li>Укажите ограничения для ставок и лотов.</li></ul></div></section></section>
+<section class="auction-tab-panel auction-archive-page" data-auction-panel="history" hidden>
+  <header class="auction-page-head"><div><span>Архив</span><h3>История аукционов</h3><p>Подтверждённые победители и завершённые сессии сохраняются на этом устройстве.</p></div><button id="auctionHistoryExport" type="button">Экспорт</button></header>
+  <div class="auction-archive-summary"><article><span>Сессий</span><strong id="auctionArchiveCount">0</strong></article><article><span>Розыгрышей</span><strong id="auctionSpinCount">0</strong></article><article><span>Последний победитель</span><strong id="auctionLastWinner">—</strong></article></div>
+  <div class="auction-archive-list" id="auctionArchiveList"></div>
+</section>
+<section class="auction-tab-panel auction-overlay-page" data-auction-panel="overlay" hidden>
+  <header class="auction-page-head"><div><span>OBS / трансляция</span><h3>Оверлей аукциона</h3><p>Настройте компактный виджет и используйте предпросмотр как ориентир для сцены.</p></div><button id="auctionOverlayCopy" type="button">Копировать ссылку</button></header>
+  <div class="auction-overlay-layout">
+    <section class="auction-overlay-preview" id="auctionOverlayPreview"><div class="auction-overlay-card"><span>141 AUCTION</span><strong id="auctionOverlayTimer">10:00</strong><p id="auctionOverlayLeader">Лидер появится после добавления лотов</p><div><b id="auctionOverlayBank">0 ₽</b><small>общий банк</small></div></div></section>
+    <section class="auction-settings-card"><h4>Элементы виджета</h4><div class="auction-setting-row"><div><strong>Показывать таймер</strong><span>Оставить обратный отсчёт в кадре</span></div><label class="auction-switch"><input checked id="auctionOverlayShowTimer" type="checkbox"><i></i></label></div><div class="auction-setting-row"><div><strong>Показывать лидера</strong><span>Название самого крупного лота</span></div><label class="auction-switch"><input checked id="auctionOverlayShowLeader" type="checkbox"><i></i></label></div><div class="auction-setting-row"><div><strong>Показывать банк</strong><span>Общая сумма активных лотов</span></div><label class="auction-switch"><input checked id="auctionOverlayShowBank" type="checkbox"><i></i></label></div><div class="auction-setting-row"><div><strong>Прозрачный фон</strong><span>Для Browser Source в OBS</span></div><label class="auction-switch"><input id="auctionOverlayTransparent" type="checkbox"><i></i></label></div></section>
+  </div>
+</section>
+<footer class="auction-footnote"><span>Вероятность</span><p>Вес участника равен сумме его лота. Выбывшие участники не попадают в следующее вращение.</p></footer>
+</main></div>
+</section>
+</div>
+<div aria-hidden="true" class="suggestions-panel" hidden id="suggestionsPanel">
+<div class="suggestions-backdrop" data-suggestions-close=""></div>
+<section aria-labelledby="suggestionsTitle" aria-modal="true" class="suggestions-dialog" role="dialog">
+<header class="suggestions-head">
+<div><span>Выбор следующей игры</span><h2 id="suggestionsTitle">Рейтинг предложки</h2><p>Зрители ставят лайки и дизлайки уже рассмотренным играм. Чем выше доля лайков, тем выше игра в списке.</p></div>
+<button aria-label="Закрыть рейтинг предложки" class="suggestions-close" id="suggestionsClose" type="button">×</button>
+</header>
+<nav aria-label="Разделы предложки" class="suggestions-tabs">
+<button class="active" data-suggestions-tab="rating" type="button">Рейтинг</button>
+<button data-suggestions-admin-only data-suggestions-tab="submit" hidden type="button">Предложить игру</button>
+</nav>
+<div class="suggestions-notice" id="suggestionsNotice" role="status"></div>
+<section class="suggestions-view active" data-suggestions-panel="rating">
+<div class="suggestions-rating-head">
+<div><span>Оценка зрителей</span><h3>Хотят ли увидеть эту игру?</h3></div>
+<label>Сортировка<select id="suggestionsSort"><option value="rating">По проценту лайков</option><option value="activity">По числу оценок</option><option value="newest">Сначала новые</option><option value="comments">По обсуждениям</option></select></label>
+</div>
+<div aria-live="polite" class="suggestions-grid" id="suggestionsGrid"><div class="suggestions-empty">Загружаем рейтинг…</div></div>
+</section>
+<section class="suggestions-view" data-suggestions-panel="submit" hidden>
+<div class="suggestion-submit-layout">
+<form class="suggestion-form" id="suggestionForm" novalidate>
+<span class="suggestion-step">Шаг 1 · Steam</span>
+<h3>Предложить игру</h3>
+<p>Вставь ссылку на страницу игры. Отправка доступна только аккаунту из таблицы <code>site_admins</code>.</p>
+<label for="suggestionSteamUrl">Ссылка на Steam</label>
+<div class="suggestion-steam-row"><input id="suggestionSteamUrl" maxlength="500" placeholder="https://store.steampowered.com/app/..." required type="url"><button id="suggestionPreviewButton" type="button">Проверить</button></div>
+<div class="suggestion-preview" hidden id="suggestionPreview">
+<img alt="" id="suggestionPreviewImage">
+<div><span>Найдена в Steam</span><strong id="suggestionPreviewTitle">—</strong><p id="suggestionPreviewText">—</p></div>
+</div>
+<label for="suggestionComment">Комментарий <small>необязательно, до 300 символов</small></label>
+<textarea disabled id="suggestionComment" maxlength="300" placeholder="Почему эту игру стоит показать на стриме?"></textarea>
+<div class="suggestion-form-actions"><button disabled id="suggestionSubmitButton" type="submit">Отправить предложение</button><small>Игра попадёт в административную очередь перед публикацией.</small></div>
+</form>
+<aside class="suggestion-rules">
+<span>Как это работает</span>
+<ol><li>Steam ID защищает список от дубликатов.</li><li>Добавлять игры может только администратор.</li><li>Игра проходит проверку перед публикацией.</li><li>После одобрения она появляется в рейтинге.</li></ol>
+<p>Добавлять и модерировать игры может только администратор. После одобрения любой зритель может поставить один лайк или дизлайк и изменить свою оценку.</p>
+</aside>
+</div>
+</section>
+</section>
+</div>
+<div aria-hidden="true" class="suggestion-comments-panel" hidden id="suggestionCommentsPanel">
+<div class="suggestion-comments-backdrop" data-suggestion-comments-close=""></div>
+<section aria-labelledby="suggestionCommentsTitle" aria-modal="true" class="suggestion-comments-dialog" role="dialog">
+<button aria-label="Закрыть комментарии" class="suggestions-close" id="suggestionCommentsClose" type="button">×</button>
+<span>Обсуждение игры</span><h2 id="suggestionCommentsTitle">Комментарии</h2>
+<div class="suggestion-comments-list" id="suggestionCommentsList"></div>
+<form class="suggestion-comment-form" id="suggestionCommentForm"><textarea id="suggestionCommentBody" maxlength="300" placeholder="Оставить комментарий…" required></textarea><div><button class="suggestion-comment-delete" hidden id="suggestionCommentDelete" type="button">Удалить мой</button><button type="submit">Сохранить комментарий</button></div></form>
+</section>
+</div>
+<div aria-hidden="true" class="media-panel" hidden id="mediaPanel">
+<div class="media-backdrop" data-media-close></div>
+<section aria-labelledby="mediaTitle" aria-modal="true" class="media-dialog" role="dialog">
+<header class="media-head">
+<div><span>Материалы для будущего стрима</span><h2 id="mediaTitle">Видосы</h2><p>Загрузи фотографии и ролики, добавь название и отправь подборку на модерацию.</p></div>
+<button aria-label="Закрыть раздел «Видосы»" class="media-close" id="mediaClose" type="button">×</button>
+</header>
+<div aria-live="polite" class="media-notice" id="mediaNotice" role="status"></div>
+<div class="media-workspace" id="mediaWorkspace">
+<nav aria-label="Разделы медиапредложки" class="media-tabs">
+<button class="active" data-media-tab="upload" type="button">Предложить материал</button>
+<button data-media-tab="published" type="button">Опубликовано</button>
+</nav>
+<section class="media-view active" data-media-view="upload">
+<section class="media-locked" hidden id="mediaLocked">
+<span>Доступ администратора</span>
+<h3>Отправка доступна только администратору</h3>
+<p>Войди в аккаунт, добавленный в <code>site_admins</code>. Обычным посетителям доступен просмотр опубликованных материалов.</p>
+<button id="mediaLoginButton" type="button">Войти как администратор</button>
+</section>
+<form class="media-form" id="mediaForm" novalidate>
+<div class="media-form-copy"><span>Шаг 1 · Файлы</span><h3>Что посмотрим на стриме?</h3><p>Выбери до 8 фотографий и видео в любом сочетании. До отправки каждый файл можно заменить или удалить.</p></div>
+<label class="media-dropzone" for="mediaFileInput" id="mediaDropzone" tabindex="0">
+<input accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" id="mediaFileInput" multiple type="file">
+<i aria-hidden="true">＋</i><strong>Выбрать фото и видео</strong><span>или перетащи файлы сюда · до 8 файлов, каждый до 100 МБ</span>
+</label>
+<div aria-live="polite" class="media-selected" hidden id="mediaSelected"></div>
+<div class="media-fields">
+<label for="mediaSubmissionTitle">Название <small>обязательно, до 120 символов</small><input id="mediaSubmissionTitle" maxlength="120" placeholder="Например: смешной момент со стрима" required></label>
+<label for="mediaSubmissionComment">Описание или комментарий <small>по желанию, до 1000 символов</small><textarea id="mediaSubmissionComment" maxlength="1000" placeholder="Добавь контекст или пояснение для модератора"></textarea></label>
+</div>
+<div class="media-submit-row"><button disabled id="mediaSubmitButton" type="submit">Отправить на модерацию</button><small id="mediaSubmitHint">Сначала выбери файлы и добавь название.</small></div>
+</form>
+</section>
+<section class="media-view" data-media-view="published" hidden>
+<div class="media-queue-head">
+<div><span>После модерации</span><h3>Опубликованные материалы</h3><p>Здесь появляются фотографии и ролики, которые одобрил администратор.</p></div>
+<div class="media-queue-controls"><button id="mediaRefreshButton" title="Обновить опубликованные материалы" type="button">↻</button></div>
+</div>
+<div aria-live="polite" class="media-queue" id="mediaQueue"><div class="media-empty">Загружаем опубликованные материалы…</div></div>
+</section>
+</div>
+</section>
+</div>
+<div aria-hidden="true" class="site-auth-panel" hidden id="siteAuthPanel">
+<div class="site-auth-backdrop" data-site-auth-close=""></div>
+<section aria-labelledby="siteAuthTitle" aria-modal="true" class="site-auth-dialog" role="dialog">
+<button aria-label="Закрыть окно входа" class="site-auth-close" id="siteAuthClose" type="button">×</button>
+<span class="site-auth-kicker">Личный профиль</span>
+<h2 id="siteAuthTitle">Войти на сайт</h2>
+<p class="site-auth-description" id="siteAuthDescription">Выбери удобный аккаунт. Пароль останется у сервиса авторизации.</p>
+<div class="site-auth-providers" id="siteAuthProviders">
+<button class="site-auth-provider is-yandex" data-auth-provider="custom:yandex" type="button"><span aria-hidden="true">Я</span><strong>Войти через Яндекс ID</strong></button>
+<button class="site-auth-provider is-google" data-auth-provider="google" type="button"><span aria-hidden="true">G</span><strong>Войти через Google</strong></button>
+</div>
+<div class="site-auth-account" hidden id="siteAuthAccount">
+<img alt="" class="site-auth-avatar" id="siteAuthAvatar"/>
+<div><strong id="siteAuthName"></strong><span id="siteAuthEmail"></span></div>
+<button class="site-auth-logout" id="siteAuthLogout" type="button">Выйти</button>
+</div>
+<p aria-live="polite" class="site-auth-notice" id="siteAuthNotice" role="status"></p>
+</section>
+</div>
+<div aria-hidden="true" class="feature-panel" hidden id="featurePanel"><div class="feature-backdrop" data-feature-close=""></div><section aria-labelledby="featureTitle" aria-modal="true" class="feature-dialog" role="dialog"><button aria-label="Закрыть окно" class="feature-close" id="featureClose" type="button">×</button><span id="featureKicker">Новый раздел</span><h2 id="featureTitle">Скоро</h2><p id="featureDescription">Функция находится в разработке.</p></section></div>
+<div aria-hidden="true" class="admin-portal" hidden="" id="adminPortal">
+<div class="admin-portal-backdrop" data-admin-portal-close=""></div>
+<section aria-labelledby="adminPortalTitle" aria-modal="true" class="admin-portal-dialog" role="dialog">
+<header class="admin-portal-head"><div><span>Защищённый раздел</span><h2 id="adminPortalTitle">Управление каталогом</h2><p>Войди с существующими данными администратора — все инструменты теперь находятся прямо на сайте.</p></div><button aria-label="Закрыть управление каталогом" class="admin-portal-close" id="adminPortalClose" type="button">×</button></header>
+<div class="admin-portal-session"><span id="sessionEmail">Не выполнен вход</span><button class="btn btn-danger" hidden="" id="logoutButton" type="button">Выйти</button></div>
+<div class="admin-portal-body">
+<div class="notice" id="notice" role="status"></div>
+<section class="panel login-panel" hidden="" id="configError">
+<div class="panel-head"><h2>Supabase не настроен</h2></div>
+<div class="panel-body">Открой <strong>config.js</strong> и вставь Project URL и публичный publishable/anon key.</div>
+</section>
+<section class="panel login-panel" hidden="" id="loginSection">
+<div class="panel-head">
+<h2>Вход владельца</h2>
+<p>Используй email и пароль пользователя из Supabase Auth.</p>
+</div>
+<div class="panel-body">
+<form id="loginForm">
+<div class="field">
+<label for="email">Email</label>
+<input autocomplete="username" id="email" placeholder="you@example.com" required="" type="email"/>
+</div>
+<div class="field">
+<label for="password">Пароль</label>
+<input autocomplete="current-password" id="password" minlength="6" placeholder="••••••••" required="" type="password"/>
+</div>
+<button class="btn btn-primary" id="loginButton" type="submit">Войти</button>
+</form>
+</div>
+</section>
+<section hidden="" id="adminSection">
+<nav aria-label="Разделы предложки" class="proposal-admin-nav" id="proposalAdminNav">
+<span>Предложка</span>
+<button class="active" data-admin-view="games" type="button">Игры</button>
+<button data-admin-view="media" type="button">Фото/видео</button>
+<button data-admin-view="catalog" type="button">Каталог</button>
+</nav>
+<div class="connection-card">Steam-данные загружаются через защищённую Supabase Edge Function. Игры и даты сразу синхронизируются с публичным каталогом.</div>
+<article class="panel suggestion-moderation">
+<div class="panel-head suggestion-moderation-head">
+<div><span class="suggestion-step">Предложка игр</span><h2>Очередь модерации</h2><p>Проверь данные игры, открой страницу Steam и реши, публиковать её в каталоге или оставить в очереди.</p></div>
+<button class="btn" id="suggestionModerationRefresh" type="button">Обновить</button>
+</div>
+<div class="suggestion-moderation-filters" role="group" aria-label="Статус заявок">
+<button class="active" data-suggestion-status="pending" type="button">На рассмотрении <span id="suggestionPendingCount">0</span></button>
+<button data-suggestion-status="approved" type="button">Опубликованные</button>
+<button data-suggestion-status="selected" type="button">Выбрана</button>
+<button data-suggestion-status="rejected" type="button">Отклонённые</button>
+<button data-suggestion-status="completed" type="button">Пройденные</button>
+<button data-suggestion-status="archived" type="button">Архив</button>
+</div>
+<div class="proposal-game-tools">
+<label class="proposal-search"><img alt="" aria-hidden="true" src="./assets/images/figma/search.svg"/><input autocomplete="off" id="proposalGameSearch" placeholder="Поиск" type="search"/></label>
+<details class="proposal-filter-box" open><summary>Фильтры</summary><fieldset><legend>Дата выхода</legend><label><input data-proposal-release="released" type="checkbox"/> Вышла</label><label><input data-proposal-release="upcoming" type="checkbox"/> Скоро</label><label><input data-proposal-release="unknown" type="checkbox"/> Без даты</label></fieldset><fieldset><legend>Количество игроков</legend><div><label>От <input id="proposalPlayersMin" inputmode="numeric" min="1" placeholder="Мин" type="number"/></label><label>До <input id="proposalPlayersMax" inputmode="numeric" min="1" placeholder="Макс" type="number"/></label></div></fieldset><label class="proposal-sort"><span>Сортировка</span><select id="proposalGameSort"><option value="oldest">Сначала старые</option><option value="newest">Сначала новые</option><option value="title">По названию</option></select></label></details>
+</div>
+<div aria-live="polite" class="suggestion-moderation-list" id="suggestionModerationList"><div class="suggestions-empty">Войди, чтобы загрузить очередь.</div></div>
+</article>
+<article class="panel admin-media-panel" id="adminMediaPanel">
+<div class="admin-media-status-tabs" role="group" aria-label="Статус материалов">
+<button class="active" data-admin-media-status="pending" type="button">На рассмотрении <span id="adminMediaPendingCount">0</span></button>
+<button data-admin-media-status="downloaded" type="button">Скачанное <span id="adminMediaDownloadedCount">0</span></button>
+<button class="admin-media-refresh" id="adminMediaRefresh" type="button" aria-label="Обновить материалы" title="Обновить материалы">↻</button>
+</div>
+<div aria-live="polite" class="admin-media-list" id="adminMediaList"><div class="media-empty">Войди, чтобы загрузить материалы.</div></div>
+</article>
+<div class="layout">
+<article class="panel">
+<div class="panel-head">
+<h2 id="formTitle">Добавить игру</h2>
+<p>Вставь ссылку Steam. После загрузки форма сама свернётся — останется только комментарий и публикация.</p>
+</div>
+<div class="panel-body">
+<form id="gameForm" novalidate="">
+<div class="steam-step" id="steamStep">
+<div class="field">
+<label for="steamUrl">Ссылка на Steam <span class="required">*</span></label>
+<div class="steam-row">
+<input id="steamUrl" maxlength="500" placeholder="https://store.steampowered.com/app/..." required="" type="url"/>
+<button class="btn btn-steam" id="steamImportButton" type="button">Загрузить игру</button>
+</div>
+<p class="hint">Вставь ссылку — Steam сам заполнит название, описание, обложку и дату.</p>
+<div aria-hidden="true" class="import-progress"></div>
+</div>
+</div>
+<div aria-hidden="true" class="details-stage" id="detailsStage">
+<div aria-live="polite" class="steam-preview" id="steamPreview">
+<img alt="Предпросмотр обложки Steam" id="steamPreviewImage"/>
+<div class="steam-preview-body">
+<span>Игра готова к публикации</span>
+<h3 id="steamPreviewTitle">—</h3>
+<p id="steamPreviewText">—</p>
+<div class="preview-chips">
+<span class="release-chip" id="steamPreviewRelease">—</span>
+<span class="coop-preview-chip" hidden="" id="steamPreviewCoop">—</span>
+</div>
+<button class="change-game-btn" id="changeGameButton" type="button">Выбрать другую игру</button>
+</div>
+</div>
+<div class="coop-editor" id="coopEditor">
+<div class="coop-editor-head"><div><span>Настройка после импорта</span><h3>Количество игроков в кооперативе</h3><p>Steam заполняет данные автоматически, но их можно уточнить вручную.</p></div><label class="coop-toggle" for="isCoop"><input id="isCoop" type="checkbox"/><span>Есть кооператив</span></label></div>
+<div class="coop-player-fields">
+<label for="coopMinPlayers">Минимум игроков<input id="coopMinPlayers" max="64" min="2" placeholder="2" type="number"/></label>
+<label for="coopMaxPlayers">Максимум игроков<input id="coopMaxPlayers" max="64" min="2" placeholder="4" type="number"/></label>
+</div>
+<p class="coop-editor-hint" id="coopEditorHint">Автоматические значения Steam можно оставить без изменений.</p>
+<input id="coopSource" maxlength="120" type="hidden"/>
+</div>
+<div class="comment-focus">
+<label for="authorComment">Комментарий автора <span class="optional">необязательно</span></label>
+<textarea id="authorComment" maxlength="1200" placeholder="Почему эту игру стоит показать на стриме?"></textarea>
+</div>
+<div class="form-actions compact-actions">
+<button class="btn btn-primary" id="saveButton" type="submit">Опубликовать игру</button>
+<button class="btn" hidden="" id="cancelEditButton" type="button">Отменить редактирование</button>
+</div>
+</div>
+<div aria-hidden="true" class="machine-fields">
+<input id="title" maxlength="120" required=""/>
+<input id="coverUrl" maxlength="1000" type="url"/>
+<textarea id="description" maxlength="2000" required=""></textarea>
+<input id="releaseDate" type="date"/>
+<input id="releaseDateText" maxlength="120"/>
+<input id="displayOrder" max="9999" min="0" type="number" value="0"/>
+<input id="steamAppId" min="1" readonly="" type="number"/>
+<input id="coopType" maxlength="20"/>
+<div aria-live="polite" class="release-status-auto unknown" id="releaseStatusAuto">
+<small id="releaseStatusHint">Статус определяется автоматически.</small>
+<span class="release-status-badge" id="releaseStatusBadge">Без даты</span>
+</div>
+<input checked="" id="published" type="checkbox"/>
+</div>
+</form>
+</div>
+</article>
+<article class="panel">
+<div class="panel-head catalog-head">
+<div>
+<h2>Текущий каталог</h2>
+<p>Найди игру по названию или выбери удобный порядок списка.</p>
+</div>
+<span class="count" id="countLabel">0 игр</span>
+</div>
+<div class="catalog-controls" role="search">
+<div class="catalog-search">
+<label class="catalog-control-label" for="catalogSearch">Поиск по названию</label>
+<span class="catalog-search-field">
+<span aria-hidden="true" class="catalog-search-icon"></span>
+<input autocomplete="off" id="catalogSearch" placeholder="Например, Island Beekeeper" type="search"/>
+<button aria-label="Очистить поиск" class="catalog-search-clear" hidden="" id="catalogSearchClear" type="button">×</button>
+</span>
+</div>
+<label class="catalog-sort" for="catalogSort">
+<span class="catalog-control-label">Сортировка</span>
+<select id="catalogSort">
+<option value="newest">Последние добавленные</option>
+<option value="alphabetical">По алфавиту А—Я</option>
+<option value="release">Дата релиза: новые сначала</option>
+</select>
+</label>
+</div>
+<div class="panel-body"><div class="game-list" id="gameList"></div></div>
+</article>
+</div>
+</section>
+
+</div>
+</section>
+<div aria-hidden="true" class="duplicate-modal" hidden="" id="duplicateModal">
+<div class="duplicate-backdrop" data-duplicate-close=""></div>
+<section aria-labelledby="duplicateTitle" aria-modal="true" class="duplicate-dialog" role="dialog">
+<span class="duplicate-kicker">Проверка каталога</span>
+<h2 id="duplicateTitle">Игра уже есть</h2>
+<p id="duplicateText"></p>
+<div class="duplicate-actions"><button class="btn" id="duplicateCancel" type="button">Отмена</button><button class="btn btn-primary" id="duplicateConfirm" type="button">Добавить второй экземпляр</button></div>
+</section>
+</div>
+</div>
+<div aria-hidden="true" class="tier-panel" hidden id="tierListPanel"><div class="tier-backdrop" data-tier-close></div><section aria-labelledby="tierListTitle" aria-modal="true" class="tier-dialog" role="dialog"><button aria-label="Закрыть тир-лист" class="tier-close" id="tierListClose" type="button">×</button><header><span>Моя библиотека</span><h2 id="tierListTitle">Тир-лист игр</h2><p>Перетаскивай обложки между рядами, чтобы собрать рейтинг пройденных и дропнутых игр.</p><div class="tier-header-actions"><small id="tierAdminStatus">Публичный просмотр</small><button hidden id="tierReset" type="button">Сбросить тир-лист</button></div></header><div class="tier-board" id="tierBoard" aria-live="polite"></div><dialog class="tier-row-dialog" id="tierRowDialog"><form method="dialog"><button aria-label="Закрыть настройки ряда" class="tier-row-dialog-close" value="cancel">×</button><h3>Настройки тира</h3><label>Название ряда<input id="tierRowLabel" maxlength="30" required></label><fieldset><legend>Цвет фона</legend><div class="tier-color-presets" id="tierColorPresets"><button data-tier-color="#ff7f7f" style="--color:#ff7f7f" type="button"></button><button data-tier-color="#ffbf7f" style="--color:#ffbf7f" type="button"></button><button data-tier-color="#ffdf7f" style="--color:#ffdf7f" type="button"></button><button data-tier-color="#ffff7f" style="--color:#ffff7f" type="button"></button><button data-tier-color="#bfff7f" style="--color:#bfff7f" type="button"></button><button data-tier-color="#7fffff" style="--color:#7fffff" type="button"></button><button data-tier-color="#7fbfff" style="--color:#7fbfff" type="button"></button><button data-tier-color="#bf7fff" style="--color:#bf7fff" type="button"></button><button data-tier-color="#ff7fff" style="--color:#ff7fff" type="button"></button><input aria-label="Произвольный цвет" id="tierRowColor" type="color"></div></fieldset><button class="tier-row-save" id="tierRowSave" value="default">Сохранить</button></form></dialog><dialog class="tier-confirm-dialog" id="tierResetDialog"><form method="dialog"><span>Сброс пресета</span><h3>Вы действительно хотите сбросить заготовленный пресет?</h3><p>Все игры вернутся в раздел «Без оценки», а названия, цвета и порядок тиров — к исходным значениям.</p><div><button value="cancel">Отмена</button><button class="is-danger" id="tierResetConfirm" value="default">Да, сбросить</button></div></form></dialog></section></div>
+<div aria-hidden="true" class="game-modal" hidden="" id="gameModal">
+<div class="modal-backdrop" data-modal-close=""></div>
+<div aria-labelledby="modalTitle" aria-modal="true" class="modal-panel" role="dialog" tabindex="-1">
+<button aria-label="Закрыть" class="modal-close" id="modalClose" type="button">×</button>
+<div class="modal-badges" id="modalBadges"></div>
+<div class="modal-media" id="modalMedia"></div>
+<div class="modal-content">
+<p class="modal-release" id="modalRelease"></p>
+<h2 class="modal-title" id="modalTitle"></h2>
+<section class="modal-section">
+<p id="modalDescription"></p>
+</section>
+<div class="modal-footer">
+<a class="modal-steam" href="#" id="modalSteam" rel="noopener noreferrer" target="_blank">Открыть в Steam <img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></a>
+<div aria-label="Оценка игры" class="modal-reactions"><button aria-label="Нравится" aria-pressed="false" data-vote="1" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/like.png"/><b id="modalLikeCount">0</b></button><button aria-label="Не нравится" aria-pressed="false" data-vote="-1" type="button"><img alt="" aria-hidden="true" class="thumb-down" src="./assets/images/figma/dislike.png"/><b id="modalDislikeCount">0</b></button></div>
+</div>
+<p aria-live="polite" class="modal-reaction-notice" id="modalReputationNotice"></p>
+<section class="modal-comments" aria-labelledby="modalCommentsTitle"><h3 class="visually-hidden" id="modalCommentsTitle">Комментарии</h3><div class="modal-comments-list" id="modalCommentsList"></div><form class="modal-comment-form" id="modalCommentForm"><span aria-hidden="true" class="modal-comment-composer-avatar" id="modalCommentComposerAvatar">П</span><label class="visually-hidden" for="modalCommentInput">Написать комментарий</label><textarea id="modalCommentInput" maxlength="500" placeholder="Написать комментарий" required></textarea><button aria-label="Отправить комментарий" type="submit"><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button></form><p class="modal-auth-hint" id="modalAuthHint">Войдите, чтобы оценивать игры и оставлять комментарии.</p></section>
+<span class="modal-added visually-hidden" id="modalAdded"></span>
+</div>
+</div>
+</div>
+<footer><div class="shell footer-inner"><p class="footer-signature">@archivebtw x @max_vopros</p></div></footer>
+<script src="./assets/js/public/loading.js"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.2"></script><script src="./assets/js/public/state.js?v=4.0"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.0"></script><script src="./assets/js/public/catalog.js?v=4.1"></script><script src="./assets/js/public/modal-effects.js?v=4.3"></script><script src="./assets/js/public/tier-list.js?v=3.0"></script><script src="./assets/js/public/suggestions.js?v=4.7-local-steam"></script><script src="./assets/js/public/media-submissions.js?v=5.3-local"></script><script async id="twitchPlayerSdk" src="https://player.twitch.tv/js/embed/v1.js"></script><script src="./assets/js/public/gang.js?v=3.3"></script><script src="./assets/js/public/auction.js?v=4.4"></script><script src="./assets/js/public/admin-portal.js?v=3.3"></script><script src="./assets/js/public/admin-portal-shell.js?v=3.8"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.2"></script><script src="./assets/js/public/figma-ui.js?v=7.7"></script><script>
+(() => {
+  const view = new URLSearchParams(location.search).get('view');
+  const targets = {tier: 'tierListPanel', auction: 'auctionPanel', admin: 'adminPortal'};
+  const targetId = targets[view];
+  if (!targetId) return;
+  document.body.classList.add('standalone-view', `standalone-${view}`);
+  const target = document.getElementById(targetId);
+  if (!target) return;
+  if (view === 'admin') {
+    window.CR7_ADMIN_PORTAL?.setView('games', true);
+    document.querySelector('.site-header .brand')?.setAttribute('href', './index.html');
+    document.querySelector('.site-header a[href="#catalog"]')?.setAttribute('href', './index.html#catalog');
+  }
+  [...document.body.children].forEach(element => {
+    const standaloneInteractive = ['site-header', 'gang-panel', 'suggestions-panel', 'media-panel', 'site-auth-panel'].some(className => element.classList.contains(className));
+    if (element !== target && element.tagName !== 'SCRIPT' && element.tagName !== 'STYLE' && !(view === 'admin' && standaloneInteractive)) {
+      element.hidden = true;
+      element.style.setProperty('display', 'none', 'important');
+    }
+  });
+  target.hidden = false;
+  target.setAttribute('aria-hidden', 'false');
+  target.classList.add('is-open');
+  const closeId = {tier: 'tierListClose', auction: 'auctionClose', admin: 'adminPortalClose'}[view];
+  document.getElementById(closeId)?.addEventListener('click', () => {
+    location.href = './index.html';
+  });
+})();
+</script></body>
+</html>
