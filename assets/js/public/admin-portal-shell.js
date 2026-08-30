@@ -21,7 +21,7 @@
   if (!document.getElementById('adminGamesTabsV4Script')) {
     const script = document.createElement('script');
     script.id = 'adminGamesTabsV4Script';
-    script.src = './assets/js/public/admin-games-tabs-v4.js?v=1.9';
+    script.src = './assets/js/public/admin-games-tabs-v4.js?v=2.0-player-range';
     script.defer = true;
     document.head.appendChild(script);
   }
