@@ -1,0 +1,322 @@
+/* Final main-page pass based on the Figma "Главная страница" frames.
+   This file only overrides presentation. Existing Supabase/auth/CRUD/Realtime logic stays untouched. */
+
+:root {
+  --figma-page: #0b0b0b;
+  --figma-section: #121212;
+  --figma-surface: #202020;
+  --figma-text: #f0f0f0;
+  --figma-muted: rgba(240, 240, 240, .55);
+  --figma-red: #e63d3d;
+}
+
+html,
+body {
+  background: var(--figma-page) !important;
+}
+
+/* Main screen */
+main#top,
+.hero {
+  background: var(--figma-page) !important;
+}
+
+@media (min-width: 1101px) {
+  .hero {
+    height: 100svh;
+  }
+
+  .hero::after {
+    background: #0b0b0b url('../../images/figma/background_settings/background_catalog.png') top right / auto 100% no-repeat !important;
+  }
+
+  .hero h1 {
+    top: 184rem;
+    font-size: clamp(112rem, 9.375vw, 180rem);
+    line-height: .8;
+  }
+
+  .hero-intro {
+    bottom: 40rem;
+  }
+}
+
+/* Proposal cards */
+.content-menu-panel {
+  background: var(--figma-section) !important;
+}
+
+.content-menu-card,
+.content-menu-card.content-menu-card-media {
+  border-radius: 6rem;
+  background: #050505 !important;
+}
+
+.content-menu-card::before,
+.content-menu-card.content-menu-card-media::before {
+  background: url('../../images/figma/background_settings/background_background_menu.png') right bottom / auto 100% no-repeat !important;
+}
+
+/* Catalog */
+.catalog-section {
+  background: var(--figma-page) !important;
+  box-shadow: none !important;
+}
+
+#catalog .catalog-shell,
+#catalog .catalog-stream,
+#catalog .catalog-group,
+#catalog .section-grid {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#catalog .controls,
+#catalog .catalog-toolbar.is-compact .controls {
+  background: #1c1c1c;
+}
+
+#catalog .search-wrap {
+  background: var(--figma-surface) !important;
+}
+
+#catalog .section-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20rem;
+}
+
+#catalog .game-card,
+#catalog .game-card.featured {
+  aspect-ratio: 560 / 262;
+  border-radius: 6rem;
+  background: #050505;
+}
+
+#catalog .card-visual {
+  inset: 0;
+}
+
+#catalog .card-bottom {
+  right: 20rem;
+  bottom: 20rem;
+  left: 20rem;
+  height: auto;
+  padding: 0;
+  background: transparent;
+}
+
+#catalog .card-title,
+#catalog .featured .card-title {
+  font-size: 32rem;
+}
+
+#catalog .card-top {
+  top: 16rem;
+  right: 16rem;
+  left: auto;
+}
+
+#catalog .card-shade {
+  background: linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.08) 42%, rgba(0,0,0,.9) 100%);
+}
+
+/* The Figma page does not need the large black frame below the catalog. */
+body > footer {
+  display: none !important;
+}
+
+/* Keep the primary Figma frame in view and scroll the lower discussion area. */
+.game-modal {
+  display: block;
+  overflow: hidden !important;
+  padding: 0 !important;
+  overscroll-behavior: contain;
+}
+
+.game-modal .modal-backdrop {
+  position: fixed !important;
+  background: rgba(11, 11, 11, .9) !important;
+  backdrop-filter: blur(7rem) !important;
+}
+
+@media (min-width: 721px) {
+  .game-modal .modal-panel,
+  .game-modal.is-open .modal-panel {
+    position: absolute !important;
+    top: var(--game-modal-top, 20rem) !important;
+    left: 50% !important;
+    width: 850rem !important;
+    height: var(--game-modal-scroll-height, 950rem) !important;
+    min-height: var(--game-modal-scroll-height, 950rem) !important;
+    max-height: var(--game-modal-scroll-height, 950rem) !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    opacity: 1 !important;
+    transform: translateX(-50%) translateY(0) scale(var(--game-modal-scale, 1)) !important;
+    transform-origin: top center !important;
+  }
+
+  .game-modal .modal-content {
+    height: 1015rem !important;
+    min-height: 1015rem !important;
+  }
+
+  .game-modal .modal-footer {
+    align-items: center !important;
+    flex-direction: row !important;
+  }
+
+  .game-modal .modal-close {
+    display: none !important;
+  }
+
+  .game-modal .modal-panel::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.game-modal .modal-panel {
+  border: 0 !important;
+  border-radius: 12rem !important;
+  background: #121212 !important;
+  box-shadow: none !important;
+}
+
+.game-modal .modal-media {
+  border-radius: 6rem;
+}
+
+.game-modal .modal-media::after {
+  display: none !important;
+}
+
+.game-modal .modal-close {
+  border: 0 !important;
+  background: #202020 !important;
+}
+
+.game-modal .modal-steam {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 41rem;
+  gap: 16rem;
+  justify-content: stretch;
+  justify-items: start;
+  padding-inline: 24rem !important;
+  background: var(--figma-red) !important;
+  font-size: 24rem !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+}
+
+.game-modal .modal-steam img {
+  justify-self: end;
+}
+
+@media (max-width: 1100px) {
+  #catalog .section-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  #catalog .section-grid {
+    grid-template-columns: 1fr;
+    gap: 12rem;
+  }
+
+  .game-modal {
+    overflow-y: auto !important;
+    padding: 0 !important;
+  }
+
+  .game-modal .modal-panel {
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+
+  .game-modal .modal-steam {
+    grid-template-columns: minmax(0, 1fr) 34rem;
+    gap: 12rem;
+    padding-inline: 18rem !important;
+    font-size: clamp(18rem, 6vw, 24rem) !important;
+  }
+
+  .game-modal .modal-steam img {
+    width: 34rem;
+    height: 34rem;
+  }
+}
+
+/* Temporary navigation states: Services is not launched yet; Management is admin-only. */
+#servicesToggle,
+#adminPortalOpen {
+  opacity: .5 !important;
+}
+
+#servicesToggle,
+#servicesToggle:hover,
+#servicesToggle:focus-visible,
+#servicesToggle[aria-expanded="true"] {
+  opacity: .5 !important;
+}
+
+#servicesToggle {
+  cursor: default !important;
+}
+
+#servicesMenu {
+  display: none !important;
+}
+
+/* Proposal content cards — exact hover/touch state. */
+.content-menu-card,
+.content-menu-card.content-menu-card-media {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #050505 !important;
+}
+
+.content-menu-card::before,
+.content-menu-card.content-menu-card-media::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  display: block !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background-image: url('../../images/figma/background_settings/background_background_menu.png?v=2.0') !important;
+  background-position: right bottom !important;
+  background-size: auto 100% !important;
+  background-repeat: no-repeat !important;
+  opacity: 0 !important;
+  filter: none !important;
+  transform: none !important;
+  transition: opacity .22s ease !important;
+}
+
+.content-menu-card:hover::before,
+.content-menu-card:focus-visible::before,
+.content-menu-card:active::before,
+.content-menu-card.is-menu-interactive::before {
+  opacity: 1 !important;
+}
+
+.content-menu-card > span,
+.content-menu-card > img {
+  position: absolute;
+  z-index: 2 !important;
+}
+
+.content-menu-card > img {
+  opacity: 1 !important;
+  transition: transform .2s ease, opacity .2s ease !important;
+}

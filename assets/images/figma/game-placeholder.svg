@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 524">
+  <rect width="1120" height="524" fill="#040404"/>
+  <path d="M0 0h1120v524H0z" fill="url(#g)"/>
+  <g fill="none" stroke="#F0F0F0" stroke-opacity=".08">
+    <path d="M0 84h1120M0 262h1120M0 440h1120"/>
+    <path d="M180 0v524M560 0v524M940 0v524"/>
+  </g>
+  <circle cx="84" cy="82" r="9" fill="#E63D3D"/>
+  <text x="64" y="430" fill="#F0F0F0" font-family="Arial Black, Arial, sans-serif" font-size="136" font-weight="900" letter-spacing="-9">141</text>
+  <text x="64" y="480" fill="#F0F0F0" fill-opacity=".5" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="7">GAME COVER</text>
+  <defs>
+    <linearGradient id="g" x1="60" y1="20" x2="1000" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#202020"/>
+      <stop offset=".55" stop-color="#121212"/>
+      <stop offset="1" stop-color="#040404"/>
+    </linearGradient>
+  </defs>
+</svg>
