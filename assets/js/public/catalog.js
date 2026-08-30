@@ -35,6 +35,21 @@ function catalogReleaseLabel(game, meta) {
       });
     }
 
+    function catalogPlayerRange(game) {
+      const storedMin = Number(game?.players_min);
+      const storedMax = Number(game?.players_max);
+      const hasStoredRange = Boolean(String(game?.player_count_source || '').trim())
+        && Number.isFinite(storedMin)
+        && Number.isFinite(storedMax)
+        && storedMin >= 1
+        && storedMax >= storedMin;
+      if (hasStoredRange) return { min: storedMin, max: storedMax };
+      if (!game?.is_coop) return { min: 1, max: 1 };
+      const min = Number(game.coop_min_players) || 2;
+      const max = Number(game.coop_max_players) || min;
+      return { min, max };
+    }
+
     function buildCard(game, index) {
       const coverUrl = safeExternalUrl(game.cover_url);
       const cover = coverUrl
@@ -45,10 +60,10 @@ function catalogReleaseLabel(game, meta) {
       const libraryStatus = String(game.library_status || '');
       const reputation = Number(state.reputationScores?.[String(game.id)] || 0);
       const stamp = libraryStamp(libraryStatus);
-      const players = Number(game.coop_max_players) || (game.is_coop ? 2 : 1);
-      const playersLabel = game.is_coop
-        ? `${Number(game.coop_min_players) || 2}–${players} ${playerWord(players)}`
-        : '1 игрок';
+      const playerRange = catalogPlayerRange(game);
+      const playersLabel = playerRange.min === playerRange.max
+        ? `${playerRange.max} ${playerWord(playerRange.max)}`
+        : `${playerRange.min}–${playerRange.max} ${playerWord(playerRange.max)}`;
 
       return `
         <article class="game-card${favorite ? ' is-favorite' : ''}${libraryStatus ? ` is-${escapeHtml(libraryStatus)}` : ''}" data-game-id="${escapeHtml(game.id)}" tabindex="0" role="button" aria-label="Открыть подробности игры ${escapeHtml(game.title)}" style="--delay:${Math.min(index * 45, 260)}ms">

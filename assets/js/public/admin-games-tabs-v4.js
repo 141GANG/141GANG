@@ -61,10 +61,23 @@
     return 'игроков';
   }
 
-  function playersLabel(game) {
-    if (!game.is_coop) return '1 игрок';
+  function playerRange(game) {
+    const storedMin = Number(game?.players_min);
+    const storedMax = Number(game?.players_max);
+    const hasStoredRange = Boolean(String(game?.player_count_source || '').trim())
+      && Number.isFinite(storedMin)
+      && Number.isFinite(storedMax)
+      && storedMin >= 1
+      && storedMax >= storedMin;
+    if (hasStoredRange) return { min: storedMin, max: storedMax };
+    if (!game?.is_coop) return { min: 1, max: 1 };
     const min = Number(game.coop_min_players) || 2;
     const max = Number(game.coop_max_players) || min;
+    return { min, max };
+  }
+
+  function playersLabel(game) {
+    const { min, max } = playerRange(game);
     return min === max ? `${max} ${playerWord(max)}` : `${min}–${max} ${playerWord(max)}`;
   }
 
@@ -213,7 +226,7 @@
         .some(value => String(value || '').toLocaleLowerCase('ru-RU').includes(query)))
       .filter(game => !releaseFilters.size || releaseFilters.has(releaseGroup(game)))
       .filter(game => {
-        const players = Number(game.coop_max_players) || (game.is_coop ? 2 : 1);
+        const players = playerRange(game).max;
         return players >= state.filters.minPlayers && players <= state.filters.maxPlayers;
       })
       .filter(game => !statusFilters.size || statusFilters.has(String(game.library_status || '')));
@@ -344,7 +357,7 @@
     state.loading = true;
     if (!silent) list.innerHTML = '<div class="suggestions-empty">Загружаем опубликованные игры…</div>';
     try {
-      const { data, error } = await supabase.from('games').select('id,title,steam_url,steam_app_id,cover_url,description,created_at,published,release_date,release_date_text,coming_soon,is_coop,coop_min_players,coop_max_players,library_status');
+      const { data, error } = await supabase.from('games').select('id,title,steam_url,steam_app_id,cover_url,description,created_at,published,release_date,release_date_text,coming_soon,is_coop,coop_min_players,coop_max_players,players_min,players_max,player_count_source,library_status');
       if (error) throw error;
       state.games = Array.isArray(data) ? data : [];
       await loadReactionCounts(supabase, false);

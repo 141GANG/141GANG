@@ -367,7 +367,7 @@ async function publishSuggestion(
 
   const { data: suggestion, error: suggestionError } = await serviceClient
     .from("game_suggestions")
-    .select("id,steam_app_id,steam_url,title,cover_url,description,status")
+    .select("id,steam_app_id,steam_url,title,cover_url,description,status,players_min,players_max,player_count_source,steam_snapshot_synced_at")
     .eq("id", suggestionId)
     .maybeSingle();
   if (suggestionError) throw suggestionError;
@@ -399,6 +399,20 @@ async function publishSuggestion(
       playerCountSource: "suggestion_snapshot",
     };
   }
+  const useSuggestionPlayerRange = Boolean(suggestion.steam_snapshot_synced_at)
+    || Boolean(String(suggestion.player_count_source || "").trim())
+    || Number(suggestion.players_min) > 1
+    || Number(suggestion.players_max) > 1;
+  const rawPlayersMin = useSuggestionPlayerRange ? Number(suggestion.players_min) : Number(steam.playersMin);
+  const rawPlayersMax = useSuggestionPlayerRange ? Number(suggestion.players_max) : Number(steam.playersMax);
+  const playersMin = Math.max(1, Math.min(256, Number.isFinite(rawPlayersMin) ? Math.trunc(rawPlayersMin) : 1));
+  const playersMax = Math.max(playersMin, Math.min(256, Number.isFinite(rawPlayersMax) ? Math.trunc(rawPlayersMax) : playersMin));
+  const playerCountSource = String(
+    useSuggestionPlayerRange
+      ? (suggestion.player_count_source || "suggestion_snapshot")
+      : (steam.playerCountSource || "steam_categories")
+  ).slice(0, 120);
+
   const { data: existingGame, error: existingError } = await serviceClient
     .from("games")
     .select("id,title,cover_url,description,coop_source,is_coop,coop_type,coop_min_players,coop_max_players")
@@ -426,6 +440,9 @@ async function publishSuggestion(
     coop_min_players: manualCoop ? existingGame.coop_min_players : steam.coopMinPlayers,
     coop_max_players: manualCoop ? existingGame.coop_max_players : steam.coopMaxPlayers,
     coop_source: manualCoop ? existingGame.coop_source : steam.coopSource,
+    players_min: playersMin,
+    players_max: playersMax,
+    player_count_source: playerCountSource,
     steam_synced_at: new Date().toISOString(),
   };
 
@@ -537,7 +554,7 @@ function syncApprovedSuggestions() {
 async function syncStaleGames(supabase: ReturnType<typeof createClient>) {
   const { data: games, error } = await supabase
     .from("games")
-    .select("id,title,cover_url,description,steam_app_id,coming_soon,release_date,steam_synced_at,is_coop,coop_type,coop_min_players,coop_max_players,coop_source")
+    .select("id,title,cover_url,description,steam_app_id,coming_soon,release_date,steam_synced_at,is_coop,coop_type,coop_min_players,coop_max_players,coop_source,players_min,players_max,player_count_source")
     .not("steam_app_id", "is", null)
     .order("steam_synced_at", { ascending: true, nullsFirst: true })
     .limit(100);
@@ -557,6 +574,8 @@ async function syncStaleGames(supabase: ReturnType<typeof createClient>) {
     const settled = await Promise.all(batch.map(async (record) => {
       const steam = await getSteamData(String(record.steam_app_id));
       const manualCoop = record.coop_source === "manual_admin";
+      const steamPlayersMin = Math.max(1, Math.min(256, Number(steam.playersMin) || 1));
+      const steamPlayersMax = Math.max(steamPlayersMin, Math.min(256, Number(steam.playersMax) || steamPlayersMin));
       const payload = {
         title: steam.title || record.title,
         cover_url: steam.coverUrl || record.cover_url,
@@ -569,6 +588,9 @@ async function syncStaleGames(supabase: ReturnType<typeof createClient>) {
         coop_min_players: manualCoop ? record.coop_min_players : steam.coopMinPlayers,
         coop_max_players: manualCoop ? record.coop_max_players : steam.coopMaxPlayers,
         coop_source: manualCoop ? record.coop_source : steam.coopSource,
+        players_min: steamPlayersMin,
+        players_max: steamPlayersMax,
+        player_count_source: String(steam.playerCountSource || "steam_categories").slice(0, 120),
         steam_synced_at: new Date().toISOString(),
       };
       const { error: updateError } = await supabase.from("games").update(payload).eq("id", record.id);
