@@ -169,7 +169,7 @@
     const stylesheet = document.createElement('link');
     stylesheet.id = stylesheetId;
     stylesheet.rel = 'stylesheet';
-    stylesheet.href = './assets/css/public/proposal-media-figma-exact.css?v=20260830-media-scroll-1';
+    stylesheet.href = './assets/css/public/proposal-media-figma-exact.css?v=20260830-media-static-slot-1';
     document.head.appendChild(stylesheet);
   }
 

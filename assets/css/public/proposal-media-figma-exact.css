@@ -39,6 +39,7 @@
 }
 
 .media-panel.is-figma-proposal .media-form {
+  position: relative;
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
@@ -232,6 +233,41 @@
   width: 0;
   height: 0;
   display: none;
+}
+
+@media (min-width: 901px) {
+  /* The selected-file strip is a visual overlay, not a layout row.
+     It lives entirely inside the existing 20px gap between categories
+     and the comment field, so adding files never moves the controls below. */
+  .media-panel.is-figma-proposal .media-selected {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 3;
+    height: 20px;
+    max-height: 20px;
+    margin: -10px 0 0;
+    transform: translateY(-10px);
+  }
+
+  .media-panel.is-figma-proposal .media-selected-item {
+    min-height: 20px;
+    height: 20px;
+  }
+
+  .media-panel.is-figma-proposal .media-selected-copy {
+    padding: 3px 8px;
+  }
+
+  .media-panel.is-figma-proposal .media-selected-actions {
+    padding: 1px 3px;
+  }
+
+  .media-panel.is-figma-proposal .media-selected-actions button {
+    min-height: 18px;
+    height: 18px;
+    padding: 0 7px;
+  }
 }
 
 .media-panel.is-figma-proposal #mediaSubmitButton > .figma-submit-label {
