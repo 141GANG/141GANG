@@ -3,7 +3,7 @@
     ['style','figmaMainFinalStyles','./assets/css/public/figma-main-final.css?v=2.0'],
     ['style','adminFigmaFinalStyles','./assets/css/public/admin-figma-final.css?v=1.0'],
     ['style','proposalWindowsFigmaStyles','./assets/css/public/proposal-windows-figma.css?v=4.8'],
-    ['style','proposalMediaFigmaExactStyles','./assets/css/public/proposal-media-figma-exact.css?v=2.5'],
+    ['style','proposalMediaFigmaExactStyles','./assets/css/public/proposal-media-figma-exact.css?v=2.6-media-scroll'],
     ['style','adminCardIconsStyles','./assets/css/public/admin-card-icons.css?v=1.1'],
     ['style','figmaTypographyFinalStyles','./assets/css/public/figma-typography-final.css?v=4.7'],
     ['script','proposalWindowsFigmaScript','./assets/js/public/proposal-windows-figma.js?v=3.4'],

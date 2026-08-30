@@ -219,9 +219,19 @@
 }
 
 .media-panel.is-figma-proposal .media-selected {
-  max-height: 72px;
+  height: 30px;
+  max-height: 30px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   margin: -10px 0 14px;
+}
+
+.media-panel.is-figma-proposal .media-selected::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .media-panel.is-figma-proposal #mediaSubmitButton > .figma-submit-label {
