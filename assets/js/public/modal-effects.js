@@ -63,9 +63,6 @@ function renderModalComments(comments = []) {
   elements.modalCommentsList.innerHTML = comments.length ? comments.map(comment => {
     const username = String(comment.username || 'Пользователь').trim();
     const initial = username.charAt(0).toLocaleUpperCase('ru-RU') || 'U';
-    const createdAt = Date.parse(comment.created_at || '');
-    const updatedAt = Date.parse(comment.updated_at || '');
-    const edited = Number.isFinite(createdAt) && Number.isFinite(updatedAt) && updatedAt > createdAt + 1000;
     const actions = comment.is_mine
       ? `<div class="modal-comment-actions" aria-label="Управление комментарием">
           <button type="button" class="modal-comment-action" data-comment-action="edit">Изменить</button>
@@ -79,7 +76,6 @@ function renderModalComments(comments = []) {
         <p data-comment-text>${escapeHtml(comment.body)}</p>
         <div class="modal-comment-meta">
           <time datetime="${escapeHtml(String(comment.created_at || ''))}">${escapeHtml(formatDate(comment.created_at, { short: true }))}</time>
-          ${edited ? '<span class="modal-comment-edited">изменено</span>' : ''}
         </div>
       </div>
     </article>`;
