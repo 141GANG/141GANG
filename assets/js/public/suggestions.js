@@ -20,6 +20,7 @@
     commentsPanel: document.getElementById('suggestionCommentsPanel'),
     commentsClose: document.getElementById('suggestionCommentsClose'),
     commentsTitle: document.getElementById('suggestionCommentsTitle'),
+    commentsKicker: document.querySelector('#suggestionCommentsPanel .suggestion-comments-dialog > span'),
     commentsList: document.getElementById('suggestionCommentsList'),
     commentForm: document.getElementById('suggestionCommentForm'),
     commentBody: document.getElementById('suggestionCommentBody'),
@@ -44,6 +45,7 @@
     games: [],
     preview: null,
     activeSuggestionId: null,
+    commentMode: 'public',
     noticeTimer: null,
     moderation: [],
     moderationStatus: 'pending',
@@ -653,6 +655,29 @@
     return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
   }
 
+  function setCommentsMode(mode = 'public') {
+    const adminSupporters = mode === 'admin-supporters';
+    suggestionState.commentMode = adminSupporters ? 'admin-supporters' : 'public';
+    elements.commentsPanel.classList.toggle('is-admin-supporters', adminSupporters);
+    elements.commentForm.hidden = adminSupporters;
+    if (elements.commentsKicker) {
+      elements.commentsKicker.textContent = adminSupporters ? 'Комментарии предложивших' : 'Обсуждение игры';
+    }
+  }
+
+  function proposalSupportCount(item) {
+    const stored = Number(item?.support_count);
+    if (Number.isFinite(stored) && stored >= 0) return Math.trunc(stored);
+    const comments = Array.isArray(item?.suggestion_comments) ? item.suggestion_comments : [];
+    return Math.max(1, comments.length);
+  }
+
+  function proposalSupportCommentCount(item) {
+    const stored = Number(item?.supporter_comment_count);
+    if (Number.isFinite(stored) && stored >= 0) return Math.trunc(stored);
+    return Array.isArray(item?.suggestion_comments) ? item.suggestion_comments.length : 0;
+  }
+
   async function loadComments(id) {
     elements.commentsList.innerHTML = '<div class="suggestions-empty">Загружаем комментарии…</div>';
     try {
@@ -676,9 +701,60 @@
     }
   }
 
+  async function loadAdminSupporterComments(id) {
+    const item = suggestionState.moderation.find(entry => String(entry.id) === String(id));
+    const supportCount = proposalSupportCount(item);
+    elements.commentsList.innerHTML = '<div class="suggestions-empty">Загружаем комментарии предложивших…</div>';
+    if (suggestionState.localMode) {
+      const comments = Array.isArray(item?.suggestion_comments) ? item.suggestion_comments : [];
+      const summary = `
+        <div class="admin-supporter-comments-summary">
+          <strong>Голосов: ${supportCount}</strong>
+          <span>Комментариев: ${comments.length}</span>
+        </div>`;
+      elements.commentsList.innerHTML = summary + (comments.length
+        ? comments.map((comment, index) => `
+          <article class="suggestion-comment admin-supporter-comment${comment.is_hidden ? ' is-hidden' : ''}">
+            <header><strong>Предложивший пользователь ${index + 1}</strong><time>${escapeHtml(formatDate(comment.created_at))}</time></header>
+            <p>${escapeHtml(comment.body)}</p>
+          </article>`).join('')
+        : '<div class="suggestions-empty admin-supporter-comments-empty">Ни один из предложивших эту игру пользователей не оставил комментарий.</div>');
+      return;
+    }
+    try {
+      const { data, error } = await suggestionState.client.rpc('get_admin_suggestion_support_comments', {
+        p_suggestion_id: Number(id)
+      });
+      if (error) throw error;
+      const comments = Array.isArray(data) ? data : [];
+      const summary = `
+        <div class="admin-supporter-comments-summary">
+          <strong>Голосов: ${supportCount}</strong>
+          <span>Комментариев: ${comments.length}</span>
+        </div>`;
+      elements.commentsList.innerHTML = summary + (comments.length
+        ? comments.map((comment, index) => `
+          <article class="suggestion-comment admin-supporter-comment${comment.is_hidden ? ' is-hidden' : ''}">
+            <header>
+              <strong>Предложивший пользователь ${index + 1}</strong>
+              <span class="admin-supporter-comment-tools">
+                <time>${escapeHtml(formatDate(comment.created_at))}</time>
+                <button data-admin-support-comment-id="${Number(comment.comment_id)}" data-admin-support-comment-hidden="${comment.is_hidden ? 'false' : 'true'}" type="button">${comment.is_hidden ? 'Вернуть' : 'Скрыть'}</button>
+              </span>
+            </header>
+            <p>${escapeHtml(comment.body)}</p>
+            ${comment.is_hidden ? '<small>Комментарий скрыт из публичного обсуждения.</small>' : ''}
+          </article>`).join('')
+        : '<div class="suggestions-empty admin-supporter-comments-empty">Ни один из предложивших эту игру пользователей не оставил комментарий.</div>');
+    } catch (error) {
+      elements.commentsList.innerHTML = `<div class="suggestions-empty">${escapeHtml(errorMessage(error))}</div>`;
+    }
+  }
+
   function openComments(id) {
     const game = suggestionState.games.find(item => String(item.id) === String(id));
     if (!game) return;
+    setCommentsMode('public');
     suggestionState.activeSuggestionId = Number(id);
     elements.commentsTitle.textContent = game.title;
     elements.commentsPanel.hidden = false;
@@ -687,14 +763,31 @@
     window.setTimeout(() => elements.commentsClose.focus(), 30);
   }
 
+  function openAdminSupporterComments(id) {
+    const item = suggestionState.moderation.find(entry => String(entry.id) === String(id));
+    if (!item) return;
+    setCommentsMode('admin-supporters');
+    suggestionState.activeSuggestionId = Number(id);
+    elements.commentsTitle.textContent = item.title || 'Комментарии';
+    elements.commentsPanel.hidden = false;
+    elements.commentsPanel.setAttribute('aria-hidden', 'false');
+    loadAdminSupporterComments(id);
+    window.setTimeout(() => elements.commentsClose.focus(), 30);
+  }
+
   function closeComments() {
     elements.commentsPanel.hidden = true;
     elements.commentsPanel.setAttribute('aria-hidden', 'true');
+    elements.commentsList.innerHTML = '';
+    elements.commentBody.value = '';
+    elements.commentDelete.hidden = true;
+    setCommentsMode('public');
     suggestionState.activeSuggestionId = null;
   }
 
   async function saveComment(event) {
     event.preventDefault();
+    if (suggestionState.commentMode !== 'public') return;
     const id = suggestionState.activeSuggestionId;
     const body = elements.commentBody.value.trim();
     if (!id || !body) return;
@@ -717,6 +810,7 @@
   }
 
   async function deleteMyComment() {
+    if (suggestionState.commentMode !== 'public') return;
     const id = suggestionState.activeSuggestionId;
     if (!id || !window.confirm('Удалить ваш комментарий к этой игре?')) return;
     setBusy(elements.commentDelete, true, 'Удаляем…');
@@ -812,21 +906,32 @@
     elements.moderationList.innerHTML = items.map(item => {
       const cover = safeUrl(item.cover_url);
       const steam = safeUrl(item.steam_url, ['steampowered.com', 'steamcommunity.com']);
-      const comments = Array.isArray(item.suggestion_comments) ? item.suggestion_comments : [];
       const reactions = moderationReactionStats(item);
-      const primaryComment = comments.find(comment => !comment.is_hidden) || comments[0];
+      const supportCount = proposalSupportCount(item);
+      const supporterCommentCount = proposalSupportCommentCount(item);
       return `
-        <article class="moderation-card">
+        <article class="moderation-card" data-suggestion-id="${Number(item.id)}">
           <div class="moderation-card-side">
             <img src="${escapeHtml(cover || './assets/images/figma/game-placeholder.svg')}" alt="Обложка ${escapeHtml(item.title)}">
             <div class="moderation-card-facts"><span class="moderation-players">${escapeHtml(moderationPlayersLabel(item))}</span><span class="moderation-release">${escapeHtml(moderationReleaseLabel(item))}</span></div>
           </div>
           <div class="moderation-card-copy">
-            <h3>${escapeHtml(item.title)}</h3>
+            <h3><button class="moderation-title-open" data-supporter-comments data-suggestion-id="${Number(item.id)}" type="button">${escapeHtml(item.title)}</button></h3>
             <p class="moderation-description">${escapeHtml(item.description || 'Описание не указано.')}</p>
             <div class="moderation-card-meta"><span>Steam ID ${Number(item.steam_app_id)}</span><span>👍 ${reactions.likes}</span><span>👎 ${reactions.dislikes}</span><span>${reactions.likes + reactions.dislikes ? `${reactions.percent}% лайков` : 'Нет оценок'}</span><span>${escapeHtml(formatDate(item.created_at))}</span></div>
             ${item.rejection_reason ? `<p><strong>Причина:</strong> ${escapeHtml(item.rejection_reason)}</p>` : ''}
-            <div class="moderation-comments"><span>Комментарий пользователя</span><p>${escapeHtml(primaryComment?.body || 'Комментарий не оставлен.')}</p>${primaryComment ? `<button data-comment-id="${Number(primaryComment.id)}" data-comment-hidden="${primaryComment.is_hidden ? 'false' : 'true'}" type="button">${primaryComment.is_hidden ? 'Вернуть' : 'Скрыть'}</button>` : ''}</div>
+            <div class="moderation-support-panel">
+              <div class="moderation-support-stats">
+                <span>Голосов за игру</span>
+                <strong>${supportCount}</strong>
+                <small>по уникальным аккаунтам</small>
+              </div>
+              <button class="moderation-support-comments-open" data-supporter-comments data-suggestion-id="${Number(item.id)}" type="button">
+                <span>Комментарии</span>
+                <b>${supporterCommentCount}</b>
+                <img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg">
+              </button>
+            </div>
             <div class="moderation-actions">${steam ? `<a class="moderation-steam" href="${escapeHtml(steam)}" target="_blank" rel="noopener noreferrer">Открыть Steam <img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"></a>` : ''}${moderationActions(item)}</div>
           </div>
         </article>`;
@@ -954,7 +1059,11 @@
   async function loadModeration() {
     if (!suggestionState.isAdmin) return;
     if (suggestionState.localMode) {
-      const localItems = readLocalSuggestions();
+      const localItems = readLocalSuggestions().map(item => ({
+        ...item,
+        support_count: Number(item.support_count) || 1,
+        supporter_comment_count: Array.isArray(item.suggestion_comments) ? item.suggestion_comments.length : 0
+      }));
       suggestionState.moderation = localItems;
       renderModeration();
       try {
@@ -977,7 +1086,26 @@
       if (!publishedCatalogActive()) elements.moderationList.innerHTML = `<div class="suggestions-empty">${escapeHtml(errorMessage(error))}</div>`;
       return;
     }
-    suggestionState.moderation = Array.isArray(data) ? data : [];
+    const moderationItems = Array.isArray(data) ? data : [];
+    let supportCounts = new Map();
+    try {
+      const { data: supportData, error: supportError } = await suggestionState.client.rpc('get_admin_suggestion_support_counts');
+      if (supportError) throw supportError;
+      supportCounts = new Map((Array.isArray(supportData) ? supportData : []).map(entry => [
+        String(entry.suggestion_id),
+        {
+          support_count: Number(entry.support_count) || 0,
+          supporter_comment_count: Number(entry.supporter_comment_count) || 0
+        }
+      ]));
+    } catch (supportError) {
+      console.warn('Не удалось загрузить количество предложивших игру:', supportError?.message || supportError);
+    }
+    suggestionState.moderation = moderationItems.map(item => ({
+      ...item,
+      support_count: supportCounts.get(String(item.id))?.support_count ?? Math.max(1, Array.isArray(item.suggestion_comments) ? item.suggestion_comments.length : 0),
+      supporter_comment_count: supportCounts.get(String(item.id))?.supporter_comment_count ?? (Array.isArray(item.suggestion_comments) ? item.suggestion_comments.length : 0)
+    }));
     await hydrateMissingModerationSnapshots(suggestionState.moderation);
     renderModeration();
   }
@@ -1057,7 +1185,9 @@
         p_hidden: Boolean(hidden)
       });
       if (error) throw error;
+      const activeId = suggestionState.commentMode === 'admin-supporters' ? suggestionState.activeSuggestionId : null;
       await Promise.all([loadModeration(), loadPublicSuggestions()]);
+      if (activeId) await loadAdminSupporterComments(activeId);
     } catch (error) {
       showNotice(errorMessage(error), 'error');
       setBusy(button, false);
@@ -1084,7 +1214,18 @@
     });
     elements.commentsClose.addEventListener('click', closeComments);
     elements.commentsPanel.addEventListener('click', event => {
-      if (event.target.matches('[data-suggestion-comments-close]')) closeComments();
+      if (event.target.matches('[data-suggestion-comments-close]')) {
+        closeComments();
+        return;
+      }
+      const moderationButton = event.target.closest('[data-admin-support-comment-id]');
+      if (moderationButton && suggestionState.commentMode === 'admin-supporters') {
+        moderateComment(
+          moderationButton.dataset.adminSupportCommentId,
+          moderationButton.dataset.adminSupportCommentHidden === 'true',
+          moderationButton
+        );
+      }
     });
     elements.commentForm.addEventListener('submit', saveComment);
     elements.commentDelete.addEventListener('click', deleteMyComment);
@@ -1114,10 +1255,13 @@
       renderModeration();
     }));
     elements.moderationList?.addEventListener('click', event => {
+      const supporterCommentsButton = event.target.closest('[data-supporter-comments][data-suggestion-id]');
+      if (supporterCommentsButton) {
+        openAdminSupporterComments(supporterCommentsButton.dataset.suggestionId);
+        return;
+      }
       const actionButton = event.target.closest('[data-action][data-suggestion-id]');
       if (actionButton) moderateSuggestion(actionButton.dataset.suggestionId, actionButton.dataset.action, actionButton);
-      const commentButton = event.target.closest('[data-comment-id]');
-      if (commentButton) moderateComment(commentButton.dataset.commentId, commentButton.dataset.commentHidden === 'true', commentButton);
     });
     document.addEventListener('keydown', event => {
       if (event.key !== 'Escape') return;
