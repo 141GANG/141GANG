@@ -76,7 +76,21 @@
       actionLabel.textContent = 'Выбрать файл';
       strong.replaceChildren(actionLabel);
     }
-    if (hint) hint.textContent = 'Не выбрано';
+
+    const syncSelectedFileHint = () => {
+      if (!hint) return;
+      const count = mediaForm?.querySelectorAll('.media-selected-item').length || 0;
+      if (!count) hint.textContent = 'Не выбрано';
+      else if (count === 1) hint.textContent = '1 файл выбран';
+      else if (count < 5) hint.textContent = `${count} файла выбраны`;
+      else hint.textContent = `${count} файлов выбраны`;
+    };
+
+    syncSelectedFileHint();
+    const selectedList = document.getElementById('mediaSelected');
+    if (selectedList) {
+      new MutationObserver(syncSelectedFileHint).observe(selectedList, { childList: true });
+    }
   }
 
   if (dropzone && !mediaForm?.querySelector('.figma-file-label')) {
