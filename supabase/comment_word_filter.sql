@@ -44,6 +44,9 @@ values
   ('пидор', 'curated_ru_en_v1'),
   ('пидорас', 'curated_ru_en_v1'),
   ('гандон', 'curated_ru_en_v1')
+  ('куколд', 'curated_ru_en_v1')
+  ('негр', 'curated_ru_en_v1')
+  ('нигер', 'curated_ru_en_v1')
 on conflict (term) do update
 set active = true,
     source_tag = excluded.source_tag;
