@@ -1048,6 +1048,11 @@ html.suggestions-open {
 }
 
 /* Admin proposal supporters: one card per game, distinct proposer count + full proposer comments. */
+.admin-portal[data-portal-mode="proposal"] .moderation-card-copy h3 {
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
+  font-weight: 900;
+}
+
 .admin-portal[data-portal-mode="proposal"] .moderation-title-open {
   display: inline;
   max-width: 100%;
@@ -1056,7 +1061,9 @@ html.suggestions-open {
   border: 0;
   color: inherit;
   background: transparent;
-  font: inherit;
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
+  font-size: inherit;
+  font-weight: 900;
   line-height: inherit;
   text-align: left;
   text-transform: inherit;
