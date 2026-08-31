@@ -240,3 +240,51 @@ revoke all on function public.get_admin_suggestion_support_counts() from public;
 revoke all on function public.get_admin_suggestion_support_comments(bigint) from public;
 grant execute on function public.get_admin_suggestion_support_counts() to authenticated;
 grant execute on function public.get_admin_suggestion_support_comments(bigint) to authenticated;
+
+-- Catalog-style author names for the admin-only proposer comment viewer.
+create or replace function public.get_admin_suggestion_support_comments_v2(p_suggestion_id bigint)
+returns table(
+  comment_id bigint,
+  username text,
+  body text,
+  is_hidden boolean,
+  created_at timestamptz,
+  updated_at timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if not public.is_site_admin() then
+    raise exception 'Это действие доступно только администратору.' using errcode = '42501';
+  end if;
+
+  return query
+  select
+    c.id as comment_id,
+    coalesce(
+      nullif(u.raw_user_meta_data ->> 'preferred_username', ''),
+      nullif(u.raw_user_meta_data ->> 'full_name', ''),
+      nullif(u.raw_user_meta_data ->> 'name', ''),
+      split_part(coalesce(u.email, 'Пользователь'), '@', 1)
+    )::text as username,
+    c.body,
+    c.is_hidden,
+    c.created_at,
+    c.updated_at
+  from public.suggestion_supporters s
+  join public.suggestion_comments c
+    on c.suggestion_id = s.suggestion_id
+   and c.user_id = s.user_id
+  left join auth.users u
+    on u.id = c.user_id
+  where s.suggestion_id = p_suggestion_id
+    and btrim(c.body) <> ''
+  order by c.created_at asc, c.id asc;
+end;
+$$;
+
+revoke all on function public.get_admin_suggestion_support_comments_v2(bigint) from public, anon;
+grant execute on function public.get_admin_suggestion_support_comments_v2(bigint) to authenticated;

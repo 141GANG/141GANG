@@ -655,6 +655,28 @@
     return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
   }
 
+  function commentAuthorInitial(username) {
+    const first = Array.from(String(username || 'П').trim())[0] || 'П';
+    return first.toLocaleUpperCase('ru-RU');
+  }
+
+  function adminSupporterCommentMarkup(comment, index, allowModeration = true) {
+    const username = String(comment?.username || `Пользователь ${index + 1}`).trim() || `Пользователь ${index + 1}`;
+    return `
+      <article class="admin-supporter-comment${comment.is_hidden ? ' is-hidden' : ''}">
+        <span class="admin-supporter-comment-avatar" aria-hidden="true">${escapeHtml(commentAuthorInitial(username))}</span>
+        <div class="admin-supporter-comment-content">
+          <header>
+            <strong>${escapeHtml(username)}</strong>
+            ${allowModeration ? `<button class="admin-supporter-comment-toggle" data-admin-support-comment-id="${Number(comment.comment_id)}" data-admin-support-comment-hidden="${comment.is_hidden ? 'false' : 'true'}" type="button">${comment.is_hidden ? 'Вернуть' : 'Скрыть'}</button>` : ''}
+          </header>
+          <p>${escapeHtml(comment.body)}</p>
+          <time>${escapeHtml(formatDate(comment.created_at))}</time>
+          ${comment.is_hidden ? '<small>Комментарий скрыт из публичного обсуждения.</small>' : ''}
+        </div>
+      </article>`;
+  }
+
   function setCommentsMode(mode = 'public') {
     const adminSupporters = mode === 'admin-supporters';
     suggestionState.commentMode = adminSupporters ? 'admin-supporters' : 'public';
@@ -703,49 +725,29 @@
 
   async function loadAdminSupporterComments(id) {
     const item = suggestionState.moderation.find(entry => String(entry.id) === String(id));
-    const supportCount = proposalSupportCount(item);
-    elements.commentsList.innerHTML = '<div class="suggestions-empty">Загружаем комментарии предложивших…</div>';
+    elements.commentsList.innerHTML = '<div class="suggestions-empty">Загружаем комментарии…</div>';
+
     if (suggestionState.localMode) {
-      const comments = Array.isArray(item?.suggestion_comments) ? item.suggestion_comments : [];
-      const summary = `
-        <div class="admin-supporter-comments-summary">
-          <strong>Голосов: ${supportCount}</strong>
-          <span>Комментариев: ${comments.length}</span>
-        </div>`;
-      elements.commentsList.innerHTML = summary + (comments.length
-        ? comments.map((comment, index) => `
-          <article class="suggestion-comment admin-supporter-comment${comment.is_hidden ? ' is-hidden' : ''}">
-            <header><strong>Предложивший пользователь ${index + 1}</strong><time>${escapeHtml(formatDate(comment.created_at))}</time></header>
-            <p>${escapeHtml(comment.body)}</p>
-          </article>`).join('')
-        : '<div class="suggestions-empty admin-supporter-comments-empty">Ни один из предложивших эту игру пользователей не оставил комментарий.</div>');
+      const comments = (Array.isArray(item?.suggestion_comments) ? item.suggestion_comments : [])
+        .filter(comment => String(comment?.body || '').trim());
+      elements.commentsList.innerHTML = comments.length
+        ? comments.map((comment, index) => adminSupporterCommentMarkup({
+            ...comment,
+            username: comment.username || `Пользователь ${index + 1}`
+          }, index, false)).join('')
+        : '<div class="suggestions-empty admin-supporter-comments-empty">Ни один из предложивших эту игру пользователей не оставил комментарий.</div>';
       return;
     }
+
     try {
-      const { data, error } = await suggestionState.client.rpc('get_admin_suggestion_support_comments', {
+      const { data, error } = await suggestionState.client.rpc('get_admin_suggestion_support_comments_v2', {
         p_suggestion_id: Number(id)
       });
       if (error) throw error;
       const comments = Array.isArray(data) ? data : [];
-      const summary = `
-        <div class="admin-supporter-comments-summary">
-          <strong>Голосов: ${supportCount}</strong>
-          <span>Комментариев: ${comments.length}</span>
-        </div>`;
-      elements.commentsList.innerHTML = summary + (comments.length
-        ? comments.map((comment, index) => `
-          <article class="suggestion-comment admin-supporter-comment${comment.is_hidden ? ' is-hidden' : ''}">
-            <header>
-              <strong>Предложивший пользователь ${index + 1}</strong>
-              <span class="admin-supporter-comment-tools">
-                <time>${escapeHtml(formatDate(comment.created_at))}</time>
-                <button data-admin-support-comment-id="${Number(comment.comment_id)}" data-admin-support-comment-hidden="${comment.is_hidden ? 'false' : 'true'}" type="button">${comment.is_hidden ? 'Вернуть' : 'Скрыть'}</button>
-              </span>
-            </header>
-            <p>${escapeHtml(comment.body)}</p>
-            ${comment.is_hidden ? '<small>Комментарий скрыт из публичного обсуждения.</small>' : ''}
-          </article>`).join('')
-        : '<div class="suggestions-empty admin-supporter-comments-empty">Ни один из предложивших эту игру пользователей не оставил комментарий.</div>');
+      elements.commentsList.innerHTML = comments.length
+        ? comments.map((comment, index) => adminSupporterCommentMarkup(comment, index, true)).join('')
+        : '<div class="suggestions-empty admin-supporter-comments-empty">Ни один из предложивших эту игру пользователей не оставил комментарий.</div>';
     } catch (error) {
       elements.commentsList.innerHTML = `<div class="suggestions-empty">${escapeHtml(errorMessage(error))}</div>`;
     }
@@ -758,6 +760,7 @@
     suggestionState.activeSuggestionId = Number(id);
     elements.commentsTitle.textContent = game.title;
     elements.commentsPanel.hidden = false;
+    elements.commentsPanel.style.removeProperty('display');
     elements.commentsPanel.setAttribute('aria-hidden', 'false');
     loadComments(id);
     window.setTimeout(() => elements.commentsClose.focus(), 30);
@@ -770,6 +773,7 @@
     suggestionState.activeSuggestionId = Number(id);
     elements.commentsTitle.textContent = item.title || 'Комментарии';
     elements.commentsPanel.hidden = false;
+    elements.commentsPanel.style.removeProperty('display');
     elements.commentsPanel.setAttribute('aria-hidden', 'false');
     loadAdminSupporterComments(id);
     window.setTimeout(() => elements.commentsClose.focus(), 30);
@@ -922,9 +926,7 @@
             ${item.rejection_reason ? `<p><strong>Причина:</strong> ${escapeHtml(item.rejection_reason)}</p>` : ''}
             <div class="moderation-support-panel">
               <div class="moderation-support-stats">
-                <span>Голосов за игру</span>
-                <strong>${supportCount}</strong>
-                <small>по уникальным аккаунтам</small>
+                <span>Голосов за игру: <strong>${supportCount}</strong></span>
               </div>
               <button class="moderation-support-comments-open" data-supporter-comments data-suggestion-id="${Number(item.id)}" type="button">
                 <span>Комментарии</span>
