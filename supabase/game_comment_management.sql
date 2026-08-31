@@ -14,6 +14,75 @@ alter table public.game_comments
 alter table public.game_comments
   alter column updated_at set not null;
 
+-- На одну опубликованную игру пользователь может оставить только один комментарий.
+-- Если файл применяется к базе со старыми дублями, сохраняем самый свежий.
+with ranked_comments as (
+  select
+    id,
+    row_number() over (
+      partition by game_id, user_id
+      order by coalesce(updated_at, created_at) desc, created_at desc, id desc
+    ) as row_num
+  from public.game_comments
+)
+delete from public.game_comments c
+using ranked_comments r
+where c.id = r.id
+  and r.row_num > 1;
+
+create unique index if not exists game_comments_one_per_user_game_idx
+  on public.game_comments (game_id, user_id);
+
+create or replace function public.add_game_comment(p_game_id bigint, p_body text)
+returns bigint
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  viewer_id uuid := auth.uid();
+  clean_body text := btrim(coalesce(p_body, ''));
+  new_id bigint;
+begin
+  if viewer_id is null then
+    raise exception 'Требуется авторизация.' using errcode = '42501';
+  end if;
+
+  if char_length(clean_body) not between 1 and 500 then
+    raise exception 'Комментарий должен содержать от 1 до 500 символов.' using errcode = '22023';
+  end if;
+
+  if not exists (
+    select 1
+    from public.games
+    where id = p_game_id
+      and published = true
+  ) then
+    raise exception 'Игра не найдена.' using errcode = 'P0002';
+  end if;
+
+  if exists (
+    select 1
+    from public.game_comments
+    where game_id = p_game_id
+      and user_id = viewer_id
+  ) then
+    raise exception 'Вы уже оставили комментарий к этой игре. Используйте «Изменить».' using errcode = '23505';
+  end if;
+
+  begin
+    insert into public.game_comments (game_id, user_id, body)
+    values (p_game_id, viewer_id, clean_body)
+    returning id into new_id;
+  exception
+    when unique_violation then
+      raise exception 'Вы уже оставили комментарий к этой игре. Используйте «Изменить».' using errcode = '23505';
+  end;
+
+  return new_id;
+end;
+$$;
+
 create or replace function public.update_game_comment(p_comment_id bigint, p_body text)
 returns timestamptz
 language plpgsql
@@ -137,6 +206,9 @@ as $$
   )
   order by c.created_at asc nulls last;
 $$;
+
+revoke all on function public.add_game_comment(bigint, text) from public;
+grant execute on function public.add_game_comment(bigint, text) to authenticated;
 
 revoke all on function public.update_game_comment(bigint, text) from public;
 revoke all on function public.delete_game_comment(bigint) from public;

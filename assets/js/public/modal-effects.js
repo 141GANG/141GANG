@@ -86,46 +86,57 @@ function renderModalComments(comments = []) {
   }).join('') : '<p class="modal-comments-empty">Пока нет комментариев. Начните обсуждение.</p>';
 }
 
-function cancelModalCommentEdit(article) {
-  if (!article) return;
-  article.classList.remove('is-editing');
-  article.querySelector('[data-comment-text]')?.removeAttribute('hidden');
-  article.querySelector('.modal-comment-edit')?.remove();
+let modalCommentEditId = null;
+let modalOwnComment = null;
+
+function resetModalCommentComposer() {
+  modalCommentEditId = null;
+  if (!elements.modalCommentForm || !elements.modalCommentInput) return;
+  elements.modalCommentInput.value = '';
+  elements.modalCommentInput.placeholder = 'Написать комментарий';
+  elements.modalCommentForm.dataset.commentMode = 'create';
+  const submitButton = elements.modalCommentForm.querySelector('button[type="submit"]');
+  submitButton?.setAttribute('aria-label', 'Отправить комментарий');
+}
+
+function syncModalCommentComposer(signedIn, ownComment = null) {
+  modalOwnComment = ownComment || null;
+  if (!elements.modalCommentForm) return;
+
+  const editingOwnComment = Boolean(
+    signedIn &&
+    modalCommentEditId &&
+    modalOwnComment &&
+    String(modalOwnComment.id) === String(modalCommentEditId)
+  );
+
+  elements.modalCommentForm.hidden = !signedIn || Boolean(modalOwnComment && !editingOwnComment);
+  if (!editingOwnComment && !modalOwnComment && signedIn) {
+    elements.modalCommentForm.dataset.commentMode = 'create';
+  }
 }
 
 function beginModalCommentEdit(article) {
-  if (!article) return;
+  if (!article || !elements.modalCommentForm || !elements.modalCommentInput) return;
   const text = article.querySelector('[data-comment-text]');
-  if (!text) return;
+  const commentId = article.dataset.commentId;
+  if (!text || !commentId) return;
 
-  elements.modalCommentsList?.querySelectorAll('.modal-comment-item.is-editing').forEach(item => {
-    if (item !== article) cancelModalCommentEdit(item);
-  });
+  modalCommentEditId = String(commentId);
+  elements.modalCommentInput.value = text.textContent || '';
+  elements.modalCommentInput.placeholder = 'Изменить комментарий';
+  elements.modalCommentForm.dataset.commentMode = 'edit';
+  elements.modalCommentForm.hidden = false;
 
-  const existing = article.querySelector('.modal-comment-edit textarea');
-  if (existing) {
-    existing.focus();
-    return;
-  }
+  const submitButton = elements.modalCommentForm.querySelector('button[type="submit"]');
+  submitButton?.setAttribute('aria-label', 'Сохранить изменения');
 
-  const editor = document.createElement('div');
-  editor.className = 'modal-comment-edit';
-  editor.innerHTML = `
-    <label class="visually-hidden">Изменить комментарий</label>
-    <textarea maxlength="500" aria-label="Изменить комментарий"></textarea>
-    <div class="modal-comment-edit-actions">
-      <button type="button" data-comment-action="save">Сохранить</button>
-      <button type="button" data-comment-action="cancel">Отмена</button>
-    </div>
-  `;
-
-  const textarea = editor.querySelector('textarea');
-  textarea.value = text.textContent || '';
-  text.hidden = true;
-  text.after(editor);
-  article.classList.add('is-editing');
-  textarea.focus();
-  textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+  elements.modalCommentInput.focus();
+  elements.modalCommentInput.setSelectionRange(
+    elements.modalCommentInput.value.length,
+    elements.modalCommentInput.value.length
+  );
+  elements.modalCommentForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 async function getSignedInUser(client) {
@@ -149,7 +160,6 @@ async function loadGameInteractions(gameId) {
       elements.modalCommentComposerAvatar.textContent = username.charAt(0).toLocaleUpperCase('ru-RU') || 'П';
     }
     elements.modalAuthHint.hidden = signedIn;
-    elements.modalCommentForm.hidden = !signedIn;
     elements.modalVoteActions.forEach(button => { button.disabled = !signedIn; });
     const { data, error } = await client.rpc('get_game_interactions', { p_game_id: Number(gameId) });
     if (error) throw error;
@@ -163,19 +173,23 @@ async function loadGameInteractions(gameId) {
     state.reputationScores[String(gameId)] = Number(summary.score) || 0;
     state.currentVotes[String(gameId)] = Number(summary.my_reaction) || 0;
     renderModalReactionState(gameId);
-    renderModalComments(rows.filter(row => row.comment_id).map(row => ({
+    const comments = rows.filter(row => row.comment_id).map(row => ({
       id: row.comment_id,
       username: row.username,
       body: row.comment_body,
       created_at: row.comment_created_at,
       updated_at: row.comment_updated_at,
       is_mine: row.comment_is_mine === true
-    })));
+    }));
+    const ownComment = comments.find(comment => comment.is_mine) || null;
+    renderModalComments(comments);
+    syncModalCommentComposer(signedIn, ownComment);
     elements.modalReputationNotice.textContent = '';
   } catch (error) {
     console.warn('Взаимодействия игры:', error?.message || error);
     renderModalReactionState(gameId);
     renderModalComments([]);
+    if (elements.modalCommentForm) elements.modalCommentForm.hidden = true;
     elements.modalReputationNotice.textContent = modalInteractionError(error);
   }
 }
@@ -204,7 +218,9 @@ function openGameModal(gameId) {
   elements.modalSteam.hidden = !steamUrl;
   if (steamUrl) elements.modalSteam.href = steamUrl;
   elements.modalCommentsList.innerHTML = '<p class="modal-comments-empty">Загружаем комментарии…</p>';
-  elements.modalCommentInput.value = '';
+  resetModalCommentComposer();
+  modalOwnComment = null;
+  if (elements.modalCommentForm) elements.modalCommentForm.hidden = true;
   renderModalReactionState(game.id);
   fitGameModalToViewport();
   elements.modal.hidden = false;
@@ -254,17 +270,27 @@ elements.modalCommentForm?.addEventListener('submit', async event => {
   const game = currentModalGame();
   const body = elements.modalCommentInput.value.trim();
   if (!game || !body) return;
+
+  const editingCommentId = modalCommentEditId;
   const button = elements.modalCommentForm.querySelector('button[type="submit"]');
   button.disabled = true;
   try {
     const client = getConfiguredClient();
+    if (!client) throw new Error('Supabase не настроен.');
     await getSignedInUser(client);
-    const { error } = await client.rpc('add_game_comment', { p_game_id: Number(game.id), p_body: body });
+
+    const request = editingCommentId
+      ? client.rpc('update_game_comment', { p_comment_id: editingCommentId, p_body: body })
+      : client.rpc('add_game_comment', { p_game_id: Number(game.id), p_body: body });
+    const { error } = await request;
     if (error) throw error;
-    elements.modalCommentInput.value = '';
+
+    resetModalCommentComposer();
+    elements.modalReputationNotice.textContent = '';
     await loadGameInteractions(game.id);
   } catch (error) {
     elements.modalReputationNotice.textContent = modalInteractionError(error);
+    if (!editingCommentId) await loadGameInteractions(game.id);
   } finally {
     button.disabled = false;
   }
@@ -284,25 +310,11 @@ elements.modalCommentsList?.addEventListener('click', async event => {
     return;
   }
 
-  if (action === 'cancel') {
-    cancelModalCommentEdit(article);
-    return;
-  }
+  if (action !== 'delete' || !window.confirm('Удалить этот комментарий?')) return;
 
   const commentId = article.dataset.commentId;
   const game = currentModalGame();
   if (!commentId || !game) return;
-
-  let nextBody = '';
-  if (action === 'save') {
-    nextBody = article.querySelector('.modal-comment-edit textarea')?.value.trim() || '';
-    if (!nextBody || nextBody.length > 500) {
-      elements.modalReputationNotice.textContent = 'Комментарий должен содержать от 1 до 500 символов.';
-      return;
-    }
-  }
-
-  if (action === 'delete' && !window.confirm('Удалить этот комментарий?')) return;
 
   article.classList.add('is-busy');
   article.querySelectorAll('button').forEach(item => { item.disabled = true; });
@@ -311,12 +323,10 @@ elements.modalCommentsList?.addEventListener('click', async event => {
     if (!client) throw new Error('Supabase не настроен.');
     await getSignedInUser(client);
 
-    const request = action === 'delete'
-      ? client.rpc('delete_game_comment', { p_comment_id: commentId })
-      : client.rpc('update_game_comment', { p_comment_id: commentId, p_body: nextBody });
-    const { error } = await request;
+    const { error } = await client.rpc('delete_game_comment', { p_comment_id: commentId });
     if (error) throw error;
 
+    if (String(modalCommentEditId || '') === String(commentId)) resetModalCommentComposer();
     elements.modalReputationNotice.textContent = '';
     await loadGameInteractions(game.id);
   } catch (error) {
@@ -331,6 +341,8 @@ function closeGameModal() {
   elements.modal.classList.remove('is-open');
   elements.modal.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('modal-open');
+  resetModalCommentComposer();
+  modalOwnComment = null;
   state.activeGameId = null;
   window.setTimeout(() => {
     elements.modal.hidden = true;
