@@ -123,8 +123,10 @@ function openGameModal(gameId) {
   const meta = getReleaseMeta(game);
   const coverUrl = safeExternalUrl(game.cover_url);
   const steamUrl = safeExternalUrl(game.steam_url, ['steampowered.com', 'steamcommunity.com']);
-  const players = Number(game.coop_max_players) || (game.is_coop ? 2 : 1);
-  const playersLabel = game.is_coop ? `${Number(game.coop_min_players) || 2}–${players} ${playerWord(players)}` : '1 игрок';
+  const playerRange = catalogPlayerRange(game);
+  const playersLabel = playerRange.min === playerRange.max
+    ? `${playerRange.max} ${playerWord(playerRange.max)}`
+    : `${playerRange.min}–${playerRange.max} ${playerWord(playerRange.max)}`;
 
   state.activeGameId = String(game.id);
   lastFocusedElement = document.activeElement;

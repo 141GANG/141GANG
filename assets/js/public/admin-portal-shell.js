@@ -5,7 +5,7 @@
     ['adminGamesTabsV4Styles', './assets/css/public/admin-games-tabs-v4.css?v=1.5'],
     ['adminPublishedIconsFixStyles', './assets/css/public/admin-published-icons-fix.css?v=1.2'],
     ['adminModeratorLayoutV5Styles', './assets/css/public/admin-moderator-layout-v5.css?v=1.2'],
-    ['adminInterfaceRefinementV8Styles', './assets/css/public/admin-interface-refinement-v8.css?v=1.7'],
+    ['adminInterfaceRefinementV8Styles', './assets/css/public/admin-interface-refinement-v8.css?v=1.8-p0-parity'],
     ['adminMediaLayoutV6Styles', './assets/css/public/admin-media-layout-v6.css?v=1.3']
   ];
 
