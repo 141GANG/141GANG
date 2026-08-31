@@ -1,0 +1,143 @@
+/* Управление собственными комментариями в карточке игры. */
+.game-modal .modal-comment-body {
+  min-width: 0;
+}
+
+.game-modal .modal-comment-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rem;
+}
+
+.game-modal .modal-comment-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8rem;
+}
+
+.game-modal .modal-comment-action,
+.game-modal .modal-comment-edit-actions button {
+  min-height: 32rem;
+  padding: 6rem 10rem;
+  border: 1rem solid rgba(240, 240, 240, .12);
+  border-radius: 5rem;
+  color: rgba(240, 240, 240, .72);
+  background: #202020;
+  font-family: var(--font-ui);
+  font-size: 14rem;
+  font-weight: 500;
+  line-height: 1;
+  transition:
+    color .18s ease,
+    border-color .18s ease,
+    background .18s ease,
+    opacity .18s ease;
+}
+
+.game-modal .modal-comment-action:hover,
+.game-modal .modal-comment-edit-actions button:hover {
+  color: #f0f0f0;
+  border-color: rgba(240, 240, 240, .3);
+  background: #292929;
+}
+
+.game-modal .modal-comment-action.is-danger {
+  color: rgba(239, 58, 60, .8);
+}
+
+.game-modal .modal-comment-action.is-danger:hover {
+  color: #ff7779;
+  border-color: rgba(239, 58, 60, .35);
+  background: rgba(239, 58, 60, .08);
+}
+
+.game-modal .modal-comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 10rem;
+  flex-wrap: wrap;
+}
+
+.game-modal .modal-comment-edited {
+  color: rgba(240, 240, 240, .3);
+  font-family: var(--font-ui);
+  font-size: 14rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.game-modal .modal-comment-edit {
+  display: grid;
+  gap: 10rem;
+  margin-top: 8rem;
+}
+
+.game-modal .modal-comment-edit textarea {
+  width: 100%;
+  min-height: 88rem;
+  max-height: 220rem;
+  padding: 14rem 16rem;
+  resize: vertical;
+  border: 1rem solid rgba(240, 240, 240, .14);
+  border-radius: 6rem;
+  outline: 0;
+  color: #f0f0f0;
+  background: #181818;
+  font-family: var(--font-body);
+  font-size: 20rem;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.game-modal .modal-comment-edit textarea:focus {
+  border-color: rgba(239, 58, 60, .58);
+  box-shadow: 0 0 0 2rem rgba(239, 58, 60, .08);
+}
+
+.game-modal .modal-comment-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8rem;
+}
+
+.game-modal .modal-comment-edit-actions button:first-child {
+  color: #f0f0f0;
+  border-color: rgba(239, 58, 60, .38);
+  background: rgba(239, 58, 60, .12);
+}
+
+.game-modal .modal-comment-item.is-editing > .modal-comment-body > .modal-comment-head .modal-comment-actions {
+  display: none;
+}
+
+.game-modal .modal-comment-item.is-busy {
+  opacity: .62;
+  pointer-events: none;
+}
+
+.game-modal .modal-comment-action:disabled,
+.game-modal .modal-comment-edit-actions button:disabled {
+  cursor: wait;
+  opacity: .5;
+}
+
+@media (max-width: 45rem) {
+  .game-modal .modal-comment-head {
+    flex-direction: column;
+    gap: 8rem;
+  }
+
+  .game-modal .modal-comment-actions {
+    width: 100%;
+  }
+
+  .game-modal .modal-comment-action {
+    flex: 1 1 auto;
+  }
+
+  .game-modal .modal-comment-edit-actions button {
+    flex: 1 1 0;
+  }
+}

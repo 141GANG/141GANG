@@ -1,7 +1,7 @@
 function modalInteractionError(error) {
   const message = String(error?.message || error || 'Не удалось выполнить действие.');
   if (/auth|jwt|session|авторизац/i.test(message)) return 'Войдите в аккаунт, чтобы оценивать игры и писать комментарии.';
-  if (/get_game_interactions|set_game_reaction|add_game_comment|PGRST202|42883|schema cache/i.test(message)) {
+  if (/get_game_interactions|set_game_reaction|add_game_comment|update_game_comment|delete_game_comment|PGRST202|42883|schema cache/i.test(message)) {
     return 'Новая система оценок ещё не подключена к базе. Выполните supabase/game_interactions.sql.';
   }
   return message;
@@ -63,8 +63,69 @@ function renderModalComments(comments = []) {
   elements.modalCommentsList.innerHTML = comments.length ? comments.map(comment => {
     const username = String(comment.username || 'Пользователь').trim();
     const initial = username.charAt(0).toLocaleUpperCase('ru-RU') || 'U';
-    return `<article class="modal-comment-item"><span class="modal-comment-avatar" aria-hidden="true">${escapeHtml(initial)}</span><div><strong>${escapeHtml(username)}</strong><p>${escapeHtml(comment.body)}</p><time>${escapeHtml(formatDate(comment.created_at, { short: true }))}</time></div></article>`;
+    const createdAt = Date.parse(comment.created_at || '');
+    const updatedAt = Date.parse(comment.updated_at || '');
+    const edited = Number.isFinite(createdAt) && Number.isFinite(updatedAt) && updatedAt > createdAt + 1000;
+    const actions = comment.is_mine
+      ? `<div class="modal-comment-actions" aria-label="Управление комментарием">
+          <button type="button" class="modal-comment-action" data-comment-action="edit">Изменить</button>
+          <button type="button" class="modal-comment-action is-danger" data-comment-action="delete">Удалить</button>
+        </div>`
+      : '';
+    return `<article class="modal-comment-item${comment.is_mine ? ' is-own' : ''}" data-comment-id="${escapeHtml(String(comment.id))}">
+      <span class="modal-comment-avatar" aria-hidden="true">${escapeHtml(initial)}</span>
+      <div class="modal-comment-body">
+        <div class="modal-comment-head"><strong>${escapeHtml(username)}</strong>${actions}</div>
+        <p data-comment-text>${escapeHtml(comment.body)}</p>
+        <div class="modal-comment-meta">
+          <time datetime="${escapeHtml(String(comment.created_at || ''))}">${escapeHtml(formatDate(comment.created_at, { short: true }))}</time>
+          ${edited ? '<span class="modal-comment-edited">изменено</span>' : ''}
+        </div>
+      </div>
+    </article>`;
   }).join('') : '<p class="modal-comments-empty">Пока нет комментариев. Начните обсуждение.</p>';
+}
+
+function cancelModalCommentEdit(article) {
+  if (!article) return;
+  article.classList.remove('is-editing');
+  article.querySelector('[data-comment-text]')?.removeAttribute('hidden');
+  article.querySelector('.modal-comment-edit')?.remove();
+}
+
+function beginModalCommentEdit(article) {
+  if (!article) return;
+  const text = article.querySelector('[data-comment-text]');
+  if (!text) return;
+
+  elements.modalCommentsList?.querySelectorAll('.modal-comment-item.is-editing').forEach(item => {
+    if (item !== article) cancelModalCommentEdit(item);
+  });
+
+  const existing = article.querySelector('.modal-comment-edit textarea');
+  if (existing) {
+    existing.focus();
+    return;
+  }
+
+  const editor = document.createElement('div');
+  editor.className = 'modal-comment-edit';
+  editor.innerHTML = `
+    <label class="visually-hidden">Изменить комментарий</label>
+    <textarea maxlength="500" aria-label="Изменить комментарий"></textarea>
+    <div class="modal-comment-edit-actions">
+      <button type="button" data-comment-action="save">Сохранить</button>
+      <button type="button" data-comment-action="cancel">Отмена</button>
+    </div>
+  `;
+
+  const textarea = editor.querySelector('textarea');
+  textarea.value = text.textContent || '';
+  text.hidden = true;
+  text.after(editor);
+  article.classList.add('is-editing');
+  textarea.focus();
+  textarea.setSelectionRange(textarea.value.length, textarea.value.length);
 }
 
 async function getSignedInUser(client) {
@@ -106,7 +167,9 @@ async function loadGameInteractions(gameId) {
       id: row.comment_id,
       username: row.username,
       body: row.comment_body,
-      created_at: row.comment_created_at
+      created_at: row.comment_created_at,
+      updated_at: row.comment_updated_at,
+      is_mine: row.comment_is_mine === true
     })));
     elements.modalReputationNotice.textContent = '';
   } catch (error) {
@@ -204,6 +267,62 @@ elements.modalCommentForm?.addEventListener('submit', async event => {
     elements.modalReputationNotice.textContent = modalInteractionError(error);
   } finally {
     button.disabled = false;
+  }
+});
+
+elements.modalCommentsList?.addEventListener('click', async event => {
+  const target = event.target instanceof Element ? event.target : null;
+  const button = target?.closest('[data-comment-action]');
+  if (!button) return;
+
+  const article = button.closest('.modal-comment-item[data-comment-id]');
+  const action = button.dataset.commentAction;
+  if (!article || !action) return;
+
+  if (action === 'edit') {
+    beginModalCommentEdit(article);
+    return;
+  }
+
+  if (action === 'cancel') {
+    cancelModalCommentEdit(article);
+    return;
+  }
+
+  const commentId = article.dataset.commentId;
+  const game = currentModalGame();
+  if (!commentId || !game) return;
+
+  let nextBody = '';
+  if (action === 'save') {
+    nextBody = article.querySelector('.modal-comment-edit textarea')?.value.trim() || '';
+    if (!nextBody || nextBody.length > 500) {
+      elements.modalReputationNotice.textContent = 'Комментарий должен содержать от 1 до 500 символов.';
+      return;
+    }
+  }
+
+  if (action === 'delete' && !window.confirm('Удалить этот комментарий?')) return;
+
+  article.classList.add('is-busy');
+  article.querySelectorAll('button').forEach(item => { item.disabled = true; });
+  try {
+    const client = getConfiguredClient();
+    if (!client) throw new Error('Supabase не настроен.');
+    await getSignedInUser(client);
+
+    const request = action === 'delete'
+      ? client.rpc('delete_game_comment', { p_comment_id: commentId })
+      : client.rpc('update_game_comment', { p_comment_id: commentId, p_body: nextBody });
+    const { error } = await request;
+    if (error) throw error;
+
+    elements.modalReputationNotice.textContent = '';
+    await loadGameInteractions(game.id);
+  } catch (error) {
+    elements.modalReputationNotice.textContent = modalInteractionError(error);
+    article.classList.remove('is-busy');
+    article.querySelectorAll('button').forEach(item => { item.disabled = false; });
   }
 });
 
