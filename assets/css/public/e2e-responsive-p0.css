@@ -1,0 +1,139 @@
+/* Release P0 responsive fixes.
+   This late layer only prevents inaccessible or overflowing controls at the
+   checklist viewport sizes. Desktop composition stays unchanged. */
+
+/* Mobile header: keep all four navigation actions visible in the existing
+   second row instead of requiring a hidden horizontal swipe. */
+@media (max-width: 45rem) {
+  .nav-center {
+    gap: 6rem !important;
+    justify-content: space-between !important;
+    overflow-x: visible !important;
+  }
+
+  .nav-center > .gang-trigger,
+  .nav-center > a[href="#catalog"],
+  .nav-center > #adminPortalOpen {
+    width: auto !important;
+    min-width: 0 !important;
+    flex: 0 1 auto !important;
+  }
+
+  .nav-center > .nav-menu-wrap {
+    min-width: 0 !important;
+    flex: 0 1 auto !important;
+  }
+
+  .nav-center > .nav-menu-wrap > .nav-menu-toggle {
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .site-header .nav-link,
+  .site-header .nav-menu-toggle {
+    gap: 6rem !important;
+    padding-inline: 8rem !important;
+    font-size: 11rem !important;
+  }
+
+  .site-header .gang-trigger i {
+    width: 7rem !important;
+    height: 7rem !important;
+  }
+
+  .site-header .nav-menu-toggle img {
+    width: 10rem !important;
+    height: 6rem !important;
+  }
+
+  /* Fixed card height plus aspect-ratio used to make a proposal card wider
+     than the mobile shell. Height stays identical; only the forced width is
+     removed. */
+  .content-menu-card,
+  .content-menu-card.content-menu-card-media {
+    width: 100% !important;
+    max-width: 100% !important;
+    aspect-ratio: auto !important;
+  }
+
+  /* All release states remain visible in one row. */
+  #catalog .release-filters,
+  #catalog .catalog-toolbar.is-compact .release-filters {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 4rem !important;
+    overflow: visible !important;
+  }
+
+  #catalog .release-filters .filter-btn,
+  #catalog .catalog-toolbar.is-compact .release-filters .filter-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 3rem !important;
+    padding-inline: 5rem !important;
+    font-size: 11rem !important;
+  }
+}
+
+/* Multiple media previews stay in one preview slot. The user can swipe or
+   use a touchpad/mouse to move between files; the scrollbar stays hidden. */
+@media (max-width: 56.25rem) {
+  .media-panel.is-figma-proposal .media-selected {
+    display: flex !important;
+    gap: 10rem !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .media-panel.is-figma-proposal .media-selected::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .media-panel.is-figma-proposal .media-selected-item,
+  .media-panel.is-figma-proposal .media-selected-item:only-child {
+    width: 100% !important;
+    flex: 0 0 100% !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: min(48vw, 190rem) auto auto !important;
+    scroll-snap-align: start;
+  }
+
+  .media-panel.is-figma-proposal .media-selected-preview {
+    grid-column: 1 !important;
+    height: min(48vw, 190rem) !important;
+  }
+}
+
+/* Standalone management owns one internal vertical scroll surface. The page
+   header remains visible while the portal is constrained to the remaining
+   viewport height. */
+body.standalone-admin {
+  --p0-admin-top: 90rem;
+}
+
+@media (max-width: 93.75rem) and (min-width: 68.8125rem) {
+  body.standalone-admin {
+    --p0-admin-top: 78rem;
+  }
+}
+
+@media (max-width: 68.75rem) {
+  body.standalone-admin {
+    --p0-admin-top: 120rem;
+  }
+}
+
+body.standalone-admin .admin-portal {
+  top: var(--p0-admin-top) !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+}

@@ -6,6 +6,7 @@
     ['style','proposalMediaFigmaExactStyles','./assets/css/public/proposal-media-figma-exact.css?v=3.0-preview'],
     ['style','adminCardIconsStyles','./assets/css/public/admin-card-icons.css?v=1.1'],
     ['style','figmaTypographyFinalStyles','./assets/css/public/figma-typography-final.css?v=4.7'],
+    ['style','e2eResponsiveP0Styles','./assets/css/public/e2e-responsive-p0.css?v=1.1-rem'],
     ['script','proposalWindowsFigmaScript','./assets/js/public/proposal-windows-figma.js?v=3.5-media-preview'],
     ['script','adminCardIconsScriptV2','./assets/js/public/admin-card-icons-v2.js?v=2.0'],
     ['script','catalogLiveRefreshScript','./assets/js/public/catalog-live-refresh.js?v=1.0']

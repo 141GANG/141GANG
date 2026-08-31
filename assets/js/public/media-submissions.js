@@ -314,12 +314,31 @@
   }
 
   function itemAuthor(item) {
+    const persisted = String(item?.author_name || '').trim();
+    if (persisted) return persisted;
     const saved = localMediaMeta()[String(item?.id)]?.authorName;
     if (saved) return String(saved);
     if (item?.created_by && item.created_by === state.session?.user?.id) {
       return userDisplayName(state.session.user);
     }
     return 'Не указан';
+  }
+
+  async function attachAdminAuthorNames(items) {
+    if (state.localMode || !state.client || !Array.isArray(items) || !items.length) return items;
+    const { data, error } = await state.client.rpc('get_media_submission_authors');
+    if (error) {
+      console.warn('Не удалось загрузить имена авторов медиазаявок:', error?.message || error);
+      return items;
+    }
+    const names = new Map((Array.isArray(data) ? data : []).map(row => [
+      String(row.submission_id || ''),
+      String(row.display_name || '').trim()
+    ]));
+    return items.map(item => ({
+      ...item,
+      author_name: names.get(String(item.id)) || ''
+    }));
   }
 
   function mediaKindIcon(type) {
@@ -932,7 +951,8 @@
         .select('id,title,comment,status,media_type,category,created_by,created_at,updated_at,moderated_at,published_at,archived_at,media_submission_files(id,storage_path,file_name,mime_type,file_size,sort_order)')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      state.adminItems = await addSignedUrls(Array.isArray(data) ? data : []);
+      const items = await addSignedUrls(Array.isArray(data) ? data : []);
+      state.adminItems = await attachAdminAuthorNames(items);
       renderAdminQueue();
     } catch (error) {
       console.error(error);
