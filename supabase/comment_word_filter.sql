@@ -1,114 +1,147 @@
-
--- Фильтрация запрещённых слов в комментариях.
--- Twitch не публикует полный список запрещённых слуров; этот denylist является
--- внутренним расширяемым набором для комментариев 141GANG.
+-- 141GANG comment moderation v2
+-- Source policy: user-provided Twitch denylist, 2026-09-01.
+-- The list is intentionally treated as a hard denylist regardless of contextual notes.
 
 create table if not exists public.comment_blocked_terms (
   term text primary key,
   active boolean not null default true,
-  source_tag text not null default 'curated_ru_en_v1',
-  created_at timestamptz not null default now(),
-  constraint comment_blocked_terms_term_length
-    check (char_length(term) between 3 and 32),
-  constraint comment_blocked_terms_single_token
-    check (term !~ '[[:space:]]')
+  source_tag text not null default 'manual',
+  created_at timestamptz not null default now()
 );
-
-alter table public.comment_blocked_terms enable row level security;
 
 revoke all on table public.comment_blocked_terms from public, anon, authenticated;
 
-insert into public.comment_blocked_terms (term, source_tag)
+-- Replace the previous curated list with the user's current policy list.
+delete from public.comment_blocked_terms;
+
+insert into public.comment_blocked_terms (term, active, source_tag)
 values
-  ('nigger', 'curated_ru_en_v1'),
-  ('nigga', 'curated_ru_en_v1'),
-  ('faggot', 'curated_ru_en_v1'),
-  ('tranny', 'curated_ru_en_v1'),
-  ('kike', 'curated_ru_en_v1'),
-  ('chink', 'curated_ru_en_v1'),
-  ('spic', 'curated_ru_en_v1'),
-  ('wetback', 'curated_ru_en_v1'),
-  ('cunt', 'curated_ru_en_v1'),
-  ('fuck', 'curated_ru_en_v1'),
-  ('shit', 'curated_ru_en_v1'),
-  ('bitch', 'curated_ru_en_v1'),
-  ('хуй', 'curated_ru_en_v1'),
-  ('хуесос', 'curated_ru_en_v1'),
-  ('пизда', 'curated_ru_en_v1'),
-  ('пиздец', 'curated_ru_en_v1'),
-  ('ебать', 'curated_ru_en_v1'),
-  ('ебаный', 'curated_ru_en_v1'),
-  ('еблан', 'curated_ru_en_v1'),
-  ('блять', 'curated_ru_en_v1'),
-  ('блядь', 'curated_ru_en_v1'),
-  ('пидор', 'curated_ru_en_v1'),
-  ('пидорас', 'curated_ru_en_v1'),
-  ('гандон', 'curated_ru_en_v1')
-  ('куколд', 'curated_ru_en_v1')
-  ('негр', 'curated_ru_en_v1')
-  ('нигер', 'curated_ru_en_v1')
+  ('ниггер', true, 'user_twitch_list_2026_09_01'),
+  ('нига', true, 'user_twitch_list_2026_09_01'),
+  ('нага', true, 'user_twitch_list_2026_09_01'),
+  ('nigger', true, 'user_twitch_list_2026_09_01'),
+  ('nigga', true, 'user_twitch_list_2026_09_01'),
+  ('naga', true, 'user_twitch_list_2026_09_01'),
+  ('пидор', true, 'user_twitch_list_2026_09_01'),
+  ('пидорас', true, 'user_twitch_list_2026_09_01'),
+  ('педик', true, 'user_twitch_list_2026_09_01'),
+  ('гомик', true, 'user_twitch_list_2026_09_01'),
+  ('петух', true, 'user_twitch_list_2026_09_01'),
+  ('faggot', true, 'user_twitch_list_2026_09_01'),
+  ('хиджаб', true, 'user_twitch_list_2026_09_01'),
+  ('белый', true, 'user_twitch_list_2026_09_01'),
+  ('натурал', true, 'user_twitch_list_2026_09_01'),
+  ('гетеросексуал', true, 'user_twitch_list_2026_09_01'),
+  ('хохол', true, 'user_twitch_list_2026_09_01'),
+  ('хач', true, 'user_twitch_list_2026_09_01'),
+  ('жид', true, 'user_twitch_list_2026_09_01'),
+  ('москаль', true, 'user_twitch_list_2026_09_01'),
+  ('ватник', true, 'user_twitch_list_2026_09_01'),
+  ('сионист', true, 'user_twitch_list_2026_09_01'),
+  ('куколд', true, 'user_twitch_list_2026_09_01'),
+  ('конча', true, 'user_twitch_list_2026_09_01'),
+  ('даун', true, 'user_twitch_list_2026_09_01'),
+  ('аутист', true, 'user_twitch_list_2026_09_01'),
+  ('дебил', true, 'user_twitch_list_2026_09_01'),
+  ('retard', true, 'user_twitch_list_2026_09_01'),
+  ('virgin', true, 'user_twitch_list_2026_09_01'),
+  ('девственник', true, 'user_twitch_list_2026_09_01'),
+  ('simp', true, 'user_twitch_list_2026_09_01'),
+  ('симп', true, 'user_twitch_list_2026_09_01'),
+  ('incel', true, 'user_twitch_list_2026_09_01'),
+  ('инцел', true, 'user_twitch_list_2026_09_01'),
+  ('cunt', true, 'user_twitch_list_2026_09_01'),
+  ('пизда', true, 'user_twitch_list_2026_09_01'),
+  ('вагина', true, 'user_twitch_list_2026_09_01'),
+
+  -- Hidden matching aliases for common full transliterations that cannot be
+  -- represented by a one-character homoglyph map (kh/ch/zh/soft sign, etc.).
+  ('hijab', true, 'matching_alias_v2'),
+  ('hidzhab', true, 'matching_alias_v2'),
+  ('khokhol', true, 'matching_alias_v2'),
+  ('hohol', true, 'matching_alias_v2'),
+  ('khach', true, 'matching_alias_v2'),
+  ('hach', true, 'matching_alias_v2'),
+  ('zhid', true, 'matching_alias_v2'),
+  ('cuckold', true, 'matching_alias_v2'),
+  ('koncha', true, 'matching_alias_v2'),
+  ('petukh', true, 'matching_alias_v2'),
+  ('devstvennik', true, 'matching_alias_v2')
 on conflict (term) do update
-set active = true,
+set active = excluded.active,
     source_tag = excluded.source_tag;
 
+-- One-character equivalence groups. They combine Latin/Cyrillic/Greek
+-- confusables, common transliteration letters and leetspeak digits/symbols.
 create or replace function public.comment_filter_char_class(p_char text)
 returns text
 language plpgsql
-immutable
-strict
+immutable strict
 set search_path = ''
 as $$
 declare
   ch text := lower(p_char);
 begin
   return case ch
-    when 'a' then '[aа@4]'
-    when 'а' then '[aа@4]'
-    when 'b' then '[bв8]'
-    when 'в' then '[bв8]'
-    when 'c' then '[cс$]'
-    when 'с' then '[cс$]'
-    when 'e' then '[eеё3]'
-    when 'е' then '[eеё3]'
-    when 'ё' then '[eеё3]'
-    when 'h' then '[hн]'
-    when 'н' then '[hн]'
-    when 'i' then '[iіи1!|]'
-    when 'і' then '[iіи1!|]'
-    when 'и' then '[iіи1!|]'
-    when 'k' then '[kк]'
-    when 'к' then '[kк]'
-    when 'm' then '[mм]'
-    when 'м' then '[mм]'
-    when 'o' then '[oо0]'
-    when 'о' then '[oо0]'
-    when 'p' then '[pр]'
-    when 'р' then '[pр]'
-    when 's' then '[sѕ5$]'
-    when 'ѕ' then '[sѕ5$]'
-    when 't' then '[tт7]'
-    when 'т' then '[tт7]'
-    when 'x' then '[xх]'
-    when 'х' then '[xх]'
-    when 'y' then '[yу]'
-    when 'у' then '[yу]'
-    when 'б' then '[б6]'
-    when 'з' then '[з3]'
-    when 'ч' then '[ч4]'
+    when 'a' then '[aаα@4]'
+    when 'а' then '[aаα@4]'
+    when 'b' then '[bвβ68]'
+    when 'б' then '[бb68]'
+    when 'в' then '[вbvβ8]'
+    when 'c' then '[cсϲ$]'
+    when 'с' then '[сcsϲ$5]'
+    when 'd' then '[dд]'
+    when 'д' then '[дd]'
+    when 'e' then '[eеёε3]'
+    when 'е' then '[еёeε3]'
+    when 'ё' then '[ёеeε3]'
+    when 'f' then '[fф]'
+    when 'ф' then '[фf]'
+    when 'g' then '[gг9q]'
+    when 'г' then '[гgr9]'
+    when 'h' then '[hнхη]'
+    when 'н' then '[нnhη]'
+    when 'i' then '[iіиι1!|l]'
+    when 'і' then '[іiиι1!|l]'
+    when 'и' then '[иiіι1!|l]'
+    when 'j' then '[jйж]'
+    when 'й' then '[йjy]'
+    when 'ж' then '[жjz]'
+    when 'k' then '[kкκ]'
+    when 'к' then '[кkκ]'
+    when 'l' then '[lл1|]'
+    when 'л' then '[лl1|]'
+    when 'm' then '[mмμ]'
+    when 'м' then '[мmμ]'
+    when 'n' then '[nнпη]'
+    when 'п' then '[пpn]'
+    when 'o' then '[oоο0]'
+    when 'о' then '[оoο0]'
+    when 'p' then '[pрпρ]'
+    when 'р' then '[рprρ]'
+    when 'q' then '[qg9]'
+    when 'r' then '[rрг]'
+    when 's' then '[sсѕ5$]'
+    when 'ѕ' then '[ѕsс5$]'
+    when 't' then '[tтτ7+]'
+    when 'т' then '[тtτ7+]'
+    when 'u' then '[uуиυ]'
+    when 'у' then '[уuyυ]'
+    when 'v' then '[vвν]'
+    when 'w' then '[wшщω]'
+    when 'x' then '[xхχ]'
+    when 'х' then '[хxhχ]'
+    when 'y' then '[yуγ]'
+    when 'ы' then '[ыy]'
+    when 'z' then '[zзж2]'
+    when 'з' then '[зz2]'
+    when 'ц' then '[цc]'
+    when 'ч' then '[чc4]'
     when 'ш' then '[шw]'
     when 'щ' then '[щw]'
-    when 'л' then '[лl]'
-    when 'г' then '[гr]'
-    when 'д' then '[дd]'
-    when 'ж' then '[жj]'
-    when 'й' then '[йj]'
-    when 'п' then '[пn]'
-    when 'ф' then '[фf]'
-    when 'ц' then '[цc]'
-    when 'ы' then '[ыy]'
     when 'э' then '[эe]'
     when 'ю' then '[юu]'
-    when 'я' then '[я9]'
+    when 'я' then '[яa9]'
     else ch
   end;
 end;
@@ -117,33 +150,44 @@ $$;
 create or replace function public.comment_term_regex(p_term text)
 returns text
 language plpgsql
-immutable
-strict
+immutable strict
 set search_path = ''
 as $$
 declare
   chars text[];
   ch text;
   core text := '';
+  token text;
 begin
   chars := regexp_split_to_array(lower(p_term), '');
 
   foreach ch in array chars loop
-    if core <> '' then
-      core := core || '[^[:alnum:]]{0,3}';
+    -- Soft/hard signs are commonly omitted in transliteration. Treat them as
+    -- optional punctuation-like characters rather than mandatory letters.
+    if ch in ('ь', 'ъ') then
+      core := core || '[ьъ''`]{0,2}';
+      continue;
     end if;
-    core := core || public.comment_filter_char_class(ch) || '{1,4}';
+
+    if core <> '' then
+      -- Allow digits, punctuation, emoji and whitespace between letters.
+      -- Letters themselves must still match one of the confusable classes.
+      core := core || '[^[:alpha:]]{0,12}';
+    end if;
+
+    token := public.comment_filter_char_class(ch);
+    core := core || token || '{1,8}';
   end loop;
 
-  return '(^|[^[:alnum:]_])(' || core || ')([^[:alnum:]_]|$)';
+  -- Treat any non-letter (including underscore/digits) as a valid boundary.
+  return '(^|[^[:alpha:]])(' || core || ')([^[:alpha:]]|$)';
 end;
 $$;
 
 create or replace function public.mask_comment_text(p_text text)
 returns text
 language plpgsql
-stable
-security definer
+stable security definer
 set search_path = ''
 as $$
 declare
@@ -153,12 +197,15 @@ declare
   pass integer;
   replacement text;
 begin
-  -- Убираем невидимые разделители, которыми часто обходят фильтры.
+  -- Strip invisible formatting characters commonly used to split words.
+  result := replace(result, chr(173), '');   -- soft hyphen
   result := replace(result, chr(8203), '');  -- zero width space
   result := replace(result, chr(8204), '');  -- zero width non-joiner
   result := replace(result, chr(8205), '');  -- zero width joiner
+  result := replace(result, chr(8206), '');  -- left-to-right mark
+  result := replace(result, chr(8207), '');  -- right-to-left mark
   result := replace(result, chr(8288), '');  -- word joiner
-  result := replace(result, chr(65279), ''); -- zero width no-break space
+  result := replace(result, chr(65279), ''); -- BOM / zero-width no-break space
 
   for item in
     select term, public.comment_term_regex(term) as pattern
@@ -168,9 +215,9 @@ begin
   loop
     replacement := E'\\1' || repeat('*', char_length(item.term)) || E'\\3';
 
-    -- Несколько проходов нужны для соседних совпадений, поскольку regex
-    -- сохраняет граничный символ в replacement.
-    for pass in 1..4 loop
+    -- Multiple passes cover several blocked terms in one sentence while
+    -- preserving surrounding separators.
+    for pass in 1..8 loop
       previous_result := result;
       result := regexp_replace(result, item.pattern, replacement, 'gi');
       exit when result = previous_result;
@@ -185,113 +232,7 @@ revoke all on function public.comment_filter_char_class(text) from public, anon,
 revoke all on function public.comment_term_regex(text) from public, anon, authenticated;
 revoke all on function public.mask_comment_text(text) from public, anon, authenticated;
 
-create or replace function public.add_game_comment(p_game_id bigint, p_body text)
-returns bigint
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
-  viewer_id uuid := auth.uid();
-  raw_body text := btrim(coalesce(p_body, ''));
-  clean_body text;
-  new_id bigint;
-begin
-  if viewer_id is null then
-    raise exception 'Требуется авторизация.' using errcode = '42501';
-  end if;
-
-  if char_length(raw_body) not between 1 and 500 then
-    raise exception 'Комментарий должен содержать от 1 до 500 символов.' using errcode = '22023';
-  end if;
-
-  clean_body := btrim(public.mask_comment_text(raw_body));
-
-  if char_length(clean_body) not between 1 and 500 then
-    raise exception 'Комментарий должен содержать от 1 до 500 символов.' using errcode = '22023';
-  end if;
-
-  if not exists (
-    select 1
-    from public.games
-    where id = p_game_id
-      and published = true
-  ) then
-    raise exception 'Игра не найдена.' using errcode = 'P0002';
-  end if;
-
-  if exists (
-    select 1
-    from public.game_comments
-    where game_id = p_game_id
-      and user_id = viewer_id
-  ) then
-    raise exception 'Вы уже оставили комментарий к этой игре. Используйте «Изменить».' using errcode = '23505';
-  end if;
-
-  begin
-    insert into public.game_comments (game_id, user_id, body)
-    values (p_game_id, viewer_id, clean_body)
-    returning id into new_id;
-  exception
-    when unique_violation then
-      raise exception 'Вы уже оставили комментарий к этой игре. Используйте «Изменить».' using errcode = '23505';
-  end;
-
-  return new_id;
-end;
-$$;
-
-create or replace function public.update_game_comment(p_comment_id bigint, p_body text)
-returns timestamptz
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
-  viewer_id uuid := auth.uid();
-  raw_body text := btrim(coalesce(p_body, ''));
-  clean_body text;
-  edited_at timestamptz;
-begin
-  if viewer_id is null then
-    raise exception 'Требуется авторизация.' using errcode = '42501';
-  end if;
-
-  if char_length(raw_body) not between 1 and 500 then
-    raise exception 'Комментарий должен содержать от 1 до 500 символов.' using errcode = '22023';
-  end if;
-
-  clean_body := btrim(public.mask_comment_text(raw_body));
-
-  if char_length(clean_body) not between 1 and 500 then
-    raise exception 'Комментарий должен содержать от 1 до 500 символов.' using errcode = '22023';
-  end if;
-
-  update public.game_comments
-  set
-    body = clean_body,
-    updated_at = now()
-  where id = p_comment_id
-    and user_id = viewer_id
-  returning updated_at into edited_at;
-
-  if edited_at is null then
-    raise exception 'Можно изменять только свои комментарии.' using errcode = '42501';
-  end if;
-
-  return edited_at;
-end;
-$$;
-
-revoke all on function public.add_game_comment(bigint, text) from public;
-revoke all on function public.update_game_comment(bigint, text) from public;
-revoke execute on function public.add_game_comment(bigint, text) from anon;
-revoke execute on function public.update_game_comment(bigint, text) from anon;
-grant execute on function public.add_game_comment(bigint, text) to authenticated;
-grant execute on function public.update_game_comment(bigint, text) to authenticated;
-
--- Однократно маскируем уже существующие комментарии.
+-- Existing comments are re-masked under the current policy.
 update public.game_comments
 set body = public.mask_comment_text(body)
 where body is distinct from public.mask_comment_text(body);
