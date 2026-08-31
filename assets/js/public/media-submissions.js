@@ -659,6 +659,7 @@
           title,
           comment: elements.comment.value.trim(),
           media_type: mediaType,
+          category: elements.form?.dataset.category || 'personal',
           status: 'pending',
           created_by: user.id,
           created_at: now,
@@ -666,7 +667,6 @@
           moderated_at: null,
           published_at: null,
           archived_at: null,
-          category: elements.form?.dataset.category || 'personal',
           media_submission_files: rows
         };
 
@@ -691,6 +691,7 @@
           title,
           comment: elements.comment.value.trim(),
           media_type: mediaType,
+          category: elements.form?.dataset.category || 'personal',
           status: 'pending',
           created_by: user.id
         })
@@ -928,7 +929,7 @@
       await requireAdmin();
       const { data, error } = await state.client
         .from('media_submissions')
-        .select('id,title,comment,status,media_type,created_by,created_at,updated_at,moderated_at,published_at,archived_at,media_submission_files(id,storage_path,file_name,mime_type,file_size,sort_order)')
+        .select('id,title,comment,status,media_type,category,created_by,created_at,updated_at,moderated_at,published_at,archived_at,media_submission_files(id,storage_path,file_name,mime_type,file_size,sort_order)')
         .order('created_at', { ascending: false });
       if (error) throw error;
       state.adminItems = await addSignedUrls(Array.isArray(data) ? data : []);

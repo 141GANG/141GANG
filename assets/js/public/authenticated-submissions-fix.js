@@ -13,6 +13,7 @@
     client: null,
     session: null,
     isAdmin: false,
+    accessReady: false,
     suggestionPreview: null,
     mediaFiles: [],
     replacingMediaId: null,
@@ -53,7 +54,12 @@
     state.client = configuredClient();
     state.session = null;
     state.isAdmin = false;
-    if (!state.client) return;
+    state.accessReady = false;
+    if (!state.client) {
+      state.accessReady = true;
+      window.setTimeout(syncNonAdminControls, 0);
+      return;
+    }
 
     try {
       const result = window.CR7_AUTH?.getUsableSession
@@ -67,6 +73,7 @@
     } catch (error) {
       console.warn('Не удалось проверить доступ к отправке предложений:', error?.message || error);
     } finally {
+      state.accessReady = true;
       window.setTimeout(syncNonAdminControls, 0);
     }
   }
@@ -83,7 +90,7 @@
   }
 
   function shouldOverride() {
-    return !state.isAdmin && window.location.protocol !== 'file:';
+    return state.accessReady && !state.isAdmin && window.location.protocol !== 'file:';
   }
 
   function parseSteamAppId(value) {
@@ -407,6 +414,7 @@
           title,
           comment: commentInput?.value.trim() || '',
           media_type: mediaType,
+          category: document.getElementById('mediaForm')?.dataset.category || 'personal',
           status: 'pending',
           created_by: user.id
         })
