@@ -10,7 +10,21 @@ input,
 textarea,
 select { font-family: var(--font-ui); }
 
-/* Display typography: Druk is the single source of truth for display surfaces. */
+/* The bundled Druk face is the intended display font. Never apply the old
+  font-size: 20rem !important;
+body:not(.has-druk-cyr) .hero h1 {
+  transform: none;
+}
+  font-size: 20rem !important;
+body:not(.has-druk-cyr) #catalog .toolbar-title h2 span {
+  transform: translateX(-50%);
+}
+
+  font-size: 22rem !important;
+body:not(.has-druk-cyr) .content-menu-toggle > span {
+  transform: none;
+}
+
 :is(
   .hero h1,
   #catalog .toolbar-title h2,
@@ -18,23 +32,13 @@ select { font-family: var(--font-ui); }
   .content-menu-toggle > span,
   #catalog .card-title,
   .game-modal .modal-title,
-  .game-modal .modal-steam
+  .game-modal .modal-steam,
+  .admin-portal .proposal-filter-actions button,
+  .admin-portal .admin-catalog-filter-actions button,
+  .admin-portal .moderation-actions button,
+  .admin-portal .moderation-actions .moderation-steam
 ) {
-  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif !important;
-  font-weight: 900;
-  font-style: normal;
-}
-
-/* Management display typography: one normal cascade rule, no emergency override. */
-.admin-portal :is(
-  .moderation-card-copy h3,
-  .moderation-title-open,
-  .proposal-filter-actions button,
-  .admin-catalog-filter-actions button,
-  .moderation-actions button,
-  .moderation-actions .moderation-steam
-) {
-  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
+  font-family: var(--font-display) !important;
   font-weight: 900;
   font-style: normal;
 }
@@ -734,9 +738,9 @@ body :is(p, button, input, textarea, select, label, small, time, .nav-link, .fil
   display: none;
 }
 
-/* Admin body copy inherits Manrope; display elements opt into Druk above. */
-.admin-portal {
-  font-family: 'Manrope', sans-serif;
+.admin-portal,
+.admin-portal * {
+  font-family: 'Manrope', sans-serif !important;
 }
 
 .admin-portal[data-portal-mode="proposal"] .admin-portal-head {
