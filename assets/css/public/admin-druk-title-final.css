@@ -1,0 +1,17 @@
+/* Final Druk restore for clickable game titles in Management -> Games -> Pending. */
+body.admin-portal-open .admin-portal[data-portal-mode="proposal"] #adminSection
+.moderation-card .moderation-card-copy h3,
+body.admin-portal-open .admin-portal[data-portal-mode="proposal"] #adminSection
+.moderation-card .moderation-card-copy h3 > button.moderation-title-open {
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif !important;
+  font-weight: 900 !important;
+  font-style: normal !important;
+}
+
+body.admin-portal-open .admin-portal[data-portal-mode="proposal"] #adminSection
+.moderation-card .moderation-card-copy h3 > button.moderation-title-open {
+  font-size: inherit !important;
+  line-height: inherit !important;
+  letter-spacing: inherit !important;
+  text-transform: inherit !important;
+}
