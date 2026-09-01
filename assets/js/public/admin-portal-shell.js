@@ -327,25 +327,62 @@
     }
   }
 
-  function openPublishedComments(gameId) {
-    const id = String(gameId || '').trim();
-    if (!id) return;
-
-    const openModal = typeof window.openGameModal === 'function'
-      ? window.openGameModal
-      : typeof openGameModal === 'function'
-        ? openGameModal
-        : null;
-    if (!openModal) return;
-
-    openModal(id);
-    watchPublishedModalComments(id);
+  function focusPublishedComments(gameId) {
+    watchPublishedModalComments(gameId);
     window.setTimeout(() => {
       const modal = document.querySelector('.game-modal:not([hidden])');
       const comments = modal?.querySelector('.modal-comments');
       if (!comments) return;
       comments.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 90);
+  }
+
+  function tryOpenPublishedGameModal(gameId) {
+    const id = String(gameId || '').trim();
+    if (!id) return false;
+
+    // Prefer the real public catalog card. Its click listener is bound inside
+    // modal-effects.js and therefore calls openGameModal from the exact same
+    // scope as the catalog itself. This avoids depending on openGameModal being
+    // exported as a window property.
+    const catalogCard = [...document.querySelectorAll('.game-card[data-game-id]')]
+      .find(card => String(card.dataset.gameId || '') === id);
+    if (catalogCard) {
+      catalogCard.dispatchEvent(new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        view: window
+      }));
+      if (document.querySelector('.game-modal:not([hidden])')) return true;
+    }
+
+    // Fallback for the short interval before the catalog card is rendered.
+    const openModal = typeof window.openGameModal === 'function'
+      ? window.openGameModal
+      : typeof openGameModal === 'function'
+        ? openGameModal
+        : null;
+    if (!openModal) return false;
+
+    openModal(id);
+    return Boolean(document.querySelector('.game-modal:not([hidden])'));
+  }
+
+  function openPublishedComments(gameId) {
+    const id = String(gameId || '').trim();
+    if (!id) return;
+
+    let attempt = 0;
+    const maxAttempts = 30;
+    const open = () => {
+      if (tryOpenPublishedGameModal(id)) {
+        focusPublishedComments(id);
+        return;
+      }
+      attempt += 1;
+      if (attempt < maxAttempts) window.setTimeout(open, 100);
+    };
+    open();
   }
 
   function normalizeAdminCards(root = moderationList) {
