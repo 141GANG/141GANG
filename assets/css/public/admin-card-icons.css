@@ -82,7 +82,7 @@
 .admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments > .moderation-support-comments-open > span {
   min-width: 0;
   overflow: hidden;
-  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif !important;
   font-weight: 900;
   line-height: 1;
   letter-spacing: 0;

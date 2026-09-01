@@ -22,7 +22,7 @@
   // with a fresh query string so the admin card fixes cannot be masked by a
   // previously cached v=1.1 copy. figma-ui.js reuses this same element id.
   const adminCardStyleId = 'adminCardIconsStyles';
-  const adminCardStyleHref = './assets/css/public/admin-card-icons.css?v=1.4-published-comments';
+  const adminCardStyleHref = './assets/css/public/admin-card-icons.css?v=1.5-comments-druk';
   let adminCardStyle = document.getElementById(adminCardStyleId);
   if (!adminCardStyle) {
     adminCardStyle = document.createElement('link');
@@ -30,7 +30,7 @@
     adminCardStyle.rel = 'stylesheet';
     document.head.appendChild(adminCardStyle);
   }
-  if (!String(adminCardStyle.getAttribute('href') || '').includes('v=1.4-published-comments')) {
+  if (!String(adminCardStyle.getAttribute('href') || '').includes('v=1.5-comments-druk')) {
     adminCardStyle.href = adminCardStyleHref;
   }
 
@@ -146,18 +146,31 @@
 
     const apply = () => {
       if (!publishButton.isConnected || !label.isConnected) return;
-      const source = window.getComputedStyle(publishButton);
-      label.style.fontFamily = source.fontFamily;
+
+      // The visible "Опубликовать" label may be drawn by ::before while the
+      // button itself still inherits Manrope. Reading only the button therefore
+      // copied the wrong family into "Комментарии" as an inline style.
+      const direct = window.getComputedStyle(publishButton);
+      const pseudo = window.getComputedStyle(publishButton, '::before');
+      const pseudoContent = String(pseudo.content || '').replace(/["']/g, '').trim();
+      const source = pseudoContent && !['none', 'normal'].includes(pseudoContent)
+        ? pseudo
+        : direct;
+
+      // Font family is explicit: comments must always use the same Druk Cyr
+      // face as the visible action labels. Other metrics follow the source label
+      // so the proportions stay identical across responsive breakpoints.
+      label.style.fontFamily = "'DrukCyr-Heavy', 'Druk Cyr', sans-serif";
       label.style.fontSize = source.fontSize;
-      label.style.fontWeight = source.fontWeight;
-      label.style.fontStyle = source.fontStyle;
+      label.style.fontWeight = '900';
+      label.style.fontStyle = source.fontStyle || 'normal';
       label.style.lineHeight = source.lineHeight;
       label.style.letterSpacing = source.letterSpacing;
-      label.style.textTransform = source.textTransform;
+      label.style.textTransform = 'uppercase';
     };
 
     // First pass handles the current frame; the second pass handles stylesheets
-    // that finished loading after the card itself was inserted.
+    // and the Druk face finishing after the card itself was inserted.
     apply();
     requestAnimationFrame(apply);
     document.fonts?.ready?.then(apply).catch(() => {});
