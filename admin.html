@@ -7,103 +7,92 @@
   <title>Управление — 141GANG</title>
   <link rel="icon" href="./favicon.ico?v=141gang-1" sizes="any" type="image/x-icon" />
   <style>
-    html { color-scheme: dark; background: #080808; }
-    body { min-height: 100vh; margin: 0; background: #080808; color: #f0f0f0; }
-    .admin-bootstrap {
-      min-height: 100vh;
+    html,
+    body {
+      width: 100%;
+      min-width: 100%;
+      height: 100%;
+      min-height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #080808;
+    }
+
+    .admin-page-frame {
+      width: 100%;
+      height: 100dvh;
+      display: block;
+      border: 0;
+      background: #080808;
+    }
+
+    .admin-page-fallback {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
       display: grid;
       place-items: center;
       padding: 24rem;
       box-sizing: border-box;
+      color: #f0f0f0;
       font: 500 15rem/1.5 Arial, sans-serif;
       text-align: center;
     }
-    .admin-bootstrap[hidden] { display: none; }
-    .admin-bootstrap a { color: #ef3d3f; }
+
+    .admin-page-fallback a { color: #ef3d3f; }
   </style>
 </head>
 <body>
-  <div class="admin-bootstrap" id="adminBootstrap" role="status" aria-live="polite">
-    Загружаем управление…
+  <div class="admin-page-fallback">
+    <span>Загружаем управление…<br><a href="./index.html?view=admin#admin">Открыть управление напрямую</a></span>
   </div>
+
+  <iframe
+    class="admin-page-frame"
+    id="adminPageFrame"
+    src="./index.html?view=admin#admin"
+    title="Управление 141GANG"
+  ></iframe>
 
   <script>
     (() => {
-      const bootstrap = document.getElementById('adminBootstrap');
+      const frame = document.getElementById('adminPageFrame');
+      if (!frame) return;
 
-      const showError = error => {
-        console.error('Не удалось открыть управление:', error);
-        if (!bootstrap) return;
-        bootstrap.innerHTML = 'Не удалось загрузить управление.<br><a href="./index.html">Вернуться на сайт</a>';
+      const normalizeHeaderNavigation = () => {
+        try {
+          const doc = frame.contentDocument;
+          if (!doc) return;
+
+          const brand = doc.querySelector('.site-header .brand');
+          if (brand) {
+            brand.href = './index.html';
+            brand.target = '_top';
+          }
+
+          const catalog = doc.querySelector('.site-header .nav-link[href="#catalog"], .site-header .nav-link[href$="index.html#catalog"]');
+          if (catalog) {
+            catalog.href = './index.html#catalog';
+            catalog.target = '_top';
+          }
+
+          doc.querySelectorAll('.site-header a[href]').forEach(link => {
+            if (link.id === 'adminPortalOpen') return;
+            link.target = '_top';
+          });
+
+          const admin = doc.getElementById('adminPortalOpen');
+          if (admin) {
+            admin.href = './admin.html';
+            admin.target = '_top';
+            admin.setAttribute('aria-current', 'page');
+          }
+        } catch (error) {
+          console.warn('Не удалось синхронизировать навигацию страницы управления:', error);
+        }
       };
 
-      const addBodyClasses = html => html.replace(/<body\b([^>]*)>/i, (full, attrs = '') => {
-        const classMatch = attrs.match(/\sclass=(['"])(.*?)\1/i);
-        const existing = classMatch ? classMatch[2].trim().split(/\s+/).filter(Boolean) : [];
-        const classes = [...new Set([...existing, 'standalone-view', 'standalone-admin', 'admin-dedicated-page'])];
-        const cleanAttrs = attrs.replace(/\sclass=(['"])(.*?)\1/i, '');
-        return `<body${cleanAttrs} class="${classes.join(' ')}">`;
-      });
-
-      const bootScript = `
-<script>
-(() => {
-  const prepareDedicatedAdmin = () => {
-    document.body.classList.add('standalone-view', 'standalone-admin', 'admin-dedicated-page');
-
-    const brand = document.querySelector('.site-header .brand');
-    if (brand) brand.setAttribute('href', './index.html');
-
-    const catalogLink = document.querySelector('.site-header .nav-link[href="#catalog"]');
-    if (catalogLink) catalogLink.setAttribute('href', './index.html#catalog');
-
-    const adminLink = document.getElementById('adminPortalOpen');
-    if (adminLink) {
-      adminLink.setAttribute('href', './admin.html');
-      adminLink.setAttribute('aria-current', 'page');
-    }
-  };
-
-  const openDedicatedAdmin = () => {
-    prepareDedicatedAdmin();
-    if (!window.CR7_ADMIN_PORTAL?.open) return false;
-    window.CR7_ADMIN_PORTAL.open('games', true);
-    return true;
-  };
-
-  prepareDedicatedAdmin();
-
-  let attempts = 0;
-  const openWhenReady = () => {
-    if (openDedicatedAdmin()) return;
-    attempts += 1;
-    if (attempts < 80) window.setTimeout(openWhenReady, 50);
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', openWhenReady, { once: true });
-  } else {
-    openWhenReady();
-  }
-})();
-<\/script>`;
-
-      fetch('./index.html', { cache: 'no-store' })
-        .then(response => {
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return response.text();
-        })
-        .then(source => {
-          let html = source;
-          html = html.replace(/<title>[\s\S]*?<\/title>/i, '<title>Управление — 141GANG</title>');
-          html = addBodyClasses(html);
-          html = html.replace(/<\/body>/i, `${bootScript}\n</body>`);
-
-          document.open();
-          document.write(html);
-          document.close();
-        })
-        .catch(showError);
+      frame.addEventListener('load', normalizeHeaderNavigation);
     })();
   </script>
 </body>
