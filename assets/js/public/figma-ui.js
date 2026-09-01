@@ -51,17 +51,11 @@
       button.setAttribute('aria-pressed', String(button.classList.contains('active')));
     });
 
-    const reset = document.getElementById('libraryFiltersReset');
-    if (!reset || reset.parentElement !== filtersMenu) return;
-    reset.classList.remove('catalog-filter-reset');
-
-    if (!filtersMenu.querySelector('[data-library-filter-actions-title]')) {
-      const title = document.createElement('div');
-      title.className = 'catalog-dropdown-title';
-      title.dataset.libraryFilterActionsTitle = '';
-      title.textContent = 'Действия';
-      reset.before(title);
-    }
+    // A second click on an active filter already clears that filter, so the
+    // separate reset action is redundant. Removing it also leaves the exact
+    // same 8rem bottom/side padding as the Sort dropdown.
+    filtersMenu.querySelector('[data-library-filter-actions-title]')?.remove();
+    document.getElementById('libraryFiltersReset')?.remove();
   }
 
   normalizeCatalogFilterMenu();
