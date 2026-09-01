@@ -134,18 +134,41 @@
     steamAction?.remove();
   }
 
-  function normalizeModerationCards(root = moderationList) {
+  function normalizePublishedCard(card) {
+    if (!(card instanceof Element)) return;
+    const actions = card.querySelector('.admin-catalog-actions');
+    if (!actions) return;
+
+    const steamAction = actions.querySelector('a[href]');
+    const title = card.querySelector('.admin-catalog-card-copy h3');
+    if (steamAction && title && !title.querySelector('a')) {
+      const titleLink = document.createElement('a');
+      titleLink.className = 'admin-catalog-title-open';
+      titleLink.href = steamAction.getAttribute('href');
+      titleLink.target = '_blank';
+      titleLink.rel = 'noopener noreferrer';
+      titleLink.textContent = title.textContent;
+      title.replaceChildren(titleLink);
+    }
+
+    steamAction?.remove();
+    actions.classList.add('has-published-parity');
+  }
+
+  function normalizeAdminCards(root = moderationList) {
     if (!root) return;
     if (root.matches?.('.moderation-card')) normalizeModerationCard(root);
+    if (root.matches?.('.admin-catalog-card')) normalizePublishedCard(root);
     root.querySelectorAll?.('.moderation-card').forEach(normalizeModerationCard);
+    root.querySelectorAll?.('.admin-catalog-card').forEach(normalizePublishedCard);
   }
 
   if (moderationList) {
-    normalizeModerationCards();
+    normalizeAdminCards();
     new MutationObserver(records => {
       records.forEach(record => {
         record.addedNodes.forEach(node => {
-          if (node instanceof Element) normalizeModerationCards(node);
+          if (node instanceof Element) normalizeAdminCards(node);
         });
       });
     }).observe(moderationList, { childList: true, subtree: true });

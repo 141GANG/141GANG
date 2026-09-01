@@ -83,8 +83,47 @@
 .admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments > .moderation-support-comments-open > span {
   min-width: 0;
   overflow: hidden;
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
+  font-size: 12rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
   text-overflow: ellipsis;
+  text-transform: uppercase;
   white-space: nowrap;
+}
+
+/* «Опубликованные»: те же принципы нижней панели и кликабельного названия. */
+.admin-portal[data-portal-mode="proposal"] .admin-catalog-card-copy h3 > a.admin-catalog-title-open {
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  text-decoration: none;
+  text-transform: inherit;
+}
+
+.admin-portal[data-portal-mode="proposal"] .admin-catalog-card-copy h3 > a.admin-catalog-title-open:hover,
+.admin-portal[data-portal-mode="proposal"] .admin-catalog-card-copy h3 > a.admin-catalog-title-open:focus-visible {
+  color: #ef3d3f;
+  outline: none;
+}
+
+.admin-portal[data-portal-mode="proposal"] .admin-catalog-actions.has-published-parity {
+  grid-template-columns: minmax(0, 1fr) 40rem;
+}
+
+.admin-portal[data-portal-mode="proposal"] .admin-catalog-actions.has-published-parity > .admin-catalog-save {
+  width: 100%;
+  min-width: 0;
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.admin-portal[data-portal-mode="proposal"] .admin-catalog-actions.has-published-parity > .admin-catalog-delete {
+  width: 40rem;
+  min-width: 40rem;
+  max-width: 40rem;
 }
 
 .admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments > [data-action="delete"] {
