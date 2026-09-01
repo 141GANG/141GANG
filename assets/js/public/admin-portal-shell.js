@@ -22,7 +22,7 @@
   // with a fresh query string so the admin card fixes cannot be masked by a
   // previously cached v=1.1 copy. figma-ui.js reuses this same element id.
   const adminCardStyleId = 'adminCardIconsStyles';
-  const adminCardStyleHref = './assets/css/public/admin-card-icons.css?v=1.6-comments-count';
+  const adminCardStyleHref = './assets/css/public/admin-card-icons.css?v=1.7-comments-parity';
   let adminCardStyle = document.getElementById(adminCardStyleId);
   if (!adminCardStyle) {
     adminCardStyle = document.createElement('link');
@@ -30,7 +30,7 @@
     adminCardStyle.rel = 'stylesheet';
     document.head.appendChild(adminCardStyle);
   }
-  if (!String(adminCardStyle.getAttribute('href') || '').includes('v=1.6-comments-count')) {
+  if (!String(adminCardStyle.getAttribute('href') || '').includes('v=1.7-comments-parity')) {
     adminCardStyle.href = adminCardStyleHref;
   }
 
@@ -145,33 +145,19 @@
   const publishedCommentCountLoading = new Set();
   let publishedModalCommentsObserver = null;
 
-  function applyCommentsTypography(sourceButton, commentsButton) {
+  function applyCommentsTypography(_sourceButton, commentsButton) {
     const label = commentsButton?.querySelector(':scope > span');
     if (!commentsButton || !label) return;
 
     const apply = () => {
       if (!commentsButton.isConnected || !label.isConnected) return;
 
-      let source = null;
-      if (sourceButton?.isConnected) {
-        const direct = window.getComputedStyle(sourceButton);
-        const pseudo = window.getComputedStyle(sourceButton, '::before');
-        const pseudoContent = String(pseudo.content || '').replace(/["']/g, '').trim();
-        source = pseudoContent && !['none', 'normal'].includes(pseudoContent) ? pseudo : direct;
-      }
-
-      // The label itself gets an inline-important Druk family. This is deliberate:
-      // several late responsive admin layers set `font-family` with !important on
-      // action buttons, so a normal declaration was still vulnerable to the cascade.
+      // Both Pending and Published now share one geometry/typography class.
+      // Keep only the Druk face inline-important so later admin layers cannot
+      // replace the font; size and spacing come from the shared CSS rule.
       label.style.setProperty('font-family', DRUK_ACTION_FONT, 'important');
       label.style.setProperty('font-weight', '900', 'important');
       label.style.setProperty('font-style', 'normal', 'important');
-      label.style.setProperty('line-height', source?.lineHeight || '1', 'important');
-      label.style.setProperty('letter-spacing', source?.letterSpacing || '0px', 'important');
-      label.style.setProperty('text-transform', 'uppercase', 'important');
-      if (source?.fontSize && source.fontSize !== '0px') {
-        label.style.setProperty('font-size', source.fontSize, 'important');
-      }
     };
 
     apply();
@@ -271,6 +257,7 @@
     }
     if (publishButton && commentsButton) {
       actions.classList.add('has-inline-comments');
+      commentsButton.classList.add('admin-comments-action-parity');
       applyCommentsTypography(publishButton, commentsButton);
     }
 
@@ -315,7 +302,7 @@
     let commentsButton = actions.querySelector('.admin-catalog-comments-open');
     if (!commentsButton && card.dataset.gameId) {
       commentsButton = document.createElement('button');
-      commentsButton.className = 'moderation-support-comments-open admin-catalog-comments-open';
+      commentsButton.className = 'moderation-support-comments-open admin-catalog-comments-open admin-comments-action-parity';
       commentsButton.type = 'button';
       commentsButton.dataset.publishedComments = card.dataset.gameId;
       commentsButton.setAttribute('aria-label', `Открыть комментарии игры ${title?.textContent?.trim() || ''}`);
@@ -326,6 +313,7 @@
 
     actions.classList.add('has-published-parity');
     if (commentsButton) {
+      commentsButton.classList.add('admin-comments-action-parity');
       applyCommentsTypography(saveButton, commentsButton);
       const cachedCount = publishedCommentCounts.get(String(card.dataset.gameId || ''));
       if (cachedCount != null) renderPublishedCommentCount(card.dataset.gameId, cachedCount);

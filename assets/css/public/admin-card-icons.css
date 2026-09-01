@@ -260,3 +260,91 @@ body.admin-portal-open .game-modal {
     font-size: 12rem;
   }
 }
+
+/* Pending + Published: one exact Comments action component. */
+.admin-portal[data-portal-mode="proposal"]
+:is(.moderation-actions.has-inline-comments, .admin-catalog-actions.has-published-parity)
+> .admin-comments-action-parity {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 40rem;
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10rem;
+  padding: 0 10rem 0 13rem;
+  border: 1rem solid #ef3d3f;
+  border-radius: 3rem;
+  color: #f0f0f0;
+  background: transparent;
+  font-size: 16rem;
+  line-height: 1;
+}
+
+.admin-portal[data-portal-mode="proposal"]
+:is(.moderation-actions.has-inline-comments, .admin-catalog-actions.has-published-parity)
+> .admin-comments-action-parity > span {
+  min-width: 0;
+  overflow: hidden;
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif !important;
+  font-size: 16rem;
+  font-weight: 900;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-portal[data-portal-mode="proposal"]
+:is(.moderation-actions.has-inline-comments, .admin-catalog-actions.has-published-parity)
+> .admin-comments-action-parity > b {
+  min-width: 22rem;
+  width: 22rem;
+  height: 22rem;
+  flex: 0 0 22rem;
+  display: inline-grid;
+  place-items: center;
+  margin-left: auto;
+  border-radius: 50%;
+  color: #fff;
+  background: #ef3d3f;
+  font-family: var(--font-ui);
+  font-size: 11rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.admin-portal[data-portal-mode="proposal"]
+:is(.moderation-actions.has-inline-comments, .admin-catalog-actions.has-published-parity)
+> .admin-comments-action-parity > img {
+  width: 18rem;
+  height: 18rem;
+  flex: 0 0 18rem;
+}
+
+@media (max-width: 900px) {
+  .admin-portal[data-portal-mode="proposal"]
+  :is(.moderation-actions.has-inline-comments, .admin-catalog-actions.has-published-parity)
+  > .admin-comments-action-parity,
+  .admin-portal[data-portal-mode="proposal"]
+  :is(.moderation-actions.has-inline-comments, .admin-catalog-actions.has-published-parity)
+  > .admin-comments-action-parity > span {
+    font-size: 14rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-portal[data-portal-mode="proposal"]
+  :is(.moderation-actions.has-inline-comments, .admin-catalog-actions.has-published-parity)
+  > .admin-comments-action-parity,
+  .admin-portal[data-portal-mode="proposal"]
+  :is(.moderation-actions.has-inline-comments, .admin-catalog-actions.has-published-parity)
+  > .admin-comments-action-parity > span {
+    font-size: 12rem;
+  }
+}
+
