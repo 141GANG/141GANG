@@ -68,8 +68,16 @@
 
 .admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments > .moderation-support-comments-open {
   align-self: stretch;
-  font-weight: 500;
-  text-transform: none;
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
+  font-size: 12rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments > .moderation-support-comments-open > b {
+  font-family: var(--font-ui);
 }
 
 .admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments > .moderation-support-comments-open > span {
