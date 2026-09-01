@@ -92,7 +92,134 @@
         }
       };
 
-      frame.addEventListener('load', normalizeHeaderNavigation);
+      const bindPublishedCommentsBridge = () => {
+        try {
+          const doc = frame.contentDocument;
+          const view = frame.contentWindow;
+          if (!doc || !view || doc.documentElement.dataset.adminPublishedCommentsBridge === '1') return;
+          doc.documentElement.dataset.adminPublishedCommentsBridge = '1';
+
+          // В standalone-admin исходный index.html скрывает прямые дочерние окна.
+          // Разрешаем показ только настоящей catalog game modal, не меняя остальной layout.
+          let visibilityFix = doc.getElementById('adminDedicatedCatalogModalFix');
+          if (!visibilityFix) {
+            visibilityFix = doc.createElement('style');
+            visibilityFix.id = 'adminDedicatedCatalogModalFix';
+            visibilityFix.textContent = `
+              html body.standalone-view > #gameModal.game-modal[hidden] { display: none !important; }
+              html body.standalone-view > #gameModal.game-modal:not([hidden]) { display: block !important; }
+            `;
+            doc.head.appendChild(visibilityFix);
+          }
+
+          const prepareCatalogModal = () => {
+            const modal = doc.getElementById('gameModal');
+            if (!modal) return null;
+
+            // index.html?view=admin скрывает все лишние body-элементы не только
+            // через CSS, но и inline `display:none !important`. Обычное правило
+            // stylesheet это перебить не может, поэтому снимаем именно inline
+            // display с настоящего окна каталога перед openGameModal().
+            modal.style.removeProperty('display');
+            if (modal.parentElement !== doc.body) doc.body.appendChild(modal);
+            modal.style.setProperty('z-index', '3000');
+            return modal;
+          };
+
+          const focusComments = gameId => {
+            const modal = prepareCatalogModal();
+            if (!modal || modal.hidden) return false;
+
+            const comments = modal.querySelector('.modal-comments');
+            const panel = modal.querySelector('.modal-panel');
+            if (!comments) return false;
+
+            const move = () => {
+              if (modal.hidden || !comments.isConnected) return;
+              if (panel) {
+                const rootSize = Number.parseFloat(view.getComputedStyle(doc.documentElement).fontSize) || 1;
+                const panelRect = panel.getBoundingClientRect();
+                const commentsRect = comments.getBoundingClientRect();
+                const offset = commentsRect.top - panelRect.top - (18 * rootSize);
+                panel.scrollTop = Math.max(0, panel.scrollTop + offset);
+              } else {
+                comments.scrollIntoView({ block: 'start' });
+              }
+            };
+
+            view.requestAnimationFrame(() => view.requestAnimationFrame(move));
+            view.setTimeout(move, 120);
+            view.setTimeout(move, 360);
+
+            const commentsList = modal.querySelector('#modalCommentsList');
+            if (commentsList) {
+              const observer = new view.MutationObserver(() => {
+                if (/Загружаем комментарии/i.test(commentsList.textContent || '')) return;
+                move();
+                observer.disconnect();
+              });
+              observer.observe(commentsList, { childList: true, subtree: true });
+              view.setTimeout(() => observer.disconnect(), 5000);
+            }
+
+            modal.dataset.openedFromAdminComments = String(gameId);
+            return true;
+          };
+
+          const openCatalogComments = gameId => {
+            const id = String(gameId || '').trim();
+            if (!id) return;
+
+            let attempt = 0;
+            const maxAttempts = 60;
+            const open = () => {
+              attempt += 1;
+              prepareCatalogModal();
+
+              // Это та же функция, которой пользуется карточка игры в index.html.
+              // Она заполняет #gameModal и вызывает get_game_interactions() для game_id.
+              if (typeof view.openGameModal === 'function') {
+                view.openGameModal(id);
+              } else {
+                const catalogCard = [...doc.querySelectorAll('.game-card[data-game-id]')]
+                  .find(card => String(card.dataset.gameId || '') === id);
+                catalogCard?.dispatchEvent(new view.MouseEvent('click', {
+                  bubbles: true,
+                  cancelable: true,
+                  view
+                }));
+              }
+
+              if (focusComments(id)) return;
+              if (attempt < maxAttempts) view.setTimeout(open, 100);
+              else console.warn(`Не удалось открыть комментарии каталога для игры ${id}.`);
+            };
+
+            open();
+          };
+
+          // Capture на document срабатывает раньше старого обработчика внутри moderationList.
+          // Благодаря этому dedicated admin не зависит от закэшированной версии admin-portal-shell.js.
+          doc.addEventListener('click', event => {
+            const target = event.target instanceof view.Element ? event.target : null;
+            const button = target?.closest('[data-published-comments]');
+            if (!button) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            openCatalogComments(button.dataset.publishedComments);
+          }, true);
+        } catch (error) {
+          console.warn('Не удалось подключить переход к комментариям каталога:', error);
+        }
+      };
+
+      const prepareAdminFrame = () => {
+        normalizeHeaderNavigation();
+        bindPublishedCommentsBridge();
+      };
+
+      frame.addEventListener('load', prepareAdminFrame);
     })();
   </script>
 </body>

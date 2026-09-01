@@ -347,6 +347,12 @@
     // portal. Moving the same node to <body> keeps every existing listener and
     // form intact while guaranteeing that the real catalog window can render
     // above Management.
+    // standalone view marks non-admin body children with inline
+    // `display:none !important`. A stylesheet rule cannot override inline
+    // !important, so remove that one property before opening the real catalog
+    // modal. The [hidden] state and the dedicated visibility rule still keep
+    // the modal closed until openGameModal() selects a game.
+    modal.style.removeProperty('display');
     if (modal.parentElement !== document.body) document.body.appendChild(modal);
     modal.style.setProperty('z-index', '2600');
     return modal;
