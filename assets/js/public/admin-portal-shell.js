@@ -327,24 +327,68 @@
     }
   }
 
+  function hoistCatalogGameModal() {
+    const modal = document.getElementById('gameModal') || document.querySelector('.game-modal');
+    if (!modal) return null;
+
+    // The catalog modal can live inside a lower stacking context than the admin
+    // portal. Moving the same node to <body> keeps every existing listener and
+    // form intact while guaranteeing that the real catalog window can render
+    // above Management.
+    if (modal.parentElement !== document.body) document.body.appendChild(modal);
+    modal.style.setProperty('z-index', '2600');
+    return modal;
+  }
+
   function focusPublishedComments(gameId) {
     watchPublishedModalComments(gameId);
-    window.setTimeout(() => {
-      const modal = document.querySelector('.game-modal:not([hidden])');
-      const comments = modal?.querySelector('.modal-comments');
-      if (!comments) return;
-      comments.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 90);
+
+    const focus = () => {
+      const modal = document.getElementById('gameModal') || document.querySelector('.game-modal:not([hidden])');
+      if (!modal || modal.hidden) return false;
+      const comments = modal.querySelector('.modal-comments');
+      if (!comments) return false;
+
+      const panel = modal.querySelector('.modal-panel');
+      if (panel) {
+        const rootSize = Number.parseFloat(window.getComputedStyle(document.documentElement).fontSize) || 1;
+        const panelRect = panel.getBoundingClientRect();
+        const commentsRect = comments.getBoundingClientRect();
+        const offset = commentsRect.top - panelRect.top - (18 * rootSize);
+        panel.scrollTop = Math.max(0, panel.scrollTop + offset);
+      } else {
+        comments.scrollIntoView({ behavior: 'auto', block: 'start' });
+      }
+      return true;
+    };
+
+    requestAnimationFrame(() => requestAnimationFrame(focus));
+    window.setTimeout(focus, 120);
+    window.setTimeout(focus, 360);
   }
 
   function tryOpenPublishedGameModal(gameId) {
     const id = String(gameId || '').trim();
     if (!id) return false;
 
-    // Prefer the real public catalog card. Its click listener is bound inside
-    // modal-effects.js and therefore calls openGameModal from the exact same
-    // scope as the catalog itself. This avoids depending on openGameModal being
-    // exported as a window property.
+    const modal = hoistCatalogGameModal();
+
+    // Open through the exact catalog function first. It fills the existing
+    // #gameModal with the selected game and loads get_game_interactions(),
+    // so these are the very same comments as when the game is opened normally.
+    const openModal = typeof openGameModal === 'function'
+      ? openGameModal
+      : typeof window.openGameModal === 'function'
+        ? window.openGameModal
+        : null;
+
+    if (openModal) {
+      openModal(id);
+      const opened = modal || document.getElementById('gameModal') || document.querySelector('.game-modal');
+      if (opened && !opened.hidden) return true;
+    }
+
+    // Compatibility fallback: use the already-bound public catalog card.
     const catalogCard = [...document.querySelectorAll('.game-card[data-game-id]')]
       .find(card => String(card.dataset.gameId || '') === id);
     if (catalogCard) {
@@ -353,19 +397,11 @@
         cancelable: true,
         view: window
       }));
-      if (document.querySelector('.game-modal:not([hidden])')) return true;
+      const opened = modal || document.getElementById('gameModal') || document.querySelector('.game-modal');
+      if (opened && !opened.hidden) return true;
     }
 
-    // Fallback for the short interval before the catalog card is rendered.
-    const openModal = typeof window.openGameModal === 'function'
-      ? window.openGameModal
-      : typeof openGameModal === 'function'
-        ? openGameModal
-        : null;
-    if (!openModal) return false;
-
-    openModal(id);
-    return Boolean(document.querySelector('.game-modal:not([hidden])'));
+    return false;
   }
 
   function openPublishedComments(gameId) {
@@ -373,7 +409,7 @@
     if (!id) return;
 
     let attempt = 0;
-    const maxAttempts = 30;
+    const maxAttempts = 40;
     const open = () => {
       if (tryOpenPublishedGameModal(id)) {
         focusPublishedComments(id);
@@ -381,6 +417,7 @@
       }
       attempt += 1;
       if (attempt < maxAttempts) window.setTimeout(open, 100);
+      else console.warn(`Не удалось открыть каталог игры ${id} из вкладки «Опубликованные».`);
     };
     open();
   }
