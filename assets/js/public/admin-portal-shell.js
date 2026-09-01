@@ -327,7 +327,19 @@
     }
   }
 
+  function ensureCatalogModalStandaloneVisibility() {
+    if (document.getElementById('adminCatalogModalStandaloneFix')) return;
+    const style = document.createElement('style');
+    style.id = 'adminCatalogModalStandaloneFix';
+    style.textContent = `
+      html body.standalone-view > #gameModal.game-modal[hidden] { display: none !important; }
+      html body.standalone-view > #gameModal.game-modal:not([hidden]) { display: block !important; }
+    `;
+    document.head.appendChild(style);
+  }
+
   function hoistCatalogGameModal() {
+    ensureCatalogModalStandaloneVisibility();
     const modal = document.getElementById('gameModal') || document.querySelector('.game-modal');
     if (!modal) return null;
 
