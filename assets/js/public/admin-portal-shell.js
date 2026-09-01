@@ -22,7 +22,7 @@
   // with a fresh query string so the admin card fixes cannot be masked by a
   // previously cached v=1.1 copy. figma-ui.js reuses this same element id.
   const adminCardStyleId = 'adminCardIconsStyles';
-  const adminCardStyleHref = './assets/css/public/admin-card-icons.css?v=1.3-action-parity';
+  const adminCardStyleHref = './assets/css/public/admin-card-icons.css?v=1.4-published-comments';
   let adminCardStyle = document.getElementById(adminCardStyleId);
   if (!adminCardStyle) {
     adminCardStyle = document.createElement('link');
@@ -30,8 +30,17 @@
     adminCardStyle.rel = 'stylesheet';
     document.head.appendChild(adminCardStyle);
   }
-  if (!String(adminCardStyle.getAttribute('href') || '').includes('v=1.3-action-parity')) {
+  if (!String(adminCardStyle.getAttribute('href') || '').includes('v=1.4-published-comments')) {
     adminCardStyle.href = adminCardStyleHref;
+  }
+
+  // Refresh the existing title stylesheet as well. It remains the single
+  // source of truth for Druk titles; this only avoids a stale cached copy.
+  const adminTitleStyleHref = './assets/css/public/admin-druk-title-final.css?v=1.1-all-game-titles';
+  const adminTitleStyle = [...document.querySelectorAll('link[rel="stylesheet"]')]
+    .find(link => String(link.getAttribute('href') || '').includes('admin-druk-title-final.css'));
+  if (adminTitleStyle && !String(adminTitleStyle.getAttribute('href') || '').includes('v=1.1-all-game-titles')) {
+    adminTitleStyle.href = adminTitleStyleHref;
   }
 
   if (!document.getElementById('adminGamesTabsV4Script')) {
@@ -217,6 +226,20 @@
     }
 
     steamAction?.remove();
+
+    const saveButton = actions.querySelector('.admin-catalog-save');
+    let commentsButton = actions.querySelector('.admin-catalog-comments-open');
+    if (!commentsButton && card.dataset.gameId) {
+      commentsButton = document.createElement('button');
+      commentsButton.className = 'moderation-support-comments-open admin-catalog-comments-open';
+      commentsButton.type = 'button';
+      commentsButton.dataset.publishedComments = card.dataset.gameId;
+      commentsButton.setAttribute('aria-label', `Открыть комментарии игры ${title?.textContent?.trim() || ''}`);
+      commentsButton.innerHTML = '<span>Комментарии</span><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg">';
+      if (saveButton) saveButton.after(commentsButton);
+      else actions.prepend(commentsButton);
+    }
+
     actions.classList.add('has-published-parity');
 
     if (pendingCardHeightRem > 0 && window.innerWidth > 720) {
@@ -224,6 +247,26 @@
       card.style.minHeight = `${pendingCardHeightRem}rem`;
       card.style.maxHeight = 'none';
     }
+  }
+
+  function openPublishedComments(gameId) {
+    const id = String(gameId || '').trim();
+    if (!id) return;
+
+    const openModal = typeof window.openGameModal === 'function'
+      ? window.openGameModal
+      : typeof openGameModal === 'function'
+        ? openGameModal
+        : null;
+    if (!openModal) return;
+
+    openModal(id);
+    window.setTimeout(() => {
+      const modal = document.querySelector('.game-modal:not([hidden])');
+      const comments = modal?.querySelector('.modal-comments');
+      if (!comments) return;
+      comments.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 90);
   }
 
   function normalizeAdminCards(root = moderationList) {
@@ -250,6 +293,15 @@
       subtree: true
     });
   }
+
+  moderationList?.addEventListener('click', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    const button = target?.closest('[data-published-comments]');
+    if (!button) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openPublishedComments(button.dataset.publishedComments);
+  }, true);
 
   // The published tab redraws the same list asynchronously. Re-run after the
   // click as a deterministic fallback in addition to MutationObserver.
@@ -298,6 +350,7 @@
   portal.addEventListener('click',event => { if (event.target.matches('[data-admin-portal-close]')) closePortal(); });
   document.addEventListener('keydown',event => {
     if (portal.hidden) return;
+    if (document.querySelector('.game-modal:not([hidden])')) return;
     if (event.key === 'Escape') closePortal();
     if (event.key !== 'Tab') return;
     const focusable = [...portal.querySelectorAll('button:not([hidden]):not(:disabled),a[href],input:not([type="hidden"]):not(:disabled),textarea:not(:disabled),select:not(:disabled)')];

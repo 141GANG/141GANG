@@ -107,7 +107,7 @@
 }
 
 .admin-portal[data-portal-mode="proposal"] .admin-catalog-actions.has-published-parity {
-  grid-template-columns: minmax(0, 1fr) 40rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40rem;
 }
 
 .admin-portal[data-portal-mode="proposal"] .admin-catalog-actions.has-published-parity > .admin-catalog-save {
@@ -168,7 +168,7 @@
 .admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
 .admin-catalog-card.is-published-parity .admin-catalog-actions.has-published-parity {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 40rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40rem;
   gap: 8rem;
 }
 
@@ -200,3 +200,58 @@
   }
 }
 
+/* «Опубликованные»: existing game comments open in the normal game modal. */
+.admin-portal[data-portal-mode="proposal"]
+.admin-catalog-actions.has-published-parity > .admin-catalog-comments-open {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 40rem;
+  align-self: stretch;
+  justify-content: space-between;
+  padding: 0 10rem 0 13rem;
+}
+
+.admin-portal[data-portal-mode="proposal"]
+.admin-catalog-actions.has-published-parity > .admin-catalog-comments-open > span {
+  min-width: 0;
+  overflow: hidden;
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
+  font-size: 16rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-portal[data-portal-mode="proposal"]
+.admin-catalog-actions.has-published-parity > .admin-catalog-comments-open > img {
+  width: 18rem;
+  height: 18rem;
+  flex: 0 0 18rem;
+}
+
+body.admin-portal-open .game-modal {
+  z-index: 2200;
+}
+
+@media (max-width: 900px) {
+  .admin-portal[data-portal-mode="proposal"]
+  .admin-catalog-actions.has-published-parity > .admin-catalog-comments-open > span {
+    font-size: 14rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-portal[data-portal-mode="proposal"]
+  .admin-catalog-actions.has-published-parity {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40rem;
+  }
+
+  .admin-portal[data-portal-mode="proposal"]
+  .admin-catalog-actions.has-published-parity > .admin-catalog-comments-open > span {
+    font-size: 12rem;
+  }
+}
