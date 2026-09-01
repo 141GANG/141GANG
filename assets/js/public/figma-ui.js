@@ -36,6 +36,36 @@
   const sortSelect = document.getElementById('publicCatalogSort');
   const managementButton = document.getElementById('adminPortalOpen');
 
+  // Library filters reuse the exact Sort dropdown component. Removing the
+  // generic filter-btn/catalog-filter-menu hooks also prevents late catalog
+  // styles from turning these rows into the large rounded pills.
+  function normalizeCatalogFilterMenu() {
+    if (!filtersMenu) return;
+
+    filtersMenu.classList.remove('catalog-filter-menu');
+    filtersMenu.classList.add('catalog-sort-menu');
+
+    filtersMenu.querySelectorAll('[data-library-filter]').forEach(button => {
+      button.classList.remove('filter-btn');
+      button.querySelector('i')?.remove();
+      button.setAttribute('aria-pressed', String(button.classList.contains('active')));
+    });
+
+    const reset = document.getElementById('libraryFiltersReset');
+    if (!reset || reset.parentElement !== filtersMenu) return;
+    reset.classList.remove('catalog-filter-reset');
+
+    if (!filtersMenu.querySelector('[data-library-filter-actions-title]')) {
+      const title = document.createElement('div');
+      title.className = 'catalog-dropdown-title';
+      title.dataset.libraryFilterActionsTitle = '';
+      title.textContent = 'Действия';
+      reset.before(title);
+    }
+  }
+
+  normalizeCatalogFilterMenu();
+
   function fontAvailable(name) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
