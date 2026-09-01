@@ -1,4 +1,5 @@
 (() => {
+  const FIGMA_UI_BUILD = '8.2-filter-no-reset';
   const assets = [
     ['style','figmaMainFinalStyles','./assets/css/public/figma-main-final.css?v=2.0'],
     ['style','adminFigmaFinalStyles','./assets/css/public/admin-figma-final.css?v=1.0'],
@@ -59,6 +60,9 @@
   }
 
   normalizeCatalogFilterMenu();
+  // Run one more idempotent pass after the current task so no later synchronous
+  // initialization can leave the legacy reset row behind.
+  queueMicrotask(normalizeCatalogFilterMenu);
 
   function fontAvailable(name) {
     const canvas = document.createElement('canvas');
