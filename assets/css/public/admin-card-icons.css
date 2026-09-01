@@ -147,14 +147,16 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10rem;
-  margin-top: 4rem;
+  gap: 12rem;
+  margin-top: 10rem;
 }
 
 .admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
 .admin-catalog-card.is-published-parity .admin-catalog-status-row > .admin-catalog-status-label {
   flex: 0 0 auto;
   margin: 0;
+  font-size: 14rem;
+  line-height: 1;
 }
 
 .admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
@@ -162,7 +164,7 @@
   min-width: 0;
   flex: 1 1 auto;
   flex-wrap: nowrap;
-  gap: 6rem;
+  gap: 8rem;
 }
 
 .admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
@@ -175,15 +177,15 @@
 @media (min-width: 901px) and (max-width: 1500px) {
   .admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
   .admin-catalog-card.is-published-parity .admin-catalog-status-row > .admin-catalog-statuses button {
-    height: 26rem;
-    min-height: 26rem;
-    padding: 0 7rem;
-    font-size: 11rem;
+    height: 34rem;
+    min-height: 34rem;
+    padding: 0 14rem;
+    font-size: 13rem;
   }
 
   .admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
   .admin-catalog-card.is-published-parity .admin-catalog-actions.has-published-parity {
-    padding-top: 6rem;
+    padding-top: 8rem;
   }
 }
 
@@ -347,4 +349,3 @@ body.admin-portal-open .game-modal {
     font-size: 12rem;
   }
 }
-
