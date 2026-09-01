@@ -3,35 +3,108 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#090303" />
-  <title>Управление каталогом — ПРЕДЛОЖКА141</title>
-  <link rel="icon" type="image/svg+xml" href="./assets/images/figma/favicon.svg" />
-  <meta http-equiv="refresh" content="0; url=./index.html?view=admin#admin" />
-  <script>
-    (() => {
-      const target = new URL('./index.html?view=admin#admin', window.location.href).href;
-      // admin.html — только стабильная точка входа. Без iframe: иначе браузер
-      // может восстановить предыдущую вложенную страницу из session history/BFCache.
-      window.location.replace(target);
-    })();
-  </script>
+  <meta name="theme-color" content="#040404" />
+  <title>Управление — 141GANG</title>
+  <link rel="icon" href="./favicon.ico?v=141gang-1" sizes="any" type="image/x-icon" />
   <style>
-    html { color-scheme: dark; background: #050101; }
-    body {
+    html { color-scheme: dark; background: #080808; }
+    body { min-height: 100vh; margin: 0; background: #080808; color: #f0f0f0; }
+    .admin-bootstrap {
       min-height: 100vh;
-      margin: 0;
       display: grid;
       place-items: center;
-      background: #050101;
-      color: #fff3ed;
-      font: 16px/1.5 Arial, sans-serif;
+      padding: 24rem;
+      box-sizing: border-box;
+      font: 500 15rem/1.5 Arial, sans-serif;
+      text-align: center;
     }
-    a { color: #ff806a; }
+    .admin-bootstrap[hidden] { display: none; }
+    .admin-bootstrap a { color: #ef3d3f; }
   </style>
 </head>
 <body>
-  <noscript>
-    <p><a href="./index.html?view=admin#admin">Открыть управление</a></p>
-  </noscript>
+  <div class="admin-bootstrap" id="adminBootstrap" role="status" aria-live="polite">
+    Загружаем управление…
+  </div>
+
+  <script>
+    (() => {
+      const bootstrap = document.getElementById('adminBootstrap');
+
+      const showError = error => {
+        console.error('Не удалось открыть управление:', error);
+        if (!bootstrap) return;
+        bootstrap.innerHTML = 'Не удалось загрузить управление.<br><a href="./index.html">Вернуться на сайт</a>';
+      };
+
+      const addBodyClasses = html => html.replace(/<body\b([^>]*)>/i, (full, attrs = '') => {
+        const classMatch = attrs.match(/\sclass=(['"])(.*?)\1/i);
+        const existing = classMatch ? classMatch[2].trim().split(/\s+/).filter(Boolean) : [];
+        const classes = [...new Set([...existing, 'standalone-view', 'standalone-admin', 'admin-dedicated-page'])];
+        const cleanAttrs = attrs.replace(/\sclass=(['"])(.*?)\1/i, '');
+        return `<body${cleanAttrs} class="${classes.join(' ')}">`;
+      });
+
+      const bootScript = `
+<script>
+(() => {
+  const prepareDedicatedAdmin = () => {
+    document.body.classList.add('standalone-view', 'standalone-admin', 'admin-dedicated-page');
+
+    const brand = document.querySelector('.site-header .brand');
+    if (brand) brand.setAttribute('href', './index.html');
+
+    const catalogLink = document.querySelector('.site-header .nav-link[href="#catalog"]');
+    if (catalogLink) catalogLink.setAttribute('href', './index.html#catalog');
+
+    const adminLink = document.getElementById('adminPortalOpen');
+    if (adminLink) {
+      adminLink.setAttribute('href', './admin.html');
+      adminLink.setAttribute('aria-current', 'page');
+    }
+  };
+
+  const openDedicatedAdmin = () => {
+    prepareDedicatedAdmin();
+    if (!window.CR7_ADMIN_PORTAL?.open) return false;
+    window.CR7_ADMIN_PORTAL.open('games', true);
+    return true;
+  };
+
+  prepareDedicatedAdmin();
+
+  let attempts = 0;
+  const openWhenReady = () => {
+    if (openDedicatedAdmin()) return;
+    attempts += 1;
+    if (attempts < 80) window.setTimeout(openWhenReady, 50);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', openWhenReady, { once: true });
+  } else {
+    openWhenReady();
+  }
+})();
+<\/script>`;
+
+      fetch('./index.html', { cache: 'no-store' })
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.text();
+        })
+        .then(source => {
+          let html = source;
+          html = html.replace(/<title>[\s\S]*?<\/title>/i, '<title>Управление — 141GANG</title>');
+          html = addBodyClasses(html);
+          html = html.replace(/<\/body>/i, `${bootScript}\n</body>`);
+
+          document.open();
+          document.write(html);
+          document.close();
+        })
+        .catch(showError);
+    })();
+  </script>
 </body>
 </html>
