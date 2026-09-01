@@ -53,6 +53,44 @@
   display: none !important;
 }
 
+/* «На рассмотрении»: Опубликовать / Комментарии / удалить. */
+.admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40rem;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments > [data-action="approve"],
+.admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments > .moderation-support-comments-open {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments > .moderation-support-comments-open {
+  align-self: stretch;
+  font-weight: 500;
+  text-transform: none;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments > .moderation-support-comments-open > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments > [data-action="delete"] {
+  width: 40rem;
+  min-width: 40rem;
+  max-width: 40rem;
+  margin-left: 0;
+  padding-inline: 0;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-title-open:is(a) {
+  text-decoration: none;
+}
+
 @media (max-width: 720px) {
   .admin-portal .moderation-fact-icon { width: 20rem; flex-basis: 20rem; }
   .admin-portal .moderation-reaction-icon { width: 25rem; height: 25rem; flex-basis: 25rem; }

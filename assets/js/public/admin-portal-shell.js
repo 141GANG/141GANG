@@ -99,6 +99,58 @@
   /* Старые версии панели могли оставить кнопки. Новая композиция их не использует. */
   mediaFilters?.querySelector('.admin-media-filter-actions')?.remove();
 
+  /*
+   * Карточка «На рассмотрении»: Steam остаётся доступен через название игры,
+   * а нижняя строка действий не дублирует отдельную кнопку «Открыть Steam».
+   * Нормализация живёт здесь, рядом с остальными DOM-правками админки, чтобы
+   * не добавлять ещё один поверхностный UI-скрипт.
+   */
+  const moderationList = document.getElementById('suggestionModerationList');
+
+  function normalizeModerationCard(card) {
+    if (!(card instanceof Element)) return;
+    const actions = card.querySelector('.moderation-actions');
+    if (!actions) return;
+
+    const steamAction = actions.querySelector('.moderation-steam[href]');
+    const titleControl = card.querySelector('.moderation-title-open');
+    if (steamAction && titleControl && titleControl.tagName !== 'A') {
+      const titleLink = document.createElement('a');
+      titleLink.className = titleControl.className;
+      titleLink.href = steamAction.getAttribute('href');
+      titleLink.target = '_blank';
+      titleLink.rel = 'noopener noreferrer';
+      titleLink.textContent = titleControl.textContent;
+      titleControl.replaceWith(titleLink);
+    }
+
+    const publishButton = actions.querySelector('[data-action="approve"]');
+    const commentsButton = card.querySelector('.moderation-support-comments-open');
+    if (publishButton && commentsButton && commentsButton.parentElement !== actions) {
+      publishButton.after(commentsButton);
+      actions.classList.add('has-inline-comments');
+    }
+
+    steamAction?.remove();
+  }
+
+  function normalizeModerationCards(root = moderationList) {
+    if (!root) return;
+    if (root.matches?.('.moderation-card')) normalizeModerationCard(root);
+    root.querySelectorAll?.('.moderation-card').forEach(normalizeModerationCard);
+  }
+
+  if (moderationList) {
+    normalizeModerationCards();
+    new MutationObserver(records => {
+      records.forEach(record => {
+        record.addedNodes.forEach(node => {
+          if (node instanceof Element) normalizeModerationCards(node);
+        });
+      });
+    }).observe(moderationList, { childList: true, subtree: true });
+  }
+
   let lastFocused = null;
 
   function setView(view = 'games', proposalMode = true) {
