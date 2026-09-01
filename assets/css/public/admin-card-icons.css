@@ -216,7 +216,7 @@
 .admin-catalog-actions.has-published-parity > .admin-catalog-comments-open > span {
   min-width: 0;
   overflow: hidden;
-  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif !important;
   font-size: 16rem;
   font-weight: 900;
   line-height: 1;
@@ -224,6 +224,11 @@
   text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.admin-portal[data-portal-mode="proposal"]
+.admin-catalog-actions.has-published-parity > .admin-catalog-comments-open > b {
+  font-family: var(--font-ui);
 }
 
 .admin-portal[data-portal-mode="proposal"]

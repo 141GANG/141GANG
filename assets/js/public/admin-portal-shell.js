@@ -22,7 +22,7 @@
   // with a fresh query string so the admin card fixes cannot be masked by a
   // previously cached v=1.1 copy. figma-ui.js reuses this same element id.
   const adminCardStyleId = 'adminCardIconsStyles';
-  const adminCardStyleHref = './assets/css/public/admin-card-icons.css?v=1.5-comments-druk';
+  const adminCardStyleHref = './assets/css/public/admin-card-icons.css?v=1.6-comments-count';
   let adminCardStyle = document.getElementById(adminCardStyleId);
   if (!adminCardStyle) {
     adminCardStyle = document.createElement('link');
@@ -30,7 +30,7 @@
     adminCardStyle.rel = 'stylesheet';
     document.head.appendChild(adminCardStyle);
   }
-  if (!String(adminCardStyle.getAttribute('href') || '').includes('v=1.5-comments-druk')) {
+  if (!String(adminCardStyle.getAttribute('href') || '').includes('v=1.6-comments-count')) {
     adminCardStyle.href = adminCardStyleHref;
   }
 
@@ -140,40 +140,111 @@
     if (height > 0) pendingCardHeightRem = height / rootSize;
   }
 
-  function copyPublishTypography(publishButton, commentsButton) {
+  const DRUK_ACTION_FONT = "'DrukCyr-Heavy', 'Druk Cyr', sans-serif";
+  const publishedCommentCounts = new Map();
+  const publishedCommentCountLoading = new Set();
+  let publishedModalCommentsObserver = null;
+
+  function applyCommentsTypography(sourceButton, commentsButton) {
     const label = commentsButton?.querySelector(':scope > span');
-    if (!publishButton || !label) return;
+    if (!commentsButton || !label) return;
 
     const apply = () => {
-      if (!publishButton.isConnected || !label.isConnected) return;
+      if (!commentsButton.isConnected || !label.isConnected) return;
 
-      // The visible "Опубликовать" label may be drawn by ::before while the
-      // button itself still inherits Manrope. Reading only the button therefore
-      // copied the wrong family into "Комментарии" as an inline style.
-      const direct = window.getComputedStyle(publishButton);
-      const pseudo = window.getComputedStyle(publishButton, '::before');
-      const pseudoContent = String(pseudo.content || '').replace(/["']/g, '').trim();
-      const source = pseudoContent && !['none', 'normal'].includes(pseudoContent)
-        ? pseudo
-        : direct;
+      let source = null;
+      if (sourceButton?.isConnected) {
+        const direct = window.getComputedStyle(sourceButton);
+        const pseudo = window.getComputedStyle(sourceButton, '::before');
+        const pseudoContent = String(pseudo.content || '').replace(/["']/g, '').trim();
+        source = pseudoContent && !['none', 'normal'].includes(pseudoContent) ? pseudo : direct;
+      }
 
-      // Font family is explicit: comments must always use the same Druk Cyr
-      // face as the visible action labels. Other metrics follow the source label
-      // so the proportions stay identical across responsive breakpoints.
-      label.style.fontFamily = "'DrukCyr-Heavy', 'Druk Cyr', sans-serif";
-      label.style.fontSize = source.fontSize;
-      label.style.fontWeight = '900';
-      label.style.fontStyle = source.fontStyle || 'normal';
-      label.style.lineHeight = source.lineHeight;
-      label.style.letterSpacing = source.letterSpacing;
-      label.style.textTransform = 'uppercase';
+      // The label itself gets an inline-important Druk family. This is deliberate:
+      // several late responsive admin layers set `font-family` with !important on
+      // action buttons, so a normal declaration was still vulnerable to the cascade.
+      label.style.setProperty('font-family', DRUK_ACTION_FONT, 'important');
+      label.style.setProperty('font-weight', '900', 'important');
+      label.style.setProperty('font-style', 'normal', 'important');
+      label.style.setProperty('line-height', source?.lineHeight || '1', 'important');
+      label.style.setProperty('letter-spacing', source?.letterSpacing || '0px', 'important');
+      label.style.setProperty('text-transform', 'uppercase', 'important');
+      if (source?.fontSize && source.fontSize !== '0px') {
+        label.style.setProperty('font-size', source.fontSize, 'important');
+      }
     };
 
-    // First pass handles the current frame; the second pass handles stylesheets
-    // and the Druk face finishing after the card itself was inserted.
     apply();
     requestAnimationFrame(apply);
     document.fonts?.ready?.then(apply).catch(() => {});
+  }
+
+  function publishedCommentsClient() {
+    return window.CR7_SUPABASE_CLIENT || null;
+  }
+
+  function renderPublishedCommentCount(gameId, count) {
+    const id = String(gameId || '').trim();
+    if (!id || !moderationList) return;
+    moderationList.querySelectorAll('[data-published-comments]').forEach(button => {
+      if (String(button.dataset.publishedComments || '') !== id) return;
+      const nextCount = String(Math.max(0, Number(count) || 0));
+      const badge = button.querySelector('[data-published-comment-count]');
+      if (badge && badge.textContent !== nextCount) badge.textContent = nextCount;
+      const nextLabel = `Комментарии: ${nextCount}`;
+      if (button.getAttribute('aria-label') !== nextLabel) button.setAttribute('aria-label', nextLabel);
+    });
+  }
+
+  async function loadPublishedCommentCount(gameId, force = false) {
+    const id = String(gameId || '').trim();
+    if (!id) return;
+    if (!force && publishedCommentCounts.has(id)) {
+      renderPublishedCommentCount(id, publishedCommentCounts.get(id));
+      return;
+    }
+    if (publishedCommentCountLoading.has(id)) return;
+
+    const supabase = publishedCommentsClient();
+    if (!supabase) return;
+    publishedCommentCountLoading.add(id);
+    try {
+      const { data, error } = await supabase.rpc('get_game_interactions', { p_game_id: Number(id) });
+      if (error) throw error;
+      const count = (Array.isArray(data) ? data : []).filter(row => row?.comment_id != null).length;
+      publishedCommentCounts.set(id, count);
+      renderPublishedCommentCount(id, count);
+    } catch (error) {
+      console.warn('Не удалось загрузить число комментариев игры:', error?.message || error);
+    } finally {
+      publishedCommentCountLoading.delete(id);
+    }
+  }
+
+  function refreshVisiblePublishedCommentCounts(force = false) {
+    if (!moderationList) return;
+    const ids = new Set([...moderationList.querySelectorAll('[data-published-comments]')]
+      .map(button => String(button.dataset.publishedComments || '').trim())
+      .filter(Boolean));
+    ids.forEach(id => loadPublishedCommentCount(id, force));
+  }
+
+  function watchPublishedModalComments(gameId) {
+    const id = String(gameId || '').trim();
+    const list = document.getElementById('modalCommentsList');
+    if (!id || !list) return;
+
+    publishedModalCommentsObserver?.disconnect();
+    const sync = () => {
+      if (!document.querySelector('.game-modal:not([hidden])')) return;
+      if (/Загружаем комментарии/i.test(list.textContent || '')) return;
+      const count = list.querySelectorAll('.modal-comment-item[data-comment-id]').length;
+      publishedCommentCounts.set(id, count);
+      renderPublishedCommentCount(id, count);
+    };
+    publishedModalCommentsObserver = new MutationObserver(sync);
+    publishedModalCommentsObserver.observe(list, { childList: true, subtree: true });
+    sync();
   }
 
   function normalizeModerationCard(card) {
@@ -200,7 +271,7 @@
     }
     if (publishButton && commentsButton) {
       actions.classList.add('has-inline-comments');
-      copyPublishTypography(publishButton, commentsButton);
+      applyCommentsTypography(publishButton, commentsButton);
     }
 
     steamAction?.remove();
@@ -248,12 +319,18 @@
       commentsButton.type = 'button';
       commentsButton.dataset.publishedComments = card.dataset.gameId;
       commentsButton.setAttribute('aria-label', `Открыть комментарии игры ${title?.textContent?.trim() || ''}`);
-      commentsButton.innerHTML = '<span>Комментарии</span><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg">';
+      commentsButton.innerHTML = '<span>Комментарии</span><b data-published-comment-count>0</b><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg">';
       if (saveButton) saveButton.after(commentsButton);
       else actions.prepend(commentsButton);
     }
 
     actions.classList.add('has-published-parity');
+    if (commentsButton) {
+      applyCommentsTypography(saveButton, commentsButton);
+      const cachedCount = publishedCommentCounts.get(String(card.dataset.gameId || ''));
+      if (cachedCount != null) renderPublishedCommentCount(card.dataset.gameId, cachedCount);
+      else loadPublishedCommentCount(card.dataset.gameId);
+    }
 
     if (pendingCardHeightRem > 0 && window.innerWidth > 720) {
       card.style.height = 'auto';
@@ -274,6 +351,7 @@
     if (!openModal) return;
 
     openModal(id);
+    watchPublishedModalComments(id);
     window.setTimeout(() => {
       const modal = document.querySelector('.game-modal:not([hidden])');
       const comments = modal?.querySelector('.modal-comments');
@@ -324,7 +402,16 @@
     scheduleAdminCardNormalization();
     window.setTimeout(scheduleAdminCardNormalization, 40);
     window.setTimeout(scheduleAdminCardNormalization, 180);
+    window.setTimeout(() => refreshVisiblePublishedCommentCounts(true), 260);
   }, true);
+
+
+  window.addEventListener('cr7:supabase-ready', () => {
+    window.setTimeout(() => refreshVisiblePublishedCommentCounts(true), 0);
+  });
+  window.addEventListener('focus', () => {
+    if (adminSection?.dataset.catalogTab === 'true') refreshVisiblePublishedCommentCounts(true);
+  });
 
   let lastFocused = null;
 
