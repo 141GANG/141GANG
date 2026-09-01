@@ -234,6 +234,10 @@
   -ms-overflow-style: none;
 }
 
+.media-panel.is-figma-proposal .media-selected.has-preview-slider {
+  margin-bottom: 8rem;
+}
+
 .media-panel.is-figma-proposal .media-selected::-webkit-scrollbar {
   width: 0;
   height: 0;
@@ -333,6 +337,99 @@
 .media-panel.is-figma-proposal .media-selected-actions .danger {
   border-color: rgba(230,61,61,.3);
   color: #ff8d8d;
+}
+
+/* Preview scrubber: mirrors the horizontal preview strip and stays in sync
+   whether it is dragged, scrolled with a wheel/touchpad, or moved by touch. */
+.media-panel.is-figma-proposal .figma-media-preview-slider {
+  width: 100%;
+  display: grid;
+  gap: 7rem;
+  margin: 0 0 20rem;
+  padding: 0 2rem;
+}
+
+.media-panel.is-figma-proposal .figma-media-preview-slider[hidden] {
+  display: none;
+}
+
+.media-panel.is-figma-proposal .figma-media-preview-slider-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rem;
+  color: rgba(240,240,240,.34);
+  font-size: 11rem;
+  line-height: 1;
+}
+
+.media-panel.is-figma-proposal .figma-media-preview-slider-meta > span:first-child {
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.media-panel.is-figma-proposal .figma-media-preview-slider-position {
+  color: rgba(240,240,240,.58);
+  font-variant-numeric: tabular-nums;
+}
+
+.media-panel.is-figma-proposal .figma-media-preview-slider input[type="range"] {
+  --preview-progress: 0%;
+  width: 100%;
+  height: 18rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  accent-color: #e63d3d;
+  cursor: ew-resize;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.media-panel.is-figma-proposal .figma-media-preview-slider input[type="range"]::-webkit-slider-runnable-track {
+  height: 4rem;
+  border-radius: 999rem;
+  background: linear-gradient(90deg, #e63d3d 0 var(--preview-progress), rgba(240,240,240,.14) var(--preview-progress) 100%);
+}
+
+.media-panel.is-figma-proposal .figma-media-preview-slider input[type="range"]::-webkit-slider-thumb {
+  width: 18rem;
+  height: 18rem;
+  margin-top: -7rem;
+  border: 3rem solid #f0f0f0;
+  border-radius: 50%;
+  background: #e63d3d;
+  box-shadow: 0 0 0 3rem rgba(230,61,61,.13), 0 3rem 10rem rgba(0,0,0,.42);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.media-panel.is-figma-proposal .figma-media-preview-slider input[type="range"]::-moz-range-track {
+  height: 4rem;
+  border: 0;
+  border-radius: 999rem;
+  background: rgba(240,240,240,.14);
+}
+
+.media-panel.is-figma-proposal .figma-media-preview-slider input[type="range"]::-moz-range-progress {
+  height: 4rem;
+  border-radius: 999rem;
+  background: #e63d3d;
+}
+
+.media-panel.is-figma-proposal .figma-media-preview-slider input[type="range"]::-moz-range-thumb {
+  width: 12rem;
+  height: 12rem;
+  border: 3rem solid #f0f0f0;
+  border-radius: 50%;
+  background: #e63d3d;
+  box-shadow: 0 0 0 3rem rgba(230,61,61,.13), 0 3rem 10rem rgba(0,0,0,.42);
+}
+
+.media-panel.is-figma-proposal .figma-media-preview-slider input[type="range"]:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4rem rgba(230,61,61,.22), 0 3rem 10rem rgba(0,0,0,.42);
 }
 
 /* With a selected file, the desktop proposal becomes a real preview window. */
@@ -457,6 +554,14 @@
     gap: 10px;
     overflow: visible;
     margin-bottom: 18px;
+  }
+
+  .media-panel.is-figma-proposal .media-selected.has-preview-slider {
+    margin-bottom: 18px;
+  }
+
+  .media-panel.is-figma-proposal .figma-media-preview-slider {
+    display: none;
   }
 
   .media-panel.is-figma-proposal .media-selected-item,

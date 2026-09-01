@@ -1,10 +1,10 @@
 (() => {
-  const FIGMA_UI_BUILD = '8.2-filter-no-reset';
+  const FIGMA_UI_BUILD = '8.3-media-preview-slider';
   const assets = [
     ['style','figmaMainFinalStyles','./assets/css/public/figma-main-final.css?v=2.0'],
     ['style','adminFigmaFinalStyles','./assets/css/public/admin-figma-final.css?v=1.0'],
     ['style','proposalWindowsFigmaStyles','./assets/css/public/proposal-windows-figma.css?v=4.8'],
-    ['style','proposalMediaFigmaExactStyles','./assets/css/public/proposal-media-figma-exact.css?v=3.0-preview'],
+    ['style','proposalMediaFigmaExactStyles','./assets/css/public/proposal-media-figma-exact.css?v=3.1-preview-slider'],
     ['style','adminCardIconsStyles','./assets/css/public/admin-card-icons.css?v=1.1'],
     ['style','figmaTypographyFinalStyles','./assets/css/public/figma-typography-final.css?v=4.7'],
     ['style','e2eResponsiveP0Styles','./assets/css/public/e2e-responsive-p0.css?v=1.1-rem'],
@@ -36,6 +36,100 @@
   const sortMenu = document.getElementById('catalogSortMenu');
   const sortSelect = document.getElementById('publicCatalogSort');
   const managementButton = document.getElementById('adminPortalOpen');
+
+  const mediaSelected = document.getElementById('mediaSelected');
+
+  // The proposal preview strip already scrolls horizontally. This range
+  // control mirrors that real scroll position instead of introducing a second
+  // carousel, so every selected photo/video remains reachable by mouse,
+  // touchpad, touch and keyboard.
+  function setupMediaPreviewSlider() {
+    if (!mediaSelected || mediaSelected.dataset.previewSliderBound === 'true') return;
+    mediaSelected.dataset.previewSliderBound = 'true';
+
+    const slider = document.createElement('div');
+    slider.className = 'figma-media-preview-slider';
+    slider.hidden = true;
+    slider.innerHTML = `
+      <div class="figma-media-preview-slider-meta">
+        <span>Предпросмотр файлов</span>
+        <span class="figma-media-preview-slider-position" data-media-preview-position>0 / 0</span>
+      </div>
+      <input aria-label="Прокрутка предпросмотра файлов" max="1000" min="0" step="1" type="range" value="0">
+    `;
+    mediaSelected.insertAdjacentElement('afterend', slider);
+
+    const range = slider.querySelector('input[type="range"]');
+    const position = slider.querySelector('[data-media-preview-position]');
+    let syncFrame = 0;
+
+    const items = () => [...mediaSelected.querySelectorAll('.media-selected-item')];
+    const maxScroll = () => Math.max(0, mediaSelected.scrollWidth - mediaSelected.clientWidth);
+
+    function syncSlider() {
+      syncFrame = 0;
+      const list = items();
+      const maximum = maxScroll();
+      const desktop = window.matchMedia('(min-width: 901px)').matches;
+      const usable = desktop && list.length > 1 && maximum > 1;
+
+      slider.hidden = !usable;
+      mediaSelected.classList.toggle('has-preview-slider', usable);
+
+      if (!list.length) {
+        range.value = '0';
+        range.style.setProperty('--preview-progress', '0%');
+        position.textContent = '0 / 0';
+        range.setAttribute('aria-valuetext', 'Файлы не выбраны');
+        return;
+      }
+
+      if (!usable) {
+        range.value = '0';
+        range.style.setProperty('--preview-progress', '0%');
+        position.textContent = `${list.length} ${list.length === 1 ? 'файл' : list.length < 5 ? 'файла' : 'файлов'}`;
+        range.setAttribute('aria-valuetext', `${list.length} ${list.length === 1 ? 'файл' : list.length < 5 ? 'файла' : 'файлов'}`);
+        return;
+      }
+
+      const value = Math.max(0, Math.min(1000, Math.round(mediaSelected.scrollLeft / maximum * 1000)));
+      range.value = String(value);
+      range.style.setProperty('--preview-progress', `${value / 10}%`);
+      position.textContent = `${list.length} ${list.length === 1 ? 'файл' : list.length < 5 ? 'файла' : 'файлов'}`;
+      range.setAttribute('aria-valuetext', `Прокрутка ${Math.round(value / 10)}%, ${list.length} файлов`);
+    }
+
+    function scheduleSync() {
+      if (!syncFrame) syncFrame = requestAnimationFrame(syncSlider);
+    }
+
+    range.addEventListener('input', () => {
+      const maximum = maxScroll();
+      mediaSelected.scrollLeft = maximum * (Number(range.value) / 1000);
+      scheduleSync();
+    });
+
+    mediaSelected.addEventListener('scroll', scheduleSync, { passive: true });
+
+    const mutationObserver = new MutationObserver(scheduleSync);
+    mutationObserver.observe(mediaSelected, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['hidden']
+    });
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(scheduleSync);
+      resizeObserver.observe(mediaSelected);
+    } else {
+      window.addEventListener('resize', scheduleSync, { passive: true });
+    }
+
+    scheduleSync();
+  }
+
+  setupMediaPreviewSlider();
 
   // Library filters reuse the exact Sort dropdown component. Removing the
   // generic filter-btn/catalog-filter-menu hooks also prevents late catalog
