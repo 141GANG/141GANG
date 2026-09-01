@@ -69,7 +69,6 @@
 .admin-portal[data-portal-mode="proposal"] .moderation-actions.has-inline-comments > .moderation-support-comments-open {
   align-self: stretch;
   font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
-  font-size: 12rem;
   font-weight: 900;
   line-height: 1;
   letter-spacing: 0;
@@ -84,7 +83,6 @@
   min-width: 0;
   overflow: hidden;
   font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
-  font-size: 12rem;
   font-weight: 900;
   line-height: 1;
   letter-spacing: 0;
@@ -142,3 +140,63 @@
   .admin-portal .moderation-fact-icon { width: 20rem; flex-basis: 20rem; }
   .admin-portal .moderation-reaction-icon { width: 25rem; height: 25rem; flex-basis: 25rem; }
 }
+
+/* Published cards use the same compact vertical rhythm as Pending cards. */
+.admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
+.admin-catalog-card.is-published-parity .admin-catalog-status-row {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10rem;
+  margin-top: 4rem;
+}
+
+.admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
+.admin-catalog-card.is-published-parity .admin-catalog-status-row > .admin-catalog-status-label {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
+.admin-catalog-card.is-published-parity .admin-catalog-status-row > .admin-catalog-statuses {
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  gap: 6rem;
+}
+
+.admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
+.admin-catalog-card.is-published-parity .admin-catalog-actions.has-published-parity {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40rem;
+  gap: 8rem;
+}
+
+@media (min-width: 901px) and (max-width: 1500px) {
+  .admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
+  .admin-catalog-card.is-published-parity .admin-catalog-status-row > .admin-catalog-statuses button {
+    height: 26rem;
+    min-height: 26rem;
+    padding: 0 7rem;
+    font-size: 11rem;
+  }
+
+  .admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
+  .admin-catalog-card.is-published-parity .admin-catalog-actions.has-published-parity {
+    padding-top: 6rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
+  .admin-catalog-card.is-published-parity .admin-catalog-status-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-portal[data-portal-mode="proposal"] #adminSection[data-catalog-tab="true"]
+  .admin-catalog-card.is-published-parity .admin-catalog-status-row > .admin-catalog-statuses {
+    flex-wrap: wrap;
+  }
+}
+

@@ -18,10 +18,26 @@
     document.head.appendChild(link);
   });
 
+  // This stylesheet already exists in the project. Load the current revision here
+  // with a fresh query string so the admin card fixes cannot be masked by a
+  // previously cached v=1.1 copy. figma-ui.js reuses this same element id.
+  const adminCardStyleId = 'adminCardIconsStyles';
+  const adminCardStyleHref = './assets/css/public/admin-card-icons.css?v=1.3-action-parity';
+  let adminCardStyle = document.getElementById(adminCardStyleId);
+  if (!adminCardStyle) {
+    adminCardStyle = document.createElement('link');
+    adminCardStyle.id = adminCardStyleId;
+    adminCardStyle.rel = 'stylesheet';
+    document.head.appendChild(adminCardStyle);
+  }
+  if (!String(adminCardStyle.getAttribute('href') || '').includes('v=1.3-action-parity')) {
+    adminCardStyle.href = adminCardStyleHref;
+  }
+
   if (!document.getElementById('adminGamesTabsV4Script')) {
     const script = document.createElement('script');
     script.id = 'adminGamesTabsV4Script';
-    script.src = './assets/js/public/admin-games-tabs-v4.js?v=2.0-player-range';
+    script.src = './assets/js/public/admin-games-tabs-v4.js?v=2.1-action-parity';
     script.defer = true;
     document.head.appendChild(script);
   }
@@ -106,6 +122,37 @@
    * не добавлять ещё один поверхностный UI-скрипт.
    */
   const moderationList = document.getElementById('suggestionModerationList');
+  let pendingCardHeightRem = 0;
+
+  function rememberPendingCardHeight(card) {
+    if (!(card instanceof Element) || card.classList.contains('admin-catalog-card')) return;
+    const rootSize = Number.parseFloat(window.getComputedStyle(document.documentElement).fontSize) || 1;
+    const height = card.getBoundingClientRect().height;
+    if (height > 0) pendingCardHeightRem = height / rootSize;
+  }
+
+  function copyPublishTypography(publishButton, commentsButton) {
+    const label = commentsButton?.querySelector(':scope > span');
+    if (!publishButton || !label) return;
+
+    const apply = () => {
+      if (!publishButton.isConnected || !label.isConnected) return;
+      const source = window.getComputedStyle(publishButton);
+      label.style.fontFamily = source.fontFamily;
+      label.style.fontSize = source.fontSize;
+      label.style.fontWeight = source.fontWeight;
+      label.style.fontStyle = source.fontStyle;
+      label.style.lineHeight = source.lineHeight;
+      label.style.letterSpacing = source.letterSpacing;
+      label.style.textTransform = source.textTransform;
+    };
+
+    // First pass handles the current frame; the second pass handles stylesheets
+    // that finished loading after the card itself was inserted.
+    apply();
+    requestAnimationFrame(apply);
+    document.fonts?.ready?.then(apply).catch(() => {});
+  }
 
   function normalizeModerationCard(card) {
     if (!(card instanceof Element)) return;
@@ -128,16 +175,25 @@
     const commentsButton = card.querySelector('.moderation-support-comments-open');
     if (publishButton && commentsButton && commentsButton.parentElement !== actions) {
       publishButton.after(commentsButton);
+    }
+    if (publishButton && commentsButton) {
       actions.classList.add('has-inline-comments');
+      copyPublishTypography(publishButton, commentsButton);
     }
 
     steamAction?.remove();
+
+    rememberPendingCardHeight(card);
+    requestAnimationFrame(() => rememberPendingCardHeight(card));
+    document.fonts?.ready?.then(() => rememberPendingCardHeight(card)).catch(() => {});
   }
 
   function normalizePublishedCard(card) {
     if (!(card instanceof Element)) return;
     const actions = card.querySelector('.admin-catalog-actions');
     if (!actions) return;
+
+    card.classList.add('is-published-parity');
 
     const steamAction = actions.querySelector('a[href]');
     const title = card.querySelector('.admin-catalog-card-copy h3');
@@ -151,8 +207,23 @@
       title.replaceChildren(titleLink);
     }
 
+    const statusLabel = card.querySelector('.admin-catalog-status-label');
+    const statuses = card.querySelector('.admin-catalog-statuses');
+    if (statusLabel && statuses && !statusLabel.closest('.admin-catalog-status-row')) {
+      const row = document.createElement('div');
+      row.className = 'admin-catalog-status-row';
+      statusLabel.before(row);
+      row.append(statusLabel, statuses);
+    }
+
     steamAction?.remove();
     actions.classList.add('has-published-parity');
+
+    if (pendingCardHeightRem > 0 && window.innerWidth > 720) {
+      card.style.height = 'auto';
+      card.style.minHeight = `${pendingCardHeightRem}rem`;
+      card.style.maxHeight = 'none';
+    }
   }
 
   function normalizeAdminCards(root = moderationList) {
@@ -163,16 +234,32 @@
     root.querySelectorAll?.('.admin-catalog-card').forEach(normalizePublishedCard);
   }
 
+  let normalizationFrame = 0;
+  function scheduleAdminCardNormalization() {
+    if (!moderationList || normalizationFrame) return;
+    normalizationFrame = requestAnimationFrame(() => {
+      normalizationFrame = 0;
+      normalizeAdminCards(moderationList);
+    });
+  }
+
   if (moderationList) {
     normalizeAdminCards();
-    new MutationObserver(records => {
-      records.forEach(record => {
-        record.addedNodes.forEach(node => {
-          if (node instanceof Element) normalizeAdminCards(node);
-        });
-      });
-    }).observe(moderationList, { childList: true, subtree: true });
+    new MutationObserver(scheduleAdminCardNormalization).observe(moderationList, {
+      childList: true,
+      subtree: true
+    });
   }
+
+  // The published tab redraws the same list asynchronously. Re-run after the
+  // click as a deterministic fallback in addition to MutationObserver.
+  document.querySelector('[data-suggestion-status="approved"]')?.addEventListener('click', () => {
+    const pendingCard = moderationList?.querySelector('.moderation-card:not(.admin-catalog-card)');
+    if (pendingCard) rememberPendingCardHeight(pendingCard);
+    scheduleAdminCardNormalization();
+    window.setTimeout(scheduleAdminCardNormalization, 40);
+    window.setTimeout(scheduleAdminCardNormalization, 180);
+  }, true);
 
   let lastFocused = null;
 
