@@ -663,15 +663,17 @@
   function adminSupporterCommentMarkup(comment, index, allowModeration = true) {
     const username = String(comment?.username || `Пользователь ${index + 1}`).trim() || `Пользователь ${index + 1}`;
     return `
-      <article class="admin-supporter-comment${comment.is_hidden ? ' is-hidden' : ''}">
-        <span class="admin-supporter-comment-avatar" aria-hidden="true">${escapeHtml(commentAuthorInitial(username))}</span>
-        <div class="admin-supporter-comment-content">
-          <header>
+      <article class="modal-comment-item admin-supporter-comment${comment.is_hidden ? ' is-hidden' : ''}">
+        <span class="modal-comment-avatar admin-supporter-comment-avatar" aria-hidden="true">${escapeHtml(commentAuthorInitial(username))}</span>
+        <div class="modal-comment-body admin-supporter-comment-content">
+          <div class="modal-comment-head admin-supporter-comment-head">
             <strong>${escapeHtml(username)}</strong>
             ${allowModeration ? `<button class="admin-supporter-comment-toggle" data-admin-support-comment-id="${Number(comment.comment_id)}" data-admin-support-comment-hidden="${comment.is_hidden ? 'false' : 'true'}" type="button">${comment.is_hidden ? 'Вернуть' : 'Скрыть'}</button>` : ''}
-          </header>
-          <p>${escapeHtml(comment.body)}</p>
-          <time>${escapeHtml(formatDate(comment.created_at))}</time>
+          </div>
+          <p data-comment-text>${escapeHtml(comment.body)}</p>
+          <div class="modal-comment-meta admin-supporter-comment-meta">
+            <time datetime="${escapeHtml(String(comment.created_at || ''))}">${escapeHtml(formatDate(comment.created_at))}</time>
+          </div>
           ${comment.is_hidden ? '<small>Комментарий скрыт из публичного обсуждения.</small>' : ''}
         </div>
       </article>`;
