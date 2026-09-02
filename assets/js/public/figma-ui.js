@@ -1,5 +1,5 @@
 (() => {
-  const FIGMA_UI_BUILD = '8.3-media-preview-slider';
+  const FIGMA_UI_BUILD = '8.4-media-auth-submit';
   const assets = [
     ['style','figmaMainFinalStyles','./assets/css/public/figma-main-final.css?v=2.0'],
     ['style','adminFigmaFinalStyles','./assets/css/public/admin-figma-final.css?v=1.0'],
@@ -11,7 +11,8 @@
     ['style','gameCommentManagementStyles','./assets/css/public/game-comment-management.css?v=1.0'],
     ['script','proposalWindowsFigmaScript','./assets/js/public/proposal-windows-figma.js?v=3.5-media-preview'],
     ['script','adminCardIconsScriptV2','./assets/js/public/admin-card-icons-v2.js?v=2.0'],
-    ['script','catalogLiveRefreshScript','./assets/js/public/catalog-live-refresh.js?v=1.0']
+    ['script','catalogLiveRefreshScript','./assets/js/public/catalog-live-refresh.js?v=1.0'],
+    ['script','mediaAuthenticatedSubmitBridge','./assets/js/public/media-authenticated-submit-bridge.js?v=1.0']
   ];
   assets.forEach(([type,id,src]) => {
     if (document.getElementById(id)) return;
