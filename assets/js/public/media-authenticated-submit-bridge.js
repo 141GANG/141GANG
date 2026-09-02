@@ -1,9 +1,6 @@
 (() => {
   'use strict';
 
-  // Authenticated media submit bridge.
-  // The moderation queue remains admin-only; this only owns the public
-  // "Предложить фото/видео" form on online builds.
   if (window.location.protocol === 'file:') return;
 
   const BUCKET = 'stream-submissions';
@@ -21,10 +18,13 @@
     files: [],
     replacingId: null,
     submitting: false,
-    bound: false
+    bound: false,
+    refreshPromise: null,
+    retryTimer: 0
   };
 
   const el = {};
+  window.CR7_MEDIA_AUTH_SUBMIT_BRIDGE = '1.1-session-ready';
 
   function configuredClient() {
     if (window.CR7_SUPABASE_CLIENT) return window.CR7_SUPABASE_CLIENT;
@@ -40,37 +40,6 @@
 
   function isRealUser(user) {
     return Boolean(user && !user.is_anonymous);
-  }
-
-  async function refreshSession() {
-    state.client = configuredClient();
-    state.session = null;
-    if (!state.client) {
-      render();
-      return null;
-    }
-    try {
-      const result = window.CR7_AUTH?.getUsableSession
-        ? await window.CR7_AUTH.getUsableSession(state.client)
-        : await state.client.auth.getSession();
-      if (result?.error) throw result.error;
-      state.session = result?.data?.session || null;
-    } catch (error) {
-      console.warn('Не удалось проверить авторизацию медиапредложки:', error?.message || error);
-    }
-    render();
-    return state.session;
-  }
-
-  async function requireUser() {
-    if (!isRealUser(state.session?.user)) await refreshSession();
-    const user = state.session?.user;
-    if (!isRealUser(user)) {
-      showNotice('Войди в аккаунт, чтобы отправить материал.', 'error');
-      document.getElementById('siteAuthOpen')?.focus?.();
-      return null;
-    }
-    return user;
   }
 
   function escapeHtml(value) {
@@ -122,6 +91,17 @@
     if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
   }
 
+  function desiredSubmitDisabled() {
+    return state.submitting || state.files.length === 0 || !Boolean(el.title?.value.trim());
+  }
+
+  function syncSubmitState() {
+    if (!el.submit) return;
+    const disabled = desiredSubmitDisabled();
+    if (el.submit.disabled !== disabled) el.submit.disabled = disabled;
+    el.submit.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+  }
+
   function render() {
     if (!el.selected || !el.submit || !el.title) return;
     const count = state.files.length;
@@ -130,18 +110,25 @@
 
     el.selected.hidden = count === 0;
     el.dropzone?.classList.toggle('has-file', count > 0);
-    el.submit.disabled = state.submitting || !signedIn || count === 0 || !hasTitle;
+    syncSubmitState();
 
     if (el.hint) {
       el.hint.textContent = count === 0
-        ? signedIn ? 'Сначала выбери файлы и добавь название.' : 'Войди в аккаунт, чтобы отправить материал.'
+        ? signedIn ? 'Сначала выбери файлы и добавь название.' : 'Выбери файлы. Авторизация проверится при отправке.'
         : !hasTitle
           ? `${count} ${count === 1 ? 'файл выбран' : count < 5 ? 'файла выбраны' : 'файлов выбраны'}. Осталось добавить название.`
           : `${count} ${count === 1 ? 'файл готов' : count < 5 ? 'файла готовы' : 'файлов готовы'} к отправке.`;
     }
 
     if (!count) {
-      el.selected.innerHTML = '';
+      if (el.selected.childElementCount) el.selected.innerHTML = '';
+      el.selected.dataset.authMediaCount = '0';
+      return;
+    }
+
+    const currentCount = Number(el.selected.dataset.authMediaCount || '-1');
+    const expectedIds = state.files.map(item => item.id).join('|');
+    if (currentCount === count && el.selected.dataset.authMediaIds === expectedIds && el.selected.childElementCount === count) {
       return;
     }
 
@@ -151,7 +138,7 @@
         ? `<video controls muted playsinline preload="metadata" src="${escapeHtml(item.previewUrl)}"></video>`
         : `<img alt="${escapeHtml(file.name)}" src="${escapeHtml(item.previewUrl)}">`;
       return `
-        <article class="media-selected-item">
+        <article class="media-selected-item" data-auth-media-item="${escapeHtml(item.id)}">
           <div class="media-selected-preview">${preview}</div>
           <div class="media-selected-copy">
             <strong title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</strong>
@@ -163,6 +150,55 @@
           </div>
         </article>`;
     }).join('');
+    el.selected.dataset.authMediaCount = String(count);
+    el.selected.dataset.authMediaIds = expectedIds;
+  }
+
+  function scheduleClientRetry() {
+    window.clearTimeout(state.retryTimer);
+    state.retryTimer = window.setTimeout(() => {
+      if (!state.client) refreshSession();
+    }, 350);
+  }
+
+  async function refreshSession() {
+    if (state.refreshPromise) return state.refreshPromise;
+    state.refreshPromise = (async () => {
+      state.client = configuredClient();
+      if (!state.client) {
+        scheduleClientRetry();
+        render();
+        return null;
+      }
+      try {
+        const result = window.CR7_AUTH?.getUsableSession
+          ? await window.CR7_AUTH.getUsableSession(state.client)
+          : await state.client.auth.getSession();
+        if (result?.error) throw result.error;
+        state.session = result?.data?.session || null;
+      } catch (error) {
+        console.warn('Не удалось проверить авторизацию медиапредложки:', error?.message || error);
+        state.session = null;
+      }
+      render();
+      return state.session;
+    })();
+    try {
+      return await state.refreshPromise;
+    } finally {
+      state.refreshPromise = null;
+    }
+  }
+
+  async function requireUser() {
+    await refreshSession();
+    const user = state.session?.user;
+    if (!isRealUser(user)) {
+      showNotice('Войди в аккаунт, чтобы отправить материал.', 'error');
+      document.getElementById('siteAuthOpen')?.focus?.();
+      return null;
+    }
+    return user;
   }
 
   function addFiles(fileList) {
@@ -207,6 +243,7 @@
       el.title.value = state.files[0].file.name.replace(/\.[^.]+$/, '').slice(0, 120);
     }
     render();
+    refreshSession();
     if (errors.length) showNotice([...new Set(errors)].join(' '), 'error');
   }
 
@@ -232,12 +269,14 @@
     event.preventDefault();
     event.stopImmediatePropagation();
 
-    const user = await requireUser();
-    if (!user) return;
+    if (state.submitting) return;
     if (!state.files.length) {
       showNotice('Сначала выбери хотя бы один файл.', 'error');
       return;
     }
+
+    const user = await requireUser();
+    if (!user) return;
 
     const title = el.title.value.trim()
       || state.files[0]?.file?.name?.replace(/\.[^.]+$/, '').slice(0, 120)
@@ -250,7 +289,7 @@
     const defaultText = el.submit.textContent || 'Отправить';
 
     state.submitting = true;
-    el.submit.disabled = true;
+    syncSubmitState();
     el.submit.textContent = 'Подготавливаем…';
 
     try {
@@ -302,9 +341,10 @@
     } catch (error) {
       console.error('Не удалось отправить медиапредложение:', error);
       await rollback(submissionId, uploadedPaths);
-      const message = /row-level security|permission denied/i.test(String(error?.message || ''))
-        ? 'Нет доступа к отправке. Проверь, что production-политики для авторизованных пользователей применены.'
-        : (error?.message || 'Не удалось загрузить материал.');
+      const text = String(error?.message || '');
+      const message = /row-level security|permission denied/i.test(text)
+        ? 'Сервер отклонил отправку. Проверь production RLS-политики для authenticated.'
+        : (text || 'Не удалось загрузить материал.');
       showNotice(message, 'error');
     } finally {
       state.submitting = false;
@@ -313,9 +353,22 @@
     }
   }
 
+  function bindObservers() {
+    if ('MutationObserver' in window) {
+      const submitObserver = new MutationObserver(() => syncSubmitState());
+      submitObserver.observe(el.submit, { attributes: true, attributeFilter: ['disabled'] });
+
+      const selectedObserver = new MutationObserver(() => {
+        if (!state.files.length) return;
+        const actualCount = el.selected.querySelectorAll('[data-auth-media-item]').length;
+        if (actualCount !== state.files.length) render();
+      });
+      selectedObserver.observe(el.selected, { childList: true, subtree: false });
+    }
+  }
+
   function bind() {
     if (state.bound) return;
-    state.bound = true;
 
     el.form = document.getElementById('mediaForm');
     el.input = document.getElementById('mediaFileInput');
@@ -328,8 +381,10 @@
     el.notice = document.getElementById('mediaNotice');
     if (!el.form || !el.input || !el.selected || !el.submit || !el.title) return;
 
-    // Capture phase intentionally owns only the public submission form.
-    // Existing admin queue/moderation listeners remain untouched.
+    state.bound = true;
+
+    // Capture phase owns only the public submission form. This prevents the
+    // legacy admin-only handlers from disabling the same controls afterwards.
     el.input.addEventListener('change', event => {
       event.stopImmediatePropagation();
       addFiles(event.target.files);
@@ -367,9 +422,21 @@
 
     el.form.addEventListener('submit', submit, true);
 
+    bindObservers();
+    render();
     refreshSession();
-    const client = configuredClient();
-    client?.auth?.onAuthStateChange?.(() => window.setTimeout(refreshSession, 0));
+
+    // The bridge can be injected before Supabase/config finishes loading.
+    // Listen for the project's readiness event instead of freezing the form
+    // in the unauthenticated state from that first tick.
+    window.addEventListener('cr7:supabase-ready', () => {
+      state.client = null;
+      refreshSession();
+    });
+
+    document.addEventListener('click', event => {
+      if (event.target.closest('.media-trigger, [data-proposal-tab="media"]')) refreshSession();
+    }, true);
   }
 
   if (document.readyState === 'loading') {
