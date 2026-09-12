@@ -24,7 +24,7 @@
     autoHide: false,
     accent: '#ef3d35',
     mode: 'winner',
-    spinDuration: 6,
+    spinDuration: 2,
     randomDuration: false,
     spinMin: 4,
     spinMax: 10,
@@ -212,7 +212,7 @@
     const hideEliminated = byId('auctionHideEliminated')?.checked;
     const entries = sortedItems().filter(item => !hideEliminated || !item.eliminated);
     list.innerHTML = entries.length ? entries.map((item, index) => `
-      <article class="auction-item${item.eliminated ? ' is-eliminated' : ''}" data-auction-id="${escapeHtml(item.id)}">
+      <article class="auction-item${item.eliminated ? ' is-eliminated' : ''}" data-auction-id="${escapeHtml(item.id)}" style="--lot-color:${colors[state.items.indexOf(item) % colors.length]}">
         <span class="auction-color" style="--lot-color:${colors[state.items.indexOf(item) % colors.length]}">${String(index + 1).padStart(2, '0')}</span>
         <div class="auction-item-copy"><h3>${escapeHtml(item.title)}</h3><p>${money(item.amount)}</p></div>
         <div class="auction-item-chance"><span>${item.eliminated ? 'Статус' : state.settings.mode === 'elimination' ? 'Шанс вылета' : 'Шанс победы'}</span><strong>${item.eliminated ? 'Выбыл' : percent(itemChance(item))}</strong></div>
@@ -254,9 +254,11 @@
 
   function renderWinner() {
     const card = byId('auctionWinnerCard');
+    const target = byId('auctionWheelTarget');
     if (!card) return;
     if (!pendingWinner) {
       card.hidden = true;
+      if (target) target.textContent = 'Колесо удачи';
       return;
     }
     const item = state.items.find(entry => entry.id === pendingWinner.itemId);
@@ -266,6 +268,7 @@
       return;
     }
     card.hidden = false;
+    if (target) target.textContent = item.title;
     byId('auctionWinnerName').textContent = item.title;
     byId('auctionWinnerChance').textContent = percent(pendingWinner.chance);
     byId('auctionWinnerCumulative').textContent = percent(pendingWinner.cumulative);
@@ -543,6 +546,8 @@
     renderWinner();
     spinButton.disabled = true;
     byId('auctionResult').textContent = 'Колесо вращается…';
+    const target = byId('auctionWheelTarget');
+    if (target) target.textContent = 'Выбираем победителя…';
     const settings = state.settings;
     const min = normaliseDuration(settings.spinMin, 4);
     const max = Math.max(min, normaliseDuration(settings.spinMax, 10));
@@ -847,6 +852,7 @@
   });
   byId('auctionNew').addEventListener('click', archiveAuction);
   byId('auctionHistoryExport').addEventListener('click', exportHistory);
+  panel.querySelector('[data-auction-open-wheel]')?.addEventListener('click', () => switchTab('wheel'));
 
   byId('auctionInitialMinutes').addEventListener('change', event => updateSetting('initialMinutes', Math.max(1, Math.min(360, Number(event.target.value) || 10))));
   byId('auctionShowTimer').addEventListener('change', event => updateSetting('showTimer', event.target.checked));

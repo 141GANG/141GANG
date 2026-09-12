@@ -1,7 +1,7 @@
 (() => {
   const FIGMA_UI_BUILD = '8.4-media-auth-submit';
   const assets = [
-    ['style','figmaMainFinalStyles','./assets/css/public/figma-main-final.css?v=2.0'],
+    ['style','figmaMainFinalStyles','./assets/css/public/figma-main-final.css?v=2.1-services'],
     ['style','adminFigmaFinalStyles','./assets/css/public/admin-figma-final.css?v=1.0'],
     ['style','proposalWindowsFigmaStyles','./assets/css/public/proposal-windows-figma.css?v=4.8'],
     ['style','proposalMediaFigmaExactStyles','./assets/css/public/proposal-media-figma-exact.css?v=3.1-preview-slider'],
@@ -199,16 +199,10 @@
     menu.addEventListener('click', event => event.stopPropagation());
   }
 
-  // Services are temporarily unavailable: keep the control visible but inactive.
-  if (servicesToggle) {
-    servicesToggle.setAttribute('aria-expanded', 'false');
-    servicesToggle.setAttribute('aria-disabled', 'true');
-    servicesToggle.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-    }, true);
-  }
+  // The auction is live again, so the services menu behaves like the other menus.
+  if (servicesToggle) servicesToggle.removeAttribute('aria-disabled');
   if (servicesMenu) servicesMenu.hidden = true;
+  togglePopup(servicesToggle, servicesMenu, () => closeCatalogMenus());
   togglePopup(filtersToggle, filtersMenu, () => {
     setPopup(sortToggle, sortMenu, false);
     setPopup(servicesToggle, servicesMenu, false);

@@ -271,10 +271,6 @@ body > footer {
   cursor: default !important;
 }
 
-#servicesMenu {
-  display: none !important;
-}
-
 /* Proposal content cards — exact hover/touch state. */
 .content-menu-card,
 .content-menu-card.content-menu-card-media {
