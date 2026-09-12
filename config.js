@@ -7,7 +7,7 @@ window.CR7_CONFIG = Object.freeze({
   if (document.getElementById('authenticatedSubmissionsFixScript')) return;
   const script = document.createElement('script');
   script.id = 'authenticatedSubmissionsFixScript';
-  script.src = './assets/js/public/authenticated-submissions-fix.js?v=1.1-e2e';
+  script.src = './assets/js/public/authenticated-submissions-fix.js?v=1.3-fullscreen-preview';
   script.async = false;
   document.head.appendChild(script);
 })();

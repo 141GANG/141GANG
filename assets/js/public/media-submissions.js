@@ -65,7 +65,15 @@
     started: false,
     eventsBound: false,
     submitting: false,
-    localMode: window.location.protocol === 'file:'
+    previewIndex: -1,
+    previewItems: [],
+    previewAuthor: '',
+    previewDetails: null,
+    previewExpanded: false,
+    previewMediaWidth: 47,
+    previewResizePointerId: null,
+    previewLastFocused: null,
+    localMode: window.location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(window.location.hostname)
   };
 
   const LOCAL_MEDIA_KEY = 'cr7-local-media-submissions-v2';
@@ -217,8 +225,10 @@
   function setBusy(button, busy, busyText = 'Подождите…') {
     if (!button) return;
     if (!button.dataset.defaultText) button.dataset.defaultText = button.textContent;
+    if (!button.dataset.defaultHtml) button.dataset.defaultHtml = button.innerHTML;
     button.disabled = busy;
-    button.textContent = busy ? busyText : button.dataset.defaultText;
+    if (busy) button.textContent = busyText;
+    else button.innerHTML = button.dataset.defaultHtml;
   }
 
   function formatBytes(bytes) {
@@ -238,6 +248,43 @@
       }).format(new Date(value));
     } catch {
       return '—';
+    }
+  }
+
+  function formatAdminDate(value) {
+    try {
+      return new Intl.DateTimeFormat('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(new Date(value)).replace(',', ' ·');
+    } catch {
+      return '—';
+    }
+  }
+
+  function formatPreviewTimestamp(value) {
+    try {
+      const date = new Date(value);
+      const now = new Date();
+      const sameDay = date.getFullYear() === now.getFullYear()
+        && date.getMonth() === now.getMonth()
+        && date.getDate() === now.getDate();
+      const time = new Intl.DateTimeFormat('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+      if (sameDay) return `сегодня в ${time}`;
+      const day = new Intl.DateTimeFormat('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).format(date);
+      return `${day} в ${time}`;
+    } catch {
+      return 'время не указано';
     }
   }
 
@@ -467,12 +514,43 @@
     if (target === 'published') loadPublished();
   }
 
+  function fitProposalToGameModal() {
+    if (!elements.panel) return;
+    if (window.matchMedia('(max-width: 720px)').matches) {
+      elements.panel.style.removeProperty('--media-proposal-scale');
+      elements.panel.style.removeProperty('--media-proposal-top');
+      elements.panel.style.removeProperty('--media-proposal-scroll-height');
+      return;
+    }
+
+    // Keep the proposal frame identical to the catalog game frame.
+    const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 1;
+    const frameWidth = 850 * rootSize;
+    const frameHeight = 1338 * rootSize;
+    const visibleFrameHeight = 970 * rootSize;
+    const edgeGap = 40 * rootSize;
+    const scale = Math.min(
+      1,
+      Math.max(0.1, (window.innerWidth - edgeGap) / frameWidth),
+      Math.max(0.1, (window.innerHeight - edgeGap) / visibleFrameHeight)
+    );
+    const top = Math.max(20 * rootSize, Math.min(40 * rootSize, window.innerHeight * 0.05));
+    const bottomGap = 20 * rootSize;
+    const availableHeight = Math.max(320 * rootSize, window.innerHeight - top - bottomGap);
+    const scrollHeight = Math.min(frameHeight, availableHeight / scale);
+
+    elements.panel.style.setProperty('--media-proposal-scale', scale.toFixed(5));
+    elements.panel.style.setProperty('--media-proposal-top', `${top.toFixed(2)}px`);
+    elements.panel.style.setProperty('--media-proposal-scroll-height', `${scrollHeight.toFixed(2)}px`);
+  }
+
   async function openPanel() {
     state.lastFocused = document.activeElement;
     elements.panel.hidden = false;
     elements.panel.setAttribute('aria-hidden', 'false');
     elements.triggers.forEach(trigger => trigger.setAttribute('aria-expanded', 'true'));
     document.documentElement.classList.add('media-open');
+    fitProposalToGameModal();
     await refreshAccess({ loadAdmin: false });
     window.setTimeout(() => {
       const focusTarget = state.currentTab === 'published'
@@ -483,6 +561,7 @@
   }
 
   function closePanel() {
+    closeFilePreview({ restoreFocus: false });
     elements.panel.hidden = true;
     elements.panel.setAttribute('aria-hidden', 'true');
     elements.triggers.forEach(trigger => trigger.setAttribute('aria-expanded', 'false'));
@@ -569,6 +648,7 @@
   }
 
   function clearSelectedFiles() {
+    closeFilePreview({ restoreFocus: false });
     state.selectedFiles.forEach(item => URL.revokeObjectURL(item.previewUrl));
     state.selectedFiles = [];
     state.replacingId = null;
@@ -596,11 +676,13 @@
     elements.selected.innerHTML = state.selectedFiles.map(selected => {
       const file = selected.file;
       const preview = isVideo(file)
-        ? `<video controls muted playsinline preload="metadata" src="${escapeHtml(selected.previewUrl)}"></video>`
+        ? `<video aria-hidden="true" muted playsinline preload="metadata" src="${escapeHtml(selected.previewUrl)}"></video>`
         : `<img alt="${escapeHtml(file.name)}" src="${escapeHtml(selected.previewUrl)}">`;
       return `
         <article class="media-selected-item">
-          <div class="media-selected-preview">${preview}</div>
+          <button class="media-selected-preview media-selected-preview-open" data-media-preview="${escapeHtml(selected.id)}" data-media-preview-kind="${isVideo(file) ? 'video' : 'image'}" data-media-preview-name="${escapeHtml(file.name)}" data-media-preview-size="${Number(file.size) || 0}" data-media-preview-url="${escapeHtml(selected.previewUrl)}" type="button" aria-label="Открыть ${isVideo(file) ? 'видео' : 'изображение'} «${escapeHtml(file.name)}» целиком">
+            ${preview}
+          </button>
           <div class="media-selected-copy">
             <strong title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</strong>
             <small>${isVideo(file) ? 'Видео' : 'Фото'} · ${escapeHtml(formatBytes(file.size))}</small>
@@ -612,6 +694,311 @@
         </article>
       `;
     }).join('');
+  }
+
+  function ensureFilePreview() {
+    let viewer = document.getElementById('mediaFilePreview');
+    if (viewer) return viewer;
+
+    viewer = document.createElement('div');
+    viewer.id = 'mediaFilePreview';
+    viewer.className = 'media-file-preview';
+    viewer.hidden = true;
+    viewer.setAttribute('aria-hidden', 'true');
+    viewer.innerHTML = `
+      <div class="media-file-preview-backdrop" data-media-preview-close></div>
+      <section class="media-file-preview-dialog" role="dialog" aria-modal="true" aria-label="Предпросмотр файлов" tabindex="-1">
+        <div class="media-file-preview-stage" id="mediaFilePreviewStage"></div>
+        <button class="media-file-preview-nav is-prev" data-media-preview-nav="-1" type="button" aria-label="Предыдущий файл">‹</button>
+        <button class="media-file-preview-nav is-next" data-media-preview-nav="1" type="button" aria-label="Следующий файл">›</button>
+        <div class="media-file-preview-resizer" data-media-preview-resizer role="separator" aria-label="Изменить ширину области предпросмотра" aria-orientation="vertical" aria-valuemin="30" aria-valuemax="70" aria-valuenow="47" tabindex="0"></div>
+        <aside class="media-file-preview-details" id="mediaFilePreviewDetails" hidden>
+          <div class="media-file-preview-detail is-author">
+            <span>Автор</span>
+            <strong id="mediaFilePreviewDetailAuthor"></strong>
+          </div>
+          <div class="media-file-preview-detail-row">
+            <div class="media-file-preview-detail">
+              <span>Дата</span>
+              <strong id="mediaFilePreviewDetailDate"></strong>
+            </div>
+            <div class="media-file-preview-detail">
+              <span>Категория</span>
+              <strong id="mediaFilePreviewDetailCategory"></strong>
+            </div>
+          </div>
+          <div class="media-file-preview-detail is-comment">
+            <span>Комментарий</span>
+            <div class="media-file-preview-comment" id="mediaFilePreviewDetailComment"></div>
+          </div>
+          <div class="media-file-preview-admin-actions" id="mediaFilePreviewAdminActions" hidden>
+            <button class="media-file-preview-admin-download" data-media-preview-admin-action="download" type="button">
+              <span>Скачать</span>
+              <img src="./assets/images/figma/arrow-circle-white.svg" alt="" aria-hidden="true">
+            </button>
+            <button class="media-file-preview-admin-delete" data-media-preview-admin-action="delete" aria-label="Удалить материал" type="button">X</button>
+          </div>
+        </aside>
+        <div class="media-file-preview-expanded-footer" id="mediaFilePreviewExpandedFooter" hidden>
+          <div class="media-file-preview-expanded-caption" id="mediaFilePreviewExpandedCaption" hidden></div>
+          <div class="media-file-preview-expanded-meta">
+            <span id="mediaFilePreviewExpandedCounter"></span>
+            <span><strong id="mediaFilePreviewExpandedAuthor"></strong><i aria-hidden="true">•</i><time id="mediaFilePreviewExpandedTime"></time></span>
+          </div>
+        </div>
+        <footer class="media-file-preview-footer">
+          <span class="media-file-preview-counter" id="mediaFilePreviewCounter"></span>
+          <strong class="media-file-preview-author" id="mediaFilePreviewAuthor"></strong>
+        </footer>
+      </section>`;
+    document.body.appendChild(viewer);
+
+    viewer.addEventListener('click', async event => {
+      if (event.target.closest('[data-media-preview-close]')) {
+        closeFilePreview();
+        return;
+      }
+      if (event.target === viewer.querySelector('#mediaFilePreviewStage')) {
+        closeFilePreview();
+        return;
+      }
+      const navigation = event.target.closest('[data-media-preview-nav]');
+      if (navigation) {
+        moveFilePreview(Number(navigation.dataset.mediaPreviewNav) || 0);
+        return;
+      }
+      const previewMedia = event.target.closest('#mediaFilePreviewStage img, #mediaFilePreviewStage video');
+      if (state.previewDetails && previewMedia && (!previewMedia.matches('video') || !state.previewExpanded)) {
+        setAdminPreviewExpanded(!state.previewExpanded);
+        return;
+      }
+      const adminAction = event.target.closest('[data-media-preview-admin-action][data-admin-media-id]');
+      if (!adminAction) return;
+      const { mediaPreviewAdminAction: action, adminMediaId: id } = adminAction.dataset;
+      if (action === 'download') await downloadSubmission(id, adminAction);
+      if (action === 'delete') {
+        await deleteSubmission(id, adminAction);
+        if (!state.adminItems.some(item => String(item.id) === String(id))) {
+          closeFilePreview({ restoreFocus: false });
+        }
+      }
+    });
+
+    const resizeHandle = viewer.querySelector('[data-media-preview-resizer]');
+    resizeHandle.addEventListener('pointerdown', event => {
+      if (!state.previewDetails || state.previewExpanded) return;
+      state.previewResizePointerId = event.pointerId;
+      resizeHandle.setPointerCapture?.(event.pointerId);
+      event.preventDefault();
+    });
+    resizeHandle.addEventListener('pointermove', event => {
+      if (state.previewResizePointerId !== event.pointerId) return;
+      const dialog = viewer.querySelector('.media-file-preview-dialog');
+      const bounds = dialog.getBoundingClientRect();
+      if (!bounds.width) return;
+      setPreviewMediaWidth(((event.clientX - bounds.left) / bounds.width) * 100);
+    });
+    const stopResize = event => {
+      if (state.previewResizePointerId !== event.pointerId) return;
+      resizeHandle.releasePointerCapture?.(event.pointerId);
+      state.previewResizePointerId = null;
+    };
+    resizeHandle.addEventListener('pointerup', stopResize);
+    resizeHandle.addEventListener('pointercancel', stopResize);
+    resizeHandle.addEventListener('keydown', event => {
+      if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setPreviewMediaWidth(state.previewMediaWidth + (event.key === 'ArrowLeft' ? -2 : 2));
+    });
+    return viewer;
+  }
+
+  function selectedPreviewItems() {
+    if (state.selectedFiles.length) return state.selectedFiles;
+    return [...elements.selected.querySelectorAll('[data-media-preview]')].map(button => ({
+      id: button.dataset.mediaPreview,
+      previewUrl: button.dataset.mediaPreviewUrl || button.querySelector('img,video')?.src || '',
+      file: {
+        name: button.dataset.mediaPreviewName || 'Файл',
+        size: Number(button.dataset.mediaPreviewSize) || 0,
+        type: button.dataset.mediaPreviewKind === 'video' ? 'video/unknown' : 'image/unknown'
+      }
+    })).filter(item => item.previewUrl);
+  }
+
+  function renderFilePreview() {
+    const viewer = ensureFilePreview();
+    const count = state.previewItems.length;
+    if (!count || state.previewIndex < 0) {
+      closeFilePreview();
+      return;
+    }
+
+    state.previewIndex = (state.previewIndex + count) % count;
+    const selected = state.previewItems[state.previewIndex];
+    const file = selected.file;
+    const video = isVideo(file);
+    const stage = viewer.querySelector('#mediaFilePreviewStage');
+    stage.innerHTML = video
+      ? `<video controls playsinline preload="metadata" src="${escapeHtml(selected.previewUrl)}"><p>Это видео не поддерживается браузером. Открой оригинал по ссылке ниже.</p></video>`
+      : `<img alt="${escapeHtml(file.name)}" src="${escapeHtml(selected.previewUrl)}">`;
+    viewer.querySelector('#mediaFilePreviewCounter').textContent = `Файл ${state.previewIndex + 1} из ${count}`;
+    viewer.querySelector('#mediaFilePreviewAuthor').textContent = `Предполагаемый автор · ${state.previewAuthor || 'Не указан'}`;
+    const details = state.previewDetails;
+    const detailsPanel = viewer.querySelector('#mediaFilePreviewDetails');
+    const adminActions = viewer.querySelector('#mediaFilePreviewAdminActions');
+    const resizeHandle = viewer.querySelector('[data-media-preview-resizer]');
+    const expandedFooter = viewer.querySelector('#mediaFilePreviewExpandedFooter');
+    viewer.querySelector('.media-file-preview-dialog')?.style.setProperty('--admin-preview-media-width', `${state.previewMediaWidth}%`);
+    resizeHandle.setAttribute('aria-valuenow', String(Math.round(state.previewMediaWidth)));
+    viewer.classList.toggle('is-admin-preview', Boolean(details));
+    viewer.classList.toggle('is-admin-expanded', Boolean(details && state.previewExpanded));
+    detailsPanel.hidden = !details;
+    adminActions.hidden = !details;
+    resizeHandle.hidden = !details;
+    expandedFooter.hidden = !(details && state.previewExpanded);
+    viewer.querySelector('.media-file-preview-footer').hidden = Boolean(details);
+    if (details) {
+      viewer.querySelector('#mediaFilePreviewDetailAuthor').textContent = details.author || 'Не указан';
+      viewer.querySelector('#mediaFilePreviewDetailDate').textContent = details.date || '—';
+      viewer.querySelector('#mediaFilePreviewDetailCategory').textContent = details.category || 'Не указана';
+      viewer.querySelector('#mediaFilePreviewDetailComment').textContent = details.comment || 'Без комментария';
+      adminActions.querySelectorAll('[data-media-preview-admin-action]').forEach(button => {
+        button.dataset.adminMediaId = details.id || '';
+      });
+      const caption = String(details.comment || '').trim();
+      const expandedCaption = viewer.querySelector('#mediaFilePreviewExpandedCaption');
+      expandedCaption.textContent = caption;
+      expandedCaption.hidden = !caption || caption === 'Без комментария';
+      viewer.querySelector('#mediaFilePreviewExpandedCounter').textContent = `${video ? 'Видео' : 'Фотография'} ${state.previewIndex + 1} из ${count}`;
+      viewer.querySelector('#mediaFilePreviewExpandedAuthor').textContent = details.author || 'Автор не указан';
+      viewer.querySelector('#mediaFilePreviewExpandedTime').textContent = details.time || 'время не указано';
+    }
+    viewer.querySelectorAll('[data-media-preview-nav]').forEach(button => {
+      button.hidden = count < 2 && adminPreviewSubmissionIds().length < 2;
+    });
+  }
+
+  function showFilePreview(items, index, trigger, author = '', details = null, options = {}) {
+    if (!Array.isArray(items) || !items.length || index < 0) return;
+    const viewer = ensureFilePreview();
+    state.previewItems = items;
+    state.previewIndex = index;
+    state.previewAuthor = String(author || 'Не указан').trim();
+    state.previewDetails = details;
+    state.previewExpanded = Boolean(details && options.expanded);
+    state.previewLastFocused = trigger || document.activeElement;
+    renderFilePreview();
+    viewer.hidden = false;
+    viewer.setAttribute('aria-hidden', 'false');
+    elements.panel.inert = true;
+    const adminPortal = document.getElementById('adminPortal');
+    if (adminPortal) adminPortal.inert = true;
+    document.documentElement.classList.add('media-file-preview-open');
+    viewer.querySelector('.media-file-preview-dialog')?.focus();
+  }
+
+  function openFilePreview(id, trigger) {
+    const items = selectedPreviewItems();
+    showFilePreview(items, items.findIndex(item => item.id === id), trigger, userDisplayName(state.session?.user));
+  }
+
+  function openAdminFilePreview(id, trigger, options = {}) {
+    const submission = state.adminItems.find(item => String(item.id) === String(id));
+    if (!submission) return;
+    const items = itemFiles(submission).map((file, index) => ({
+      id: String(file.id || file.storage_path || `${id}-${index}`),
+      previewUrl: file.signed_url || '',
+      file: {
+        name: file.file_name || `Файл ${index + 1}`,
+        size: Number(file.file_size) || 0,
+        type: file.mime_type || 'application/octet-stream'
+      }
+    })).filter(item => item.previewUrl);
+    if (!items.length) {
+      showNotice('Предпросмотр этого материала недоступен.', 'error');
+      return;
+    }
+    const author = itemAuthor(submission);
+    const requestedIndex = options.index === 'last' ? items.length - 1 : Number(options.index) || 0;
+    showFilePreview(items, Math.min(items.length - 1, Math.max(0, requestedIndex)), trigger, author, {
+      id: String(submission.id),
+      author,
+      date: formatAdminDate(submission.created_at),
+      time: formatPreviewTimestamp(submission.created_at),
+      category: MEDIA_CATEGORY_LABELS[itemCategory(submission)] || 'Не указана',
+      comment: String(submission.comment || '').trim() || 'Без комментария'
+    }, { expanded: Boolean(options.expanded) });
+  }
+
+  function closeFilePreview({ restoreFocus = true } = {}) {
+    const viewer = document.getElementById('mediaFilePreview');
+    if (!viewer || viewer.hidden) return;
+    viewer.querySelector('video')?.pause?.();
+    viewer.hidden = true;
+    viewer.setAttribute('aria-hidden', 'true');
+    elements.panel.inert = false;
+    const adminPortal = document.getElementById('adminPortal');
+    if (adminPortal) adminPortal.inert = false;
+    document.documentElement.classList.remove('media-file-preview-open');
+    state.previewIndex = -1;
+    state.previewItems = [];
+    state.previewAuthor = '';
+    state.previewDetails = null;
+    state.previewExpanded = false;
+    if (restoreFocus) state.previewLastFocused?.focus?.();
+    state.previewLastFocused = null;
+  }
+
+  function moveFilePreview(direction) {
+    if (!direction || state.previewIndex < 0 || !state.previewItems.length) return;
+    const viewer = ensureFilePreview();
+    viewer.querySelector('video')?.pause?.();
+    const nextIndex = state.previewIndex + direction;
+    if (state.previewDetails && (nextIndex < 0 || nextIndex >= state.previewItems.length)) {
+      if (moveAdminPreviewSubmission(direction)) return;
+    }
+    if (state.previewItems.length < 2) return;
+    state.previewIndex = (nextIndex + state.previewItems.length) % state.previewItems.length;
+    renderFilePreview();
+  }
+
+  function adminPreviewSubmissionIds() {
+    if (!state.previewDetails || !elements.adminList) return [];
+    return [...elements.adminList.querySelectorAll('[data-admin-media-card]')]
+      .map(card => String(card.dataset.adminMediaCard || ''))
+      .filter(Boolean);
+  }
+
+  function moveAdminPreviewSubmission(direction) {
+    const ids = adminPreviewSubmissionIds();
+    if (ids.length < 2) return false;
+    const currentId = String(state.previewDetails?.id || '');
+    const currentIndex = ids.indexOf(currentId);
+    if (currentIndex < 0) return false;
+    const targetIndex = (currentIndex + (direction < 0 ? -1 : 1) + ids.length) % ids.length;
+    const targetId = ids[targetIndex];
+    const targetTrigger = elements.adminList.querySelector(`[data-admin-media-card="${CSS.escape(targetId)}"] [data-admin-media-preview]`);
+    openAdminFilePreview(targetId, targetTrigger || state.previewLastFocused, {
+      index: direction < 0 ? 'last' : 0,
+      expanded: state.previewExpanded
+    });
+    return true;
+  }
+
+  function setPreviewMediaWidth(value) {
+    state.previewMediaWidth = Math.min(70, Math.max(30, Number(value) || 47));
+    const dialog = document.querySelector('#mediaFilePreview .media-file-preview-dialog');
+    dialog?.style.setProperty('--admin-preview-media-width', `${state.previewMediaWidth}%`);
+    document.querySelector('#mediaFilePreview [data-media-preview-resizer]')
+      ?.setAttribute('aria-valuenow', String(Math.round(state.previewMediaWidth)));
+  }
+
+  function setAdminPreviewExpanded(expanded) {
+    if (!state.previewDetails) return;
+    state.previewExpanded = Boolean(expanded);
+    renderFilePreview();
   }
 
   async function rollbackSubmission(submissionId, uploadedPaths) {
@@ -874,15 +1261,22 @@
 
   function adminPreviewMarkup(item) {
     const files = itemFiles(item);
-    const first = files[0];
-    if (!first) return '<div class="media-empty">Файл не найден</div>';
-    const kind = isVideo(first) ? 'video' : 'photo';
-    const preview = first.signed_url
-      ? (kind === 'video'
-        ? `<video muted playsinline preload="metadata" src="${escapeHtml(first.signed_url)}"></video>`
-        : `<img alt="${escapeHtml(item.title || 'Материал')}" loading="lazy" src="${escapeHtml(first.signed_url)}">`)
-      : '<div class="media-empty">Файл недоступен</div>';
-    return `<div class="media-card-file">${preview}</div>${mediaKindIcon(kind)}`;
+    if (!files.length) return '<div class="media-empty">Файл не найден</div>';
+    const fileCountLabel = `${files.length} ${files.length === 1 ? 'файл' : files.length < 5 ? 'файла' : 'файлов'}`;
+    const layoutClass = files.length === 1 ? 'is-single' : files.length === 2 ? 'is-double' : 'is-grid';
+    const visibleFiles = files.length > 3 ? files.slice(0, 3) : files;
+    const tileMarkup = visibleFiles.map((file, index) => {
+      if (!file.signed_url) {
+        return `<span class="admin-media-tile"><span class="media-empty">Файл ${index + 1}<br>недоступен</span></span>`;
+      }
+      const preview = isVideo(file)
+        ? `<video aria-hidden="true" muted playsinline preload="metadata" src="${escapeHtml(file.signed_url)}"></video>`
+        : `<img alt="" aria-hidden="true" loading="lazy" src="${escapeHtml(file.signed_url)}">`;
+      return `<span class="admin-media-tile">${preview}</span>`;
+    });
+    if (files.length === 3) tileMarkup.push('<span class="admin-media-tile is-empty" aria-hidden="true"></span>');
+    if (files.length > 3) tileMarkup.push(`<span class="admin-media-tile is-more" aria-hidden="true">+${files.length - 3}</span>`);
+    return `<button class="admin-media-preview-open" data-admin-media-preview="${escapeHtml(item.id)}" type="button" aria-label="Просмотреть ${fileCountLabel} «${escapeHtml(item.title || files[0].file_name || 'Материал')}»"><span class="admin-media-mosaic ${layoutClass}">${tileMarkup.join('')}</span></button>`;
   }
 
   function formatMatches(item) {
@@ -917,17 +1311,12 @@
     }
 
     elements.adminList.innerHTML = items.map(item => {
-      const category = itemCategory(item);
       return `
         <article class="admin-media-card" data-admin-media-card="${escapeHtml(item.id)}">
           <div class="admin-media-preview">${adminPreviewMarkup(item)}</div>
-          <div class="admin-media-card-meta">
-            <div><span>Автор</span><strong title="${escapeHtml(itemAuthor(item))}">${escapeHtml(itemAuthor(item))}</strong></div>
-            <div><span>Категория</span><strong>${escapeHtml(MEDIA_CATEGORY_LABELS[category])}</strong></div>
-          </div>
           <div class="admin-media-actions">
             <button class="admin-media-download" data-admin-media-action="download" data-admin-media-id="${escapeHtml(item.id)}" type="button"><span class="admin-media-download-label">Скачать</span><img class="admin-media-download-icon" src="./assets/images/figma/arrow-circle-white.svg" alt="" aria-hidden="true" /></button>
-            <button class="admin-media-delete" data-admin-media-action="delete" data-admin-media-id="${escapeHtml(item.id)}" aria-label="Удалить материал" type="button">×</button>
+            <button class="admin-media-delete" data-admin-media-action="delete" data-admin-media-id="${escapeHtml(item.id)}" aria-label="Удалить материал" type="button">X</button>
           </div>
         </article>
       `;
@@ -1157,6 +1546,7 @@
   }
 
   function bindEvents() {
+    window.addEventListener('resize', fitProposalToGameModal);
     elements.triggers.forEach(trigger => trigger.addEventListener('click', openPanel));
     elements.close.addEventListener('click', closePanel);
     elements.panel.addEventListener('click', event => {
@@ -1194,7 +1584,10 @@
       if (replaceButton) {
         state.replacingId = replaceButton.dataset.mediaReplace;
         elements.fileInput.click();
+        return;
       }
+      const previewButton = event.target.closest('[data-media-preview]');
+      if (previewButton) openFilePreview(previewButton.dataset.mediaPreview, previewButton);
     });
     ['dragenter', 'dragover'].forEach(name => elements.dropzone.addEventListener(name, event => {
       event.preventDefault();
@@ -1212,6 +1605,11 @@
       button.addEventListener('click', () => setAdminStatus(button.dataset.adminMediaStatus));
     });
     elements.adminList?.addEventListener('click', event => {
+      const preview = event.target.closest('[data-admin-media-preview]');
+      if (preview) {
+        openAdminFilePreview(preview.dataset.adminMediaPreview, preview);
+        return;
+      }
       const button = event.target.closest('[data-admin-media-action][data-admin-media-id]');
       if (!button) return;
       const { adminMediaAction: action, adminMediaId: id } = button.dataset;
@@ -1227,6 +1625,8 @@
       window.setTimeout(() => refreshAccess(), 120);
     });
     document.addEventListener('keydown', event => {
+      const viewer = document.getElementById('mediaFilePreview');
+      if (viewer && !viewer.hidden) return;
       if (elements.panel.hidden) return;
       if (event.key === 'Escape') {
         closePanel();
@@ -1245,6 +1645,36 @@
         first?.focus();
       }
     });
+
+    document.addEventListener('keydown', event => {
+      const viewer = document.getElementById('mediaFilePreview');
+      if (!viewer || viewer.hidden) return;
+      if (event.target.closest?.('[data-media-preview-resizer]')) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (state.previewExpanded) setAdminPreviewExpanded(false);
+        else closeFilePreview();
+        return;
+      }
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        moveFilePreview(event.key === 'ArrowLeft' ? -1 : 1);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = [...viewer.querySelectorAll('button:not([hidden]):not(:disabled),a[href]')];
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    }, true);
   }
 
   function start() {

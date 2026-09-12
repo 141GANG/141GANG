@@ -1,10 +1,10 @@
 (() => {
-  const FIGMA_UI_BUILD = '8.4-media-auth-submit';
+const FIGMA_UI_BUILD = '8.7-telegram-preview';
   const assets = [
     ['style','figmaMainFinalStyles','./assets/css/public/figma-main-final.css?v=2.1-services'],
     ['style','adminFigmaFinalStyles','./assets/css/public/admin-figma-final.css?v=1.0'],
     ['style','proposalWindowsFigmaStyles','./assets/css/public/proposal-windows-figma.css?v=4.8'],
-    ['style','proposalMediaFigmaExactStyles','./assets/css/public/proposal-media-figma-exact.css?v=3.1-preview-slider'],
+    ['style','proposalMediaFigmaExactStyles','./assets/css/public/proposal-media-figma-exact.css?v=3.9-game-frame-scroll'],
     ['style','adminCardIconsStyles','./assets/css/public/admin-card-icons.css?v=1.1'],
     ['style','figmaTypographyFinalStyles','./assets/css/public/figma-typography-final.css?v=4.7'],
     ['style','e2eResponsiveP0Styles','./assets/css/public/e2e-responsive-p0.css?v=1.1-rem'],
@@ -12,7 +12,7 @@
     ['script','proposalWindowsFigmaScript','./assets/js/public/proposal-windows-figma.js?v=3.5-media-preview'],
     ['script','adminCardIconsScriptV2','./assets/js/public/admin-card-icons-v2.js?v=2.0'],
     ['script','catalogLiveRefreshScript','./assets/js/public/catalog-live-refresh.js?v=1.0'],
-    ['script','mediaAuthenticatedSubmitBridge','./assets/js/public/media-authenticated-submit-bridge.js?v=1.0']
+    ['script','mediaAuthenticatedSubmitBridge','./assets/js/public/media-authenticated-submit-bridge.js?v=1.3-fullscreen-preview']
   ];
   assets.forEach(([type,id,src]) => {
     if (document.getElementById(id)) return;

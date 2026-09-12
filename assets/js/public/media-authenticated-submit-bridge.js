@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  if (window.location.protocol === 'file:') return;
+  if (window.location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(window.location.hostname)) return;
 
   const BUCKET = 'stream-submissions';
   const MAX_FILES = 8;
@@ -134,15 +134,18 @@
 
     el.selected.innerHTML = state.files.map(item => {
       const file = item.file;
-      const preview = isVideo(file)
-        ? `<video controls muted playsinline preload="metadata" src="${escapeHtml(item.previewUrl)}"></video>`
+      const video = isVideo(file);
+      const preview = video
+        ? `<video aria-hidden="true" muted playsinline preload="metadata" src="${escapeHtml(item.previewUrl)}"></video>`
         : `<img alt="${escapeHtml(file.name)}" src="${escapeHtml(item.previewUrl)}">`;
       return `
         <article class="media-selected-item" data-auth-media-item="${escapeHtml(item.id)}">
-          <div class="media-selected-preview">${preview}</div>
+          <button class="media-selected-preview media-selected-preview-open" data-media-preview="${escapeHtml(item.id)}" data-media-preview-kind="${video ? 'video' : 'image'}" data-media-preview-name="${escapeHtml(file.name)}" data-media-preview-size="${Number(file.size) || 0}" data-media-preview-url="${escapeHtml(item.previewUrl)}" type="button" aria-label="Открыть ${video ? 'видео' : 'изображение'} «${escapeHtml(file.name)}» целиком">
+            ${preview}
+          </button>
           <div class="media-selected-copy">
             <strong title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</strong>
-            <small>${isVideo(file) ? 'Видео' : 'Фото'} · ${escapeHtml(formatBytes(file.size))}</small>
+            <small>${video ? 'Видео' : 'Фото'} · ${escapeHtml(formatBytes(file.size))}</small>
           </div>
           <div class="media-selected-actions">
             <button data-auth-media-replace="${escapeHtml(item.id)}" type="button">Заменить</button>

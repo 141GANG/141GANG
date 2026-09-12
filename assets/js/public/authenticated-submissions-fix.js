@@ -90,7 +90,8 @@
   }
 
   function shouldOverride() {
-    return state.accessReady && !state.isAdmin && window.location.protocol !== 'file:';
+    const localPreview = window.location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    return state.accessReady && !state.isAdmin && !localPreview;
   }
 
   function parseSteamAppId(value) {
@@ -306,12 +307,15 @@
     if (!selected) return;
     selected.innerHTML = state.mediaFiles.map(item => {
       const file = item.file;
-      const preview = mediaIsVideo(file)
-        ? `<video controls muted playsinline preload="metadata" src="${escapeHtml(item.previewUrl)}"></video>`
+      const video = mediaIsVideo(file);
+      const preview = video
+        ? `<video aria-hidden="true" muted playsinline preload="metadata" src="${escapeHtml(item.previewUrl)}"></video>`
         : `<img alt="${escapeHtml(file.name)}" src="${escapeHtml(item.previewUrl)}">`;
       return `<article class="media-selected-item">
-        <div class="media-selected-preview">${preview}</div>
-        <div class="media-selected-copy"><strong title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</strong><small>${mediaIsVideo(file) ? 'Видео' : 'Фото'} · ${escapeHtml(formatBytes(file.size))}</small></div>
+        <button class="media-selected-preview media-selected-preview-open" data-media-preview="${escapeHtml(item.id)}" data-media-preview-kind="${video ? 'video' : 'image'}" data-media-preview-name="${escapeHtml(file.name)}" data-media-preview-size="${Number(file.size) || 0}" data-media-preview-url="${escapeHtml(item.previewUrl)}" type="button" aria-label="Открыть ${video ? 'видео' : 'изображение'} «${escapeHtml(file.name)}» целиком">
+          ${preview}
+        </button>
+        <div class="media-selected-copy"><strong title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</strong><small>${video ? 'Видео' : 'Фото'} · ${escapeHtml(formatBytes(file.size))}</small></div>
         <div class="media-selected-actions"><button data-media-fix-replace="${escapeHtml(item.id)}" type="button">Заменить</button><button class="danger" data-media-fix-remove="${escapeHtml(item.id)}" type="button">Удалить</button></div>
       </article>`;
     }).join('');
