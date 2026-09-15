@@ -1,15 +1,16 @@
 (() => {
-const FIGMA_UI_BUILD = '8.7-telegram-preview';
+const FIGMA_UI_BUILD = '9.4-upload-media-mosaic';
   const assets = [
-    ['style','figmaMainFinalStyles','./assets/css/public/figma-main-final.css?v=2.1-services'],
+    ['style','figmaMainFinalStyles','./assets/css/public/figma-main-final.css?v=2.2-fast-game-modal-close'],
     ['style','adminFigmaFinalStyles','./assets/css/public/admin-figma-final.css?v=1.0'],
     ['style','proposalWindowsFigmaStyles','./assets/css/public/proposal-windows-figma.css?v=4.8'],
-    ['style','proposalMediaFigmaExactStyles','./assets/css/public/proposal-media-figma-exact.css?v=3.9-game-frame-scroll'],
+    ['style','proposalMediaFigmaExactStyles','./assets/css/public/proposal-media-figma-exact.css?v=4.1-upload-preview-layout'],
+    ['style','proposalMediaUploadV2Styles','./assets/css/public/proposal-media-upload-v2.css?v=1.6-upload-media-mosaic'],
     ['style','adminCardIconsStyles','./assets/css/public/admin-card-icons.css?v=1.1'],
     ['style','figmaTypographyFinalStyles','./assets/css/public/figma-typography-final.css?v=4.7'],
     ['style','e2eResponsiveP0Styles','./assets/css/public/e2e-responsive-p0.css?v=1.1-rem'],
     ['style','gameCommentManagementStyles','./assets/css/public/game-comment-management.css?v=1.0'],
-    ['script','proposalWindowsFigmaScript','./assets/js/public/proposal-windows-figma.js?v=3.5-media-preview'],
+    ['script','proposalWindowsFigmaScript','./assets/js/public/proposal-windows-figma.js?v=3.6-upload-preview-layout'],
     ['script','adminCardIconsScriptV2','./assets/js/public/admin-card-icons-v2.js?v=2.0'],
     ['script','catalogLiveRefreshScript','./assets/js/public/catalog-live-refresh.js?v=1.0'],
     ['script','mediaAuthenticatedSubmitBridge','./assets/js/public/media-authenticated-submit-bridge.js?v=1.3-fullscreen-preview']
@@ -130,7 +131,8 @@ const FIGMA_UI_BUILD = '8.7-telegram-preview';
     scheduleSync();
   }
 
-  setupMediaPreviewSlider();
+  // The selected files now use the same compact mosaic as the management
+  // preview. The old horizontal range is intentionally not mounted.
 
   // Library filters reuse the exact Sort dropdown component. Removing the
   // generic filter-btn/catalog-filter-menu hooks also prevents late catalog

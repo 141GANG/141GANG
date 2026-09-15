@@ -53,6 +53,7 @@
     session: null,
     isAdmin: false,
     selectedFiles: [],
+    selectedMosaicExpanded: false,
     replacingId: null,
     currentTab: 'upload',
     published: [],
@@ -609,6 +610,7 @@
       existingKeys.add(key);
     });
     elements.fileInput.value = '';
+    state.selectedMosaicExpanded = false;
     if (!elements.title.value.trim() && state.selectedFiles[0]?.file?.name) {
       elements.title.value = state.selectedFiles[0].file.name.replace(/\.[^.]+$/, '').slice(0, 120);
     }
@@ -644,6 +646,7 @@
     if (index < 0) return;
     URL.revokeObjectURL(state.selectedFiles[index].previewUrl);
     state.selectedFiles.splice(index, 1);
+    if (state.selectedFiles.length <= 4) state.selectedMosaicExpanded = false;
     updateSelectedFiles();
   }
 
@@ -651,6 +654,7 @@
     closeFilePreview({ restoreFocus: false });
     state.selectedFiles.forEach(item => URL.revokeObjectURL(item.previewUrl));
     state.selectedFiles = [];
+    state.selectedMosaicExpanded = false;
     state.replacingId = null;
     elements.fileInput.value = '';
     updateSelectedFiles();
@@ -669,17 +673,25 @@
         : `${count} ${count === 1 ? 'файл готов' : count < 5 ? 'файла готовы' : 'файлов готовы'} к отправке.`;
 
     if (!count) {
+      elements.selected.className = 'media-selected';
+      elements.selected.removeAttribute('data-selected-count');
       elements.selected.innerHTML = '';
       return;
     }
 
-    elements.selected.innerHTML = state.selectedFiles.map(selected => {
+    const layoutClass = count === 1 ? 'is-single' : count === 2 ? 'is-double' : 'is-grid';
+    const isCollapsedOverflow = count > 4 && !state.selectedMosaicExpanded;
+    elements.selected.className = `media-selected ${layoutClass}${state.selectedMosaicExpanded ? ' is-expanded' : ''}`;
+    elements.selected.dataset.selectedCount = String(count);
+
+    const fileTiles = state.selectedFiles.map((selected, index) => {
       const file = selected.file;
+      const hidden = isCollapsedOverflow && index >= 3 ? ' hidden' : '';
       const preview = isVideo(file)
         ? `<video aria-hidden="true" muted playsinline preload="metadata" src="${escapeHtml(selected.previewUrl)}"></video>`
         : `<img alt="${escapeHtml(file.name)}" src="${escapeHtml(selected.previewUrl)}">`;
       return `
-        <article class="media-selected-item">
+        <article class="media-selected-item"${hidden}>
           <button class="media-selected-preview media-selected-preview-open" data-media-preview="${escapeHtml(selected.id)}" data-media-preview-kind="${isVideo(file) ? 'video' : 'image'}" data-media-preview-name="${escapeHtml(file.name)}" data-media-preview-size="${Number(file.size) || 0}" data-media-preview-url="${escapeHtml(selected.previewUrl)}" type="button" aria-label="Открыть ${isVideo(file) ? 'видео' : 'изображение'} «${escapeHtml(file.name)}» целиком">
             ${preview}
           </button>
@@ -689,11 +701,23 @@
           </div>
           <div class="media-selected-actions">
             <button data-media-replace="${escapeHtml(selected.id)}" type="button">Заменить</button>
-            <button class="danger" data-media-remove="${escapeHtml(selected.id)}" type="button">Удалить</button>
+            <button class="danger" data-media-remove="${escapeHtml(selected.id)}" type="button" aria-label="Удалить файл «${escapeHtml(file.name)}»">Удалить</button>
           </div>
         </article>
       `;
     }).join('');
+
+    const emptyTile = count === 3
+      ? '<div class="media-selected-empty" aria-hidden="true"></div>'
+      : '';
+    const moreTile = isCollapsedOverflow
+      ? `<button class="media-selected-more" data-media-show-all type="button" aria-label="Показать остальные ${count - 3} ${count - 3 === 1 ? 'файл' : 'файла'}"><span>+${count - 3}</span><small>Показать все</small></button>`
+      : '';
+    const collapseButton = state.selectedMosaicExpanded && count > 4
+      ? '<button class="media-selected-collapse" data-media-collapse type="button">Свернуть подборку</button>'
+      : '';
+
+    elements.selected.innerHTML = `${fileTiles}${emptyTile}${moreTile}${collapseButton}`;
   }
 
   function ensureFilePreview() {
@@ -1575,6 +1599,20 @@
       elements.fileInput.click();
     });
     elements.selected.addEventListener('click', event => {
+      const showAllButton = event.target.closest('[data-media-show-all]');
+      if (showAllButton) {
+        state.selectedMosaicExpanded = true;
+        updateSelectedFiles();
+        elements.selected.querySelector('.media-selected-item:nth-child(4) .media-selected-preview')?.focus();
+        return;
+      }
+      const collapseButton = event.target.closest('[data-media-collapse]');
+      if (collapseButton) {
+        state.selectedMosaicExpanded = false;
+        updateSelectedFiles();
+        elements.selected.querySelector('[data-media-show-all]')?.focus();
+        return;
+      }
       const removeButton = event.target.closest('[data-media-remove]');
       if (removeButton) {
         removeFile(removeButton.dataset.mediaRemove);

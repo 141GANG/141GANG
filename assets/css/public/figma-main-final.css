@@ -141,8 +141,7 @@ body > footer {
 }
 
 @media (min-width: 721px) {
-  .game-modal .modal-panel,
-  .game-modal.is-open .modal-panel {
+  .game-modal .modal-panel {
     position: absolute !important;
     top: var(--game-modal-top, 20rem) !important;
     left: 50% !important;
@@ -155,9 +154,14 @@ body > footer {
     overflow-y: auto !important;
     overscroll-behavior: contain;
     scrollbar-width: none;
-    opacity: 1 !important;
+    opacity: 0 !important;
     transform: translateX(-50%) translateY(0) scale(var(--game-modal-scale, 1)) !important;
     transform-origin: top center !important;
+    transition: opacity .16s ease-out !important;
+  }
+
+  .game-modal.is-open .modal-panel {
+    opacity: 1 !important;
   }
 
   .game-modal .modal-content {

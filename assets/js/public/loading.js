@@ -169,7 +169,7 @@
     const stylesheet = document.createElement('link');
     stylesheet.id = stylesheetId;
     stylesheet.rel = 'stylesheet';
-    stylesheet.href = './assets/css/public/proposal-media-figma-exact.css?v=3.9-game-frame-scroll';
+    stylesheet.href = './assets/css/public/proposal-media-figma-exact.css?v=4.1-upload-preview-layout';
     document.head.appendChild(stylesheet);
   }
 

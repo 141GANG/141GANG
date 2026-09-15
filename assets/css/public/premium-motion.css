@@ -1,0 +1,217 @@
+/*
+ * 141GANG premium motion system
+ * Quiet entrances, one shared rhythm, no decorative motion overload.
+ */
+
+:root {
+  --motion-ease-out: cubic-bezier(.16, 1, .3, 1);
+  --motion-ease-soft: cubic-bezier(.22, .72, .18, 1);
+  --motion-fast: 220ms;
+  --motion-medium: 460ms;
+  --motion-slow: 720ms;
+}
+
+/* Page introduction. The loader covers these initial states, preventing flash. */
+html.premium-motion-pending .site-header {
+  opacity: 0 !important;
+  transform: translate3d(0, -10px, 0) !important;
+}
+
+html.premium-motion-pending .hero h1 > span,
+html.premium-motion-pending .hero-intro > p,
+html.premium-motion-pending .hero-intro > .content-menu-toggle {
+  opacity: 0 !important;
+  transform: translate3d(0, 18px, 0) !important;
+}
+
+html.premium-motion-enabled .site-header {
+  transition:
+    opacity 560ms var(--motion-ease-soft),
+    transform 680ms var(--motion-ease-out) !important;
+}
+
+html.premium-motion-enabled .hero h1 > span,
+html.premium-motion-enabled .hero-intro > p,
+html.premium-motion-enabled .hero-intro > .content-menu-toggle {
+  transition:
+    opacity 620ms var(--motion-ease-soft),
+    transform 780ms var(--motion-ease-out) !important;
+}
+
+html.premium-motion-ready .site-header,
+html.premium-motion-ready .hero h1 > span,
+html.premium-motion-ready .hero-intro > p,
+html.premium-motion-ready .hero-intro > .content-menu-toggle {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+html.premium-motion-ready .hero h1 > span:first-child { transition-delay: 70ms !important; }
+html.premium-motion-ready .hero h1 > span:nth-child(2) { transition-delay: 145ms !important; }
+html.premium-motion-ready .hero-intro > p { transition-delay: 225ms !important; }
+html.premium-motion-ready .hero-intro > .content-menu-toggle { transition-delay: 300ms !important; }
+html.premium-motion-ready .hero-intro > .content-menu-toggle:hover,
+html.premium-motion-ready .hero-intro > .content-menu-toggle:focus-visible {
+  transform: translateY(-3rem) !important;
+}
+
+/* One-time viewport reveals. Classes are removed after the entrance so hover
+   transforms keep working exactly as designed. */
+html.premium-motion-enabled .premium-reveal {
+  opacity: 0 !important;
+  transform: translate3d(0, 14px, 0) !important;
+  transition:
+    opacity 540ms var(--motion-ease-soft),
+    transform 680ms var(--motion-ease-out) !important;
+  transition-delay: var(--premium-reveal-delay, 0ms) !important;
+}
+
+html.premium-motion-enabled .premium-reveal.premium-inview {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+html.premium-motion-enabled #catalog .game-card.premium-reveal {
+  animation: none !important;
+}
+
+/* Dropdowns and tab changes are intentionally quicker than full windows. */
+html.premium-motion-enabled :is(.nav-dropdown, .catalog-dropdown):not([hidden]) {
+  transform-origin: top center;
+  animation: premiumPopoverIn 280ms var(--motion-ease-out) both;
+}
+
+html.premium-motion-enabled :is(
+  .media-view,
+  .suggestions-view,
+  .auction-tab-panel,
+  .admin-view
+):not([hidden]) {
+  animation: premiumViewIn 340ms var(--motion-ease-out) both !important;
+}
+
+@keyframes premiumPopoverIn {
+  from { opacity: 0; transform: translate3d(0, -5px, 0) scale(.985); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes premiumViewIn {
+  from { opacity: 0; transform: translate3d(0, 7px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* Shared window choreography: backdrop first, surface second, content last. */
+html.premium-motion-enabled .premium-window .premium-window-backdrop {
+  opacity: 0 !important;
+  transition: opacity 320ms ease !important;
+}
+
+html.premium-motion-enabled .premium-window.premium-open .premium-window-backdrop {
+  opacity: 1 !important;
+}
+
+html.premium-motion-enabled .premium-window .premium-window-surface {
+  opacity: 0 !important;
+  transform: translate3d(0, 13px, 0) scale(.99) !important;
+  transform-origin: center center;
+  transition:
+    opacity 400ms var(--motion-ease-soft),
+    transform 540ms var(--motion-ease-out) !important;
+}
+
+html.premium-motion-enabled .premium-window.premium-window-side .premium-window-surface {
+  transform: translate3d(18px, 0, 0) scale(.994) !important;
+}
+
+html.premium-motion-enabled .premium-window.premium-open .premium-window-surface {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+html.premium-motion-enabled .premium-window .premium-window-piece {
+  opacity: 0;
+  transform: translate3d(0, 7px, 0);
+}
+
+html.premium-motion-enabled .premium-window.premium-open .premium-window-piece {
+  animation: premiumWindowPieceIn 440ms var(--motion-ease-out) both;
+  animation-delay: calc(115ms + var(--premium-piece-index, 0) * 42ms);
+}
+
+@keyframes premiumWindowPieceIn {
+  from { opacity: 0; transform: translate3d(0, 7px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* The media proposal uses a translated positioning shell. Animate its safe
+   inner workspace, never the positioning transform of .media-dialog. */
+html.premium-motion-enabled .media-panel.premium-window .media-dialog {
+  opacity: 1 !important;
+}
+
+/* The full-size media viewer keeps its Telegram-like geometry intact. */
+html.premium-motion-enabled .media-file-preview.premium-window .premium-window-surface {
+  transform: scale(.985) !important;
+}
+
+html.premium-motion-enabled .media-file-preview.premium-window.premium-open .premium-window-surface {
+  transform: scale(1) !important;
+}
+
+/* Existing interactions keep their personality but share the same easing. */
+html.premium-motion-enabled :is(
+  .content-menu-toggle,
+  .content-menu-card,
+  #catalog .game-card,
+  .nav-link,
+  .catalog-menu-toggle,
+  .filter-btn,
+  .site-auth-provider,
+  .modal-close,
+  .gang-close,
+  .auction-close,
+  .tier-close,
+  .suggestions-close,
+  .media-close,
+  .admin-portal-close
+) {
+  transition-timing-function: var(--motion-ease-out) !important;
+}
+
+@media (max-width: 720px) {
+  html.premium-motion-pending .hero h1 > span,
+  html.premium-motion-pending .hero-intro > p,
+  html.premium-motion-pending .hero-intro > .content-menu-toggle {
+    transform: translate3d(0, 12px, 0) !important;
+  }
+
+  html.premium-motion-enabled .premium-window .premium-window-surface,
+  html.premium-motion-enabled .premium-window.premium-window-side .premium-window-surface {
+    transform: translate3d(0, 9px, 0) scale(.995) !important;
+  }
+
+  html.premium-motion-enabled .premium-window.premium-open .premium-window-surface {
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.premium-motion-pending .site-header,
+  html.premium-motion-pending .hero h1 > span,
+  html.premium-motion-pending .hero-intro > p,
+  html.premium-motion-pending .hero-intro > .content-menu-toggle,
+  html.premium-motion-enabled .premium-reveal,
+  html.premium-motion-enabled .premium-window .premium-window-backdrop,
+  html.premium-motion-enabled .premium-window .premium-window-surface,
+  html.premium-motion-enabled .premium-window .premium-window-piece {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html.premium-motion-enabled :is(.nav-dropdown, .catalog-dropdown):not([hidden]),
+  html.premium-motion-enabled :is(.media-view, .suggestions-view, .auction-tab-panel, .admin-view):not([hidden]) {
+    animation: none !important;
+  }
+}

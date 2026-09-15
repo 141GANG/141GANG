@@ -142,6 +142,61 @@
     new MutationObserver(keepMediaSubmitLabel).observe(mediaSubmitButton, { childList: true });
   }
 
+  function setupMediaUploadLayout() {
+    if (!mediaForm || mediaForm.querySelector('.figma-upload-layout')) return;
+
+    const title = mediaForm.querySelector('.figma-proposal-title');
+    const fileLabel = mediaForm.querySelector('.figma-file-label');
+    const category = mediaForm.querySelector('.figma-media-category-field');
+    const selected = document.getElementById('mediaSelected');
+    const slider = mediaForm.querySelector('.figma-media-preview-slider');
+    const fields = mediaForm.querySelector('.media-fields');
+    const submit = mediaForm.querySelector('.media-submit-row');
+    if (!title || !fileLabel || !dropzone || !category || !selected || !fields || !submit) return;
+
+    const layout = document.createElement('div');
+    layout.className = 'figma-upload-layout';
+    const mediaPane = document.createElement('section');
+    mediaPane.className = 'figma-upload-media-pane';
+    mediaPane.setAttribute('aria-label', 'Файлы для отправки');
+    const detailsPane = document.createElement('aside');
+    detailsPane.className = 'figma-upload-details-pane';
+    detailsPane.setAttribute('aria-label', 'Параметры отправки');
+
+    const author = document.createElement('div');
+    author.className = 'figma-upload-author';
+    author.setAttribute('aria-label', 'Предполагаемый автор');
+    author.innerHTML = '<strong data-figma-upload-author>Автор не указан</strong>';
+
+    const authButton = document.getElementById('siteAuthOpen');
+    const authorName = author.querySelector('[data-figma-upload-author]');
+    const syncAuthor = () => {
+      const ariaLabel = String(authButton?.getAttribute('aria-label') || '');
+      const profileName = ariaLabel.match(/:\s*(.+)$/)?.[1]?.trim();
+      const buttonText = String(authButton?.textContent || '').trim();
+      authorName.textContent = profileName || buttonText || 'Автор не указан';
+    };
+    syncAuthor();
+    if (authButton) {
+      new MutationObserver(syncAuthor).observe(authButton, {
+        attributes: true,
+        attributeFilter: ['aria-label'],
+        childList: true,
+        characterData: true,
+        subtree: true
+      });
+    }
+
+    mediaPane.append(title, fileLabel, dropzone, selected);
+    if (slider) mediaPane.append(slider);
+    detailsPane.append(author, category, fields, submit);
+    layout.append(mediaPane, detailsPane);
+    mediaForm.querySelector('.media-form-copy')?.setAttribute('hidden', '');
+    mediaForm.append(layout);
+  }
+
+  setupMediaUploadLayout();
+
   function fillMediaTitleFromFile() {
     if (!mediaTitleInput || mediaTitleInput.value.trim()) return;
     const file = mediaInput?.files?.[0];

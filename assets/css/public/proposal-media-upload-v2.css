@@ -1,0 +1,396 @@
+/* Final geometry for the two-pane photo/video submission window. */
+@media (min-width: 901px) {
+  .media-panel.is-figma-proposal .media-dialog,
+  .media-panel.is-figma-proposal:has(.media-selected:not([hidden])) .media-dialog,
+  .media-panel.is-figma-proposal:not(:has(.media-selected:not([hidden]))) .media-dialog {
+    top: 50% !important;
+    left: 50% !important;
+    width: min(1040px, calc(100vw - 80px)) !important;
+    height: min(680px, calc(100dvh - 80px)) !important;
+    min-height: 0 !important;
+    max-width: 1040px !important;
+    max-height: calc(100dvh - 80px) !important;
+    box-sizing: border-box !important;
+    padding: 16px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .media-panel.is-figma-proposal .media-dialog::before,
+  .media-panel.is-figma-proposal .media-dialog::after {
+    display: none !important;
+  }
+
+  .media-panel.is-figma-proposal .figma-upload-layout {
+    gap: 14px !important;
+  }
+
+  .media-panel.is-figma-proposal .figma-upload-media-pane,
+  .media-panel.is-figma-proposal .figma-upload-details-pane {
+    box-sizing: border-box !important;
+    height: 100% !important;
+    padding: 14px !important;
+    border: 1px solid rgba(240, 240, 240, .07) !important;
+    border-radius: 12px !important;
+    background:
+      linear-gradient(145deg, rgba(239, 61, 63, .035), transparent 50%),
+      #121212 !important;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, .18) !important;
+  }
+
+  .media-panel.is-figma-proposal .figma-upload-details-pane {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .media-panel.is-figma-proposal .figma-upload-details-pane .media-fields {
+    min-height: 0 !important;
+    flex: 1 1 0 !important;
+    display: flex !important;
+  }
+
+  .media-panel.is-figma-proposal .figma-upload-details-pane .media-fields > label:last-child {
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+  }
+
+  .media-panel.is-figma-proposal .figma-upload-details-pane #mediaSubmissionComment {
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+  }
+
+  .media-panel.is-figma-proposal .figma-upload-details-pane .media-submit-row {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+  }
+}
+
+/* Selected files mirror the 2x2 management mosaic. The concept defines the
+   composition; colors, type and controls stay native to the 141GANG UI. */
+.media-panel.is-figma-proposal .figma-upload-media-pane .media-selected:not([hidden]) {
+  position: relative !important;
+  isolation: isolate;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 220px !important;
+  display: grid !important;
+  align-items: stretch !important;
+  align-content: stretch !important;
+  gap: 2px !important;
+  overflow: hidden !important;
+  padding: 2px !important;
+  border: 1px solid rgba(240, 240, 240, .09) !important;
+  border-radius: 12px !important;
+  background: #080808 !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .012) !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(239, 61, 63, .55) rgba(255, 255, 255, .04);
+}
+
+.media-panel.is-figma-proposal .media-selected.is-single {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+}
+
+.media-panel.is-figma-proposal .media-selected.is-double {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+}
+
+.media-panel.is-figma-proposal .media-selected.is-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.media-panel.is-figma-proposal .figma-upload-media-pane .media-selected.is-expanded:not([hidden]) {
+  align-content: start !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: none !important;
+  grid-auto-rows: minmax(142px, 1fr) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding-bottom: 44px !important;
+}
+
+.media-panel.is-figma-proposal .media-selected-item,
+.media-panel.is-figma-proposal .media-selected-item:only-child {
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: #111 !important;
+  box-shadow: none !important;
+}
+
+.media-panel.is-figma-proposal .media-selected-item[hidden] {
+  display: none !important;
+}
+
+.media-panel.is-figma-proposal .media-selected-preview,
+.media-panel.is-figma-proposal button.media-selected-preview-open {
+  position: absolute !important;
+  inset: 0 0 36px !important;
+  z-index: 0;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: inherit !important;
+  background: #111 !important;
+}
+
+.media-panel.is-figma-proposal .media-selected-preview::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, .88) 100%);
+  pointer-events: none;
+  transition: background .24s ease;
+}
+
+.media-panel.is-figma-proposal .media-selected-item:hover .media-selected-preview::after,
+.media-panel.is-figma-proposal .media-selected-item:focus-within .media-selected-preview::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, .08), rgba(0, 0, 0, .92) 100%);
+}
+
+.media-panel.is-figma-proposal .media-selected-preview img,
+.media-panel.is-figma-proposal .media-selected-preview video {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  transform: none !important;
+  transition: transform .55s cubic-bezier(.22, 1, .36, 1), filter .3s ease !important;
+}
+
+.media-panel.is-figma-proposal .media-selected.is-single .media-selected-preview img,
+.media-panel.is-figma-proposal .media-selected.is-single .media-selected-preview video {
+  object-fit: contain !important;
+}
+
+.media-panel.is-figma-proposal .media-selected-item:hover .media-selected-preview img,
+.media-panel.is-figma-proposal .media-selected-item:hover .media-selected-preview video {
+  transform: scale(1.018) !important;
+  filter: brightness(.92);
+}
+
+.media-panel.is-figma-proposal .media-selected-copy {
+  position: absolute !important;
+  z-index: 2;
+  right: 10px;
+  bottom: 43px;
+  left: 12px;
+  min-width: 0;
+  display: flex !important;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  pointer-events: none;
+}
+
+.media-panel.is-figma-proposal .media-selected-copy strong {
+  overflow: hidden;
+  color: #f0f0f0 !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  line-height: 1.25 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .8);
+}
+
+.media-panel.is-figma-proposal .media-selected-copy small {
+  color: rgba(240, 240, 240, .58) !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .9);
+}
+
+.media-panel.is-figma-proposal .media-selected-actions {
+  position: absolute !important;
+  z-index: 3;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 36px;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 38px;
+  align-items: stretch;
+  gap: 2px !important;
+  padding: 0 !important;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .2s ease, transform .25s cubic-bezier(.22, 1, .36, 1);
+}
+
+.media-panel.is-figma-proposal .media-selected-item:hover .media-selected-actions,
+.media-panel.is-figma-proposal .media-selected-item:focus-within .media-selected-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.media-panel.is-figma-proposal .media-selected-actions button {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 10px !important;
+  border: 1px solid rgba(240, 240, 240, .16) !important;
+  border-radius: 0 !important;
+  color: #f0f0f0 !important;
+  background: #1b1b1b !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 11px !important;
+  font-weight: 650 !important;
+}
+
+.media-panel.is-figma-proposal .media-selected-actions button.danger {
+  border-color: rgba(239, 61, 63, .38) !important;
+  color: #ff7476 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  font-size: 0 !important;
+}
+
+.media-panel.is-figma-proposal .media-selected-actions button.danger::after {
+  content: '×';
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.media-panel.is-figma-proposal .media-selected-empty,
+.media-panel.is-figma-proposal .media-selected-more {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+}
+
+.media-panel.is-figma-proposal .media-selected-empty {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(239, 61, 63, .045), transparent 52%),
+    #0d0d0d;
+}
+
+.media-panel.is-figma-proposal .media-selected-more {
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  color: #f0f0f0;
+  background:
+    linear-gradient(145deg, rgba(239, 61, 63, .13), transparent 60%),
+    #151515;
+  cursor: pointer;
+  transition: background .25s ease, transform .25s cubic-bezier(.22, 1, .36, 1);
+}
+
+.media-panel.is-figma-proposal .media-selected-more:hover,
+.media-panel.is-figma-proposal .media-selected-more:focus-visible {
+  background:
+    linear-gradient(145deg, rgba(239, 61, 63, .22), transparent 64%),
+    #191919;
+  transform: translateY(-1px);
+}
+
+.media-panel.is-figma-proposal .media-selected-more span {
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
+  font-size: clamp(30px, 3vw, 48px);
+  font-weight: 900;
+  line-height: .9;
+}
+
+.media-panel.is-figma-proposal .media-selected-more small {
+  color: rgba(240, 240, 240, .5);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.media-panel.is-figma-proposal .media-selected-collapse {
+  position: absolute;
+  z-index: 5;
+  right: 8px;
+  bottom: 7px;
+  left: 8px;
+  min-height: 36px;
+  border: 1px solid rgba(240, 240, 240, .1);
+  border-radius: 7px;
+  color: rgba(240, 240, 240, .72);
+  background: #151515;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.media-panel.is-figma-proposal .figma-media-preview-slider {
+  display: none !important;
+}
+
+@media (hover: none), (max-width: 900px) {
+  .media-panel.is-figma-proposal .media-selected-actions {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .media-panel.is-figma-proposal .figma-upload-media-pane .media-selected:not([hidden]) {
+    min-height: 250px !important;
+    max-height: 42dvh !important;
+    flex: 0 0 min(42dvh, 360px) !important;
+    margin: 8px 0 !important;
+  }
+
+  .media-panel.is-figma-proposal .media-selected-actions {
+    right: 0;
+    bottom: 0;
+    left: 0;
+    gap: 4px !important;
+  }
+
+  .media-panel.is-figma-proposal .media-selected-actions button {
+    height: 36px !important;
+    min-height: 36px !important;
+    padding-inline: 8px !important;
+    font-size: 10px !important;
+  }
+
+  .media-panel.is-figma-proposal .media-selected-copy {
+    right: 8px;
+    bottom: 43px;
+    left: 9px;
+  }
+
+  .media-panel.is-figma-proposal .media-selected-copy strong {
+    font-size: 11px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-panel.is-figma-proposal .media-selected-preview img,
+  .media-panel.is-figma-proposal .media-selected-preview video,
+  .media-panel.is-figma-proposal .media-selected-actions,
+  .media-panel.is-figma-proposal .media-selected-more {
+    transition: none !important;
+  }
+}

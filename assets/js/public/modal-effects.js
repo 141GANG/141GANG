@@ -343,7 +343,7 @@ function closeGameModal() {
   window.setTimeout(() => {
     elements.modal.hidden = true;
     if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
-  }, 300);
+  }, 180);
 }
 
 let revealObserver = null;
