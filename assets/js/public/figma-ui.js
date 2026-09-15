@@ -1,15 +1,16 @@
 (() => {
-const FIGMA_UI_BUILD = '9.4-upload-media-mosaic';
+  const FIGMA_UI_BUILD = '9.8-admin-login-fit';
   const assets = [
-    ['style','figmaMainFinalStyles','./assets/css/public/figma-main-final.css?v=2.2-fast-game-modal-close'],
+    ['style','figmaMainFinalStyles','./assets/css/public/figma-main-final.css?v=2.3-management-sync'],
     ['style','adminFigmaFinalStyles','./assets/css/public/admin-figma-final.css?v=1.0'],
     ['style','proposalWindowsFigmaStyles','./assets/css/public/proposal-windows-figma.css?v=4.8'],
     ['style','proposalMediaFigmaExactStyles','./assets/css/public/proposal-media-figma-exact.css?v=4.1-upload-preview-layout'],
     ['style','proposalMediaUploadV2Styles','./assets/css/public/proposal-media-upload-v2.css?v=1.6-upload-media-mosaic'],
     ['style','adminCardIconsStyles','./assets/css/public/admin-card-icons.css?v=1.1'],
     ['style','figmaTypographyFinalStyles','./assets/css/public/figma-typography-final.css?v=4.7'],
-    ['style','e2eResponsiveP0Styles','./assets/css/public/e2e-responsive-p0.css?v=1.1-rem'],
+    ['style','e2eResponsiveP0Styles','./assets/css/public/e2e-responsive-p0.css?v=1.2-nav-center'],
     ['style','gameCommentManagementStyles','./assets/css/public/game-comment-management.css?v=1.0'],
+    ['style','adminLoginFinalStyles','./assets/css/public/admin-login-final.css?v=1.2-fit-no-border'],
     ['script','proposalWindowsFigmaScript','./assets/js/public/proposal-windows-figma.js?v=3.6-upload-preview-layout'],
     ['script','adminCardIconsScriptV2','./assets/js/public/admin-card-icons-v2.js?v=2.0'],
     ['script','catalogLiveRefreshScript','./assets/js/public/catalog-live-refresh.js?v=1.0'],
@@ -131,8 +132,7 @@ const FIGMA_UI_BUILD = '9.4-upload-media-mosaic';
     scheduleSync();
   }
 
-  // The selected files now use the same compact mosaic as the management
-  // preview. The old horizontal range is intentionally not mounted.
+  setupMediaPreviewSlider();
 
   // Library filters reuse the exact Sort dropdown component. Removing the
   // generic filter-btn/catalog-filter-menu hooks also prevents late catalog
@@ -312,9 +312,10 @@ const FIGMA_UI_BUILD = '9.4-upload-media-mosaic';
     }
     document.body.classList.toggle('is-site-admin', isAdmin);
     if (managementButton) {
+      managementButton.hidden = !isAdmin;
       managementButton.classList.toggle('is-admin', isAdmin);
-      managementButton.setAttribute('aria-label', isAdmin ? 'Открыть управление сайтом' : 'Войти в управление сайтом');
-      managementButton.title = isAdmin ? 'Управление сайтом' : 'Вход администратора';
+      managementButton.setAttribute('aria-label', 'Открыть управление сайтом');
+      managementButton.title = 'Управление сайтом';
     }
   }
 

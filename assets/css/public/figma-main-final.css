@@ -141,7 +141,8 @@ body > footer {
 }
 
 @media (min-width: 721px) {
-  .game-modal .modal-panel {
+  .game-modal .modal-panel,
+  .game-modal.is-open .modal-panel {
     position: absolute !important;
     top: var(--game-modal-top, 20rem) !important;
     left: 50% !important;
@@ -154,14 +155,9 @@ body > footer {
     overflow-y: auto !important;
     overscroll-behavior: contain;
     scrollbar-width: none;
-    opacity: 0 !important;
+    opacity: 1 !important;
     transform: translateX(-50%) translateY(0) scale(var(--game-modal-scale, 1)) !important;
     transform-origin: top center !important;
-    transition: opacity .16s ease-out !important;
-  }
-
-  .game-modal.is-open .modal-panel {
-    opacity: 1 !important;
   }
 
   .game-modal .modal-content {
@@ -258,7 +254,7 @@ body > footer {
   }
 }
 
-/* Temporary navigation states: Services is not launched yet; Management is admin-only. */
+/* Muted navigation tone from the Figma header; Management remains admin-only. */
 #servicesToggle,
 #adminPortalOpen {
   opacity: .5 !important;
@@ -272,7 +268,7 @@ body > footer {
 }
 
 #servicesToggle {
-  cursor: default !important;
+  cursor: pointer !important;
 }
 
 /* Proposal content cards — exact hover/touch state. */

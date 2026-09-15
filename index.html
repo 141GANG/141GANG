@@ -15,7 +15,7 @@
 <script defer src="./assets/js/public/smooth-scroll.js?v=3.2"></script>
 <link href="./assets/css/public/fonts.css?v=3.1" rel="stylesheet"/>
 <link href="./assets/css/public/variables.css?v=3.2" rel="stylesheet"/>
-<link href="./assets/css/public/base.css?v=3.0" rel="stylesheet"/><link href="./assets/css/public/header-hero.css" rel="stylesheet"/><link href="./assets/css/public/catalog.css" rel="stylesheet"/><link href="./assets/css/public/modal.css" rel="stylesheet"/><link href="./assets/css/public/gang.css?v=3.2" rel="stylesheet"/><link href="./assets/css/public/auction.css?v=4.4" rel="stylesheet"/><link href="./assets/css/public/auction-pointauc.css?v=5.0" rel="stylesheet"/><link href="./assets/css/public/responsive.css" rel="stylesheet"/><link href="./assets/css/public/admin-portal.css?v=1.1" rel="stylesheet"/><link href="./assets/css/public/suggestions.css?v=3.4-catalog-comments" rel="stylesheet"/><link href="./assets/css/public/media-submissions.css?v=4.1" rel="stylesheet"/><link href="./assets/css/public/figma-refresh.css?v=3.8" rel="stylesheet"/><link href="./assets/css/public/site-auth.css?v=1.0" rel="stylesheet"/><link href="./assets/css/public/figma-redesign.css?v=2.4" rel="stylesheet"/><link href="./assets/css/public/admin-druk-title-final.css?v=1.0" rel="stylesheet"/><script>document.documentElement.classList.add('premium-motion-pending');</script><link href="./assets/css/public/premium-motion.css?v=1.1" id="premiumMotionStyles" rel="stylesheet"/><script defer id="premiumMotionScript" src="./assets/js/public/premium-motion.js?v=1.4-fast-game-modal-close"></script><noscript><style>.premium-motion-pending *{opacity:1!important;filter:none!important;transform:none!important}</style></noscript></head>
+<link href="./assets/css/public/base.css?v=3.0" rel="stylesheet"/><link href="./assets/css/public/header-hero.css" rel="stylesheet"/><link href="./assets/css/public/catalog.css" rel="stylesheet"/><link href="./assets/css/public/modal.css" rel="stylesheet"/><link href="./assets/css/public/gang.css?v=3.2" rel="stylesheet"/><link href="./assets/css/public/auction.css?v=4.4" rel="stylesheet"/><link href="./assets/css/public/auction-pointauc.css?v=5.0" rel="stylesheet"/><link href="./assets/css/public/responsive.css" rel="stylesheet"/><link href="./assets/css/public/admin-portal.css?v=1.1" rel="stylesheet"/><link href="./assets/css/public/suggestions.css?v=3.4-catalog-comments" rel="stylesheet"/><link href="./assets/css/public/media-submissions.css?v=4.1" rel="stylesheet"/><link href="./assets/css/public/figma-refresh.css?v=3.10-services-menu" rel="stylesheet"/><link href="./assets/css/public/site-auth.css?v=1.4-provider-icons" rel="stylesheet"/><link href="./assets/css/public/figma-redesign.css?v=2.4" rel="stylesheet"/><link href="./assets/css/public/admin-druk-title-final.css?v=1.0" rel="stylesheet"/><script>document.documentElement.classList.add('premium-motion-pending');</script><link href="./assets/css/public/premium-motion.css?v=1.1" id="premiumMotionStyles" rel="stylesheet"/><script defer id="premiumMotionScript" src="./assets/js/public/premium-motion.js?v=1.4-fast-game-modal-close"></script><noscript><style>.premium-motion-pending *{opacity:1!important;filter:none!important;transform:none!important}</style></noscript></head>
 <style>body.standalone-view> :not(.site-header):not(.tier-panel):not(.auction-panel):not(.admin-portal):not(.gang-panel):not(.suggestions-panel):not(.suggestion-comments-panel):not(.media-panel):not(.media-file-preview):not(.site-auth-panel){display:none!important}body.standalone-view{min-height:100vh;overflow:auto}body.standalone-view .site-header{position:relative;display:block}body.standalone-view .tier-panel,body.standalone-view .auction-panel,body.standalone-view .admin-portal{position:relative;inset:auto;min-height:100vh}body.standalone-view .tier-panel,body.standalone-view .auction-panel,body.standalone-view .gang-panel,body.standalone-view .suggestions-panel,body.standalone-view .suggestion-comments-panel,body.standalone-view .media-panel,body.standalone-view .site-auth-panel{position:fixed}body.standalone-view .tier-panel[hidden],body.standalone-view .auction-panel[hidden],body.standalone-view .admin-portal[hidden]{display:block!important}</style>
 <body><a class="skip-link" href="#catalog">Перейти к каталогу</a><div aria-label="Загрузка сайта" aria-live="polite" class="site-loader" id="siteLoader" role="status">
 <div class="loader-content">
@@ -40,7 +40,7 @@
 <button aria-controls="auctionPanel" aria-expanded="false" class="auction-trigger" id="auctionOpen" type="button">Аукцион</button>
 </div>
 </div>
-<a aria-label="Открыть локальное управление сайтом" class="nav-link admin-portal-trigger" href="./admin.html" id="adminPortalOpen" title="Локальное управление">Управление</a>
+<a aria-label="Открыть управление сайтом" class="nav-link admin-portal-trigger" href="./admin.html" hidden id="adminPortalOpen" title="Управление сайтом">Управление</a>
 </nav>
 <button aria-controls="siteAuthPanel" aria-expanded="false" class="account-auth-trigger" id="siteAuthOpen" type="button">Войти</button>
 <div class="status connection-status" hidden title="Подключение к каталогу"><span class="status-dot" id="statusDot"></span><span id="statusText">Подключение…</span></div>
@@ -272,10 +272,11 @@
 <button aria-label="Закрыть окно входа" class="site-auth-close" id="siteAuthClose" type="button">×</button>
 <span class="site-auth-kicker">Личный профиль</span>
 <h2 id="siteAuthTitle">Войти на сайт</h2>
-<p class="site-auth-description" id="siteAuthDescription">Выбери удобный аккаунт. Пароль останется у сервиса авторизации.</p>
+<p class="site-auth-description" id="siteAuthDescription">Выбери способ входа. Для администратора используется отдельная защищённая форма.</p>
 <div class="site-auth-providers" id="siteAuthProviders">
-<button class="site-auth-provider is-yandex" data-auth-provider="custom:yandex" type="button"><span aria-hidden="true">Я</span><strong>Войти через Яндекс ID</strong></button>
-<button class="site-auth-provider is-google" data-auth-provider="google" type="button"><span aria-hidden="true">G</span><strong>Войти через Google</strong></button>
+<button class="site-auth-provider is-yandex" data-auth-provider="custom:yandex" type="button"><span aria-hidden="true"><img alt="" src="./assets/images/figma/yandex-icon.png"/></span><strong>Войти через Яндекс ID</strong></button>
+<button class="site-auth-provider is-google" data-auth-provider="google" type="button"><span aria-hidden="true"><img alt="" src="./assets/images/figma/google-icon.png"/></span><strong>Войти через Google</strong></button>
+<a class="site-auth-provider is-admin" href="./admin.html"><span aria-hidden="true"><img alt="" src="./assets/images/figma/cheloveck.png"/></span><strong>Войти как администратор</strong></a>
 </div>
 <div class="site-auth-account" hidden id="siteAuthAccount">
 <img alt="" class="site-auth-avatar" id="siteAuthAvatar"/>
@@ -299,8 +300,8 @@
 </section>
 <section class="panel login-panel" hidden="" id="loginSection">
 <div class="panel-head">
-<h2>Вход владельца</h2>
-<p>Используй email и пароль пользователя из Supabase Auth.</p>
+<h2>Войти на сайт</h2>
+<p>Введи данные администратора, чтобы открыть управление сайтом.</p>
 </div>
 <div class="panel-body">
 <form id="loginForm">
@@ -487,30 +488,7 @@
 </div>
 </div>
 <footer><div class="shell footer-inner"><p class="footer-signature">@archivebtw x @max_vopros</p></div></footer>
-<script src="./assets/js/public/loading.js?v=20260913-upload-preview-layout"></script>
-<script>document.body.classList.add('is-ready');</script>
-<script src="./assets/js/public/supabase-loader.js"></script>
-<script src="./config.js"></script>
-<script src="./assets/js/public/auth-recovery.js?v=3.2"></script>
-<script src="./assets/js/public/site-auth.js?v=1.2"></script>
-<script src="./assets/js/public/state.js?v=4.0"></script>
-<script src="./assets/js/public/ticker.js"></script>
-<script src="./assets/js/public/release-utils.js?v=4.0"></script>
-<script src="./assets/js/public/hero.js?v=3.0"></script>
-<script src="./assets/js/public/catalog.js?v=4.2-player-range"></script>
-<script src="./assets/js/public/modal-effects.js?v=4.7-fast-game-modal-close"></script>
-<script src="./assets/js/public/tier-list.js?v=3.0"></script>
-<script src="./assets/js/public/suggestions.js?v=4.10-catalog-comments"></script>
-<script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script>
-<script async id="twitchPlayerSdk" src="https://player.twitch.tv/js/embed/v1.js"></script>
-<script src="./assets/js/public/gang.js?v=3.3"></script>
-<script src="./assets/js/public/auction.js?v=5.0-pointauc"></script>
-<script src="./assets/js/public/admin-portal.js?v=3.3"></script>
-<script src="./assets/js/public/admin-portal-shell.js?v=4.7-resizable-gallery"></script>
-<script src="./assets/js/public/experience.js?v=3.3"></script>
-<script src="./assets/js/public/app.js?v=4.3-player-range"></script>
-<script src="./assets/js/public/figma-ui.js?v=9.4-upload-media-mosaic"></script>
-<script>
+<script src="./assets/js/public/loading.js?v=20260915-management-sync"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.2"></script><script src="./assets/js/public/state.js?v=4.0"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.0"></script><script src="./assets/js/public/catalog.js?v=4.2-player-range"></script><script src="./assets/js/public/modal-effects.js?v=4.7-fast-game-modal-close"></script><script src="./assets/js/public/tier-list.js?v=3.0"></script><script src="./assets/js/public/suggestions.js?v=4.10-catalog-comments"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script async id="twitchPlayerSdk" src="https://player.twitch.tv/js/embed/v1.js"></script><script src="./assets/js/public/gang.js?v=3.3"></script><script src="./assets/js/public/auction.js?v=5.0-pointauc"></script><script src="./assets/js/public/admin-portal.js?v=3.3"></script><script src="./assets/js/public/admin-portal-shell.js?v=4.8-login-reset"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.3-player-range"></script><script src="./assets/js/public/figma-ui.js?v=9.8-admin-login-fit"></script><script>
 (() => {
   const view = new URLSearchParams(location.search).get('view');
   const targets = {tier: 'tierListPanel', auction: 'auctionPanel', admin: 'adminPortal'};

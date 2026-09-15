@@ -7,7 +7,7 @@
 @media (max-width: 45rem) {
   .nav-center {
     gap: 6rem !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
     overflow-x: visible !important;
   }
 
@@ -32,6 +32,12 @@
   .site-header .nav-link,
   .site-header .nav-menu-toggle {
     gap: 6rem !important;
+    padding-inline: 8rem !important;
+    font-size: 11rem !important;
+  }
+
+  .site-header .nav-dropdown > a,
+  .site-header .nav-dropdown > button {
     padding-inline: 8rem !important;
     font-size: 11rem !important;
   }
