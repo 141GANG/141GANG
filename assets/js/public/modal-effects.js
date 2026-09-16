@@ -1,8 +1,8 @@
 function modalInteractionError(error) {
   const message = String(error?.message || error || 'Не удалось выполнить действие.');
   if (/auth|jwt|session|авторизац/i.test(message)) return 'Войдите в аккаунт, чтобы оценивать игры и писать комментарии.';
-  if (/get_game_interactions|set_game_reaction|add_game_comment|update_game_comment|delete_game_comment|PGRST202|42883|schema cache/i.test(message)) {
-    return 'Новая система оценок ещё не подключена к базе. Выполните supabase/game_interactions.sql.';
+  if (/get_game_interactions|set_game_reaction|set_game_comment_reaction|add_game_comment|update_game_comment|delete_game_comment|PGRST202|42883|schema cache/i.test(message)) {
+    return 'Новая система комментариев ещё не подключена к базе. Выполните supabase/game_comment_reactions.sql.';
   }
   return message;
 }
@@ -13,31 +13,9 @@ function currentModalGame() {
 
 function fitGameModalToViewport() {
   if (!elements.modal) return;
-  if (window.matchMedia('(max-width: 720px)').matches) {
-    elements.modal.style.removeProperty('--game-modal-scale');
-    elements.modal.style.removeProperty('--game-modal-top');
-    elements.modal.style.removeProperty('--game-modal-scroll-height');
-    return;
-  }
-
-  const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 1;
-  const frameWidth = 850 * rootSize;
-  const frameHeight = 1338 * rootSize;
-  const visibleFrameHeight = 970 * rootSize;
-  const edgeGap = 40 * rootSize;
-  const scale = Math.min(
-    1,
-    Math.max(0.1, (window.innerWidth - edgeGap) / frameWidth),
-    Math.max(0.1, (window.innerHeight - edgeGap) / visibleFrameHeight)
-  );
-  const top = Math.max(20 * rootSize, Math.min(40 * rootSize, window.innerHeight * 0.05));
-  const bottomGap = 20 * rootSize;
-  const availableHeight = Math.max(320 * rootSize, window.innerHeight - top - bottomGap);
-  const scrollHeight = Math.min(frameHeight, availableHeight / scale);
-
-  elements.modal.style.setProperty('--game-modal-scale', scale.toFixed(5));
-  elements.modal.style.setProperty('--game-modal-top', `${top.toFixed(2)}px`);
-  elements.modal.style.setProperty('--game-modal-scroll-height', `${scrollHeight.toFixed(2)}px`);
+  elements.modal.style.removeProperty('--game-modal-scale');
+  elements.modal.style.removeProperty('--game-modal-top');
+  elements.modal.style.removeProperty('--game-modal-scroll-height');
 }
 
 let gameModalFitFrame = 0;
@@ -58,16 +36,50 @@ function renderModalReactionState(gameId) {
   });
 }
 
-function renderModalComments(comments = []) {
+let modalCommentsCache = [];
+let modalViewerSignedIn = false;
+let modalCommentSortMode = 'popular';
+
+const MODAL_COMMENT_SORT_LABELS = {
+  popular: 'По популярности',
+  newest: 'Сначала новые',
+  oldest: 'Сначала старые'
+};
+
+function sortedModalComments(comments) {
+  const list = [...comments];
+  if (modalCommentSortMode === 'newest') {
+    return list.sort((left, right) => new Date(right.created_at || 0) - new Date(left.created_at || 0));
+  }
+  if (modalCommentSortMode === 'oldest') {
+    return list.sort((left, right) => new Date(left.created_at || 0) - new Date(right.created_at || 0));
+  }
+  return list.sort((left, right) =>
+    (Number(right.score) || 0) - (Number(left.score) || 0) ||
+    (Number(right.likes) || 0) - (Number(left.likes) || 0) ||
+    new Date(right.created_at || 0) - new Date(left.created_at || 0)
+  );
+}
+
+function renderModalComments(comments = modalCommentsCache) {
   if (!elements.modalCommentsList) return;
-  elements.modalCommentsList.innerHTML = comments.length ? comments.map(comment => {
+  modalCommentsCache = Array.isArray(comments) ? [...comments] : [];
+  const sortedComments = sortedModalComments(modalCommentsCache);
+  const count = document.getElementById('modalCommentsCount');
+  if (count) count.textContent = String(sortedComments.length);
+  elements.modalCommentsList.innerHTML = sortedComments.length ? sortedComments.map(comment => {
     const username = String(comment.username || 'Пользователь').trim();
     const initial = username.charAt(0).toLocaleUpperCase('ru-RU') || 'U';
-    const actions = comment.is_mine
+    const actions = comment.is_mine || comment.can_delete
       ? `<div class="modal-comment-actions" aria-label="Управление комментарием">
-          <button type="button" class="modal-comment-action" data-comment-action="edit">Изменить</button>
+          ${comment.is_mine ? '<button type="button" class="modal-comment-action" data-comment-action="edit">Изменить</button>' : ''}
           <button type="button" class="modal-comment-action is-danger" data-comment-action="delete">Удалить</button>
         </div>`
+      : '';
+    const myReaction = Number(comment.my_reaction) || 0;
+    const reactionDisabled = modalViewerSignedIn ? '' : ' disabled';
+    const edited = comment.updated_at && comment.created_at && new Date(comment.updated_at).getTime() > new Date(comment.created_at).getTime() + 1000
+      ? '<span class="modal-comment-edited">изменено</span>'
       : '';
     return `<article class="modal-comment-item${comment.is_mine ? ' is-own' : ''}" data-comment-id="${escapeHtml(String(comment.id))}">
       <span class="modal-comment-avatar" aria-hidden="true">${escapeHtml(initial)}</span>
@@ -76,6 +88,11 @@ function renderModalComments(comments = []) {
         <p data-comment-text>${escapeHtml(comment.body)}</p>
         <div class="modal-comment-meta">
           <time datetime="${escapeHtml(String(comment.created_at || ''))}">${escapeHtml(formatDate(comment.created_at, { short: true }))}</time>
+          ${edited}
+          <div class="modal-comment-reactions" aria-label="Оценка комментария">
+            <button aria-label="Нравится" aria-pressed="${myReaction === 1}" class="${myReaction === 1 ? 'is-active' : ''}" data-comment-reaction="1" type="button"${reactionDisabled}><img alt="" aria-hidden="true" src="./assets/images/figma/like.png"><b>${Number(comment.likes) || 0}</b></button>
+            <button aria-label="Не нравится" aria-pressed="${myReaction === -1}" class="${myReaction === -1 ? 'is-active' : ''}" data-comment-reaction="-1" type="button"${reactionDisabled}><img alt="" aria-hidden="true" src="./assets/images/figma/dislike.png"><b>${Number(comment.dislikes) || 0}</b></button>
+          </div>
         </div>
       </div>
     </article>`;
@@ -150,6 +167,7 @@ async function loadGameInteractions(gameId) {
     const { data: sessionData } = await client.auth.getSession();
     const signedUser = sessionData?.session?.user;
     const signedIn = Boolean(signedUser && !signedUser.is_anonymous);
+    modalViewerSignedIn = signedIn;
     if (signedIn && elements.modalCommentComposerAvatar) {
       const metadata = signedUser.user_metadata || {};
       const username = String(metadata.preferred_username || metadata.full_name || metadata.name || signedUser.email || 'Пользователь').trim();
@@ -175,7 +193,12 @@ async function loadGameInteractions(gameId) {
       body: row.comment_body,
       created_at: row.comment_created_at,
       updated_at: row.comment_updated_at,
-      is_mine: row.comment_is_mine === true
+      is_mine: row.comment_is_mine === true,
+      can_delete: row.comment_can_delete === true,
+      likes: Number(row.comment_like_count) || 0,
+      dislikes: Number(row.comment_dislike_count) || 0,
+      score: Number(row.comment_score) || 0,
+      my_reaction: Number(row.comment_my_reaction) || 0
     }));
     const ownComment = comments.find(comment => comment.is_mine) || null;
     renderModalComments(comments);
@@ -183,6 +206,7 @@ async function loadGameInteractions(gameId) {
     elements.modalReputationNotice.textContent = '';
   } catch (error) {
     console.warn('Взаимодействия игры:', error?.message || error);
+    modalViewerSignedIn = false;
     renderModalReactionState(gameId);
     renderModalComments([]);
     if (elements.modalCommentForm) elements.modalCommentForm.hidden = true;
@@ -206,6 +230,7 @@ function openGameModal(gameId) {
   elements.modalMedia.innerHTML = coverUrl
     ? `<img src="${escapeHtml(coverUrl)}" alt="Обложка ${escapeHtml(game.title)}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='./assets/images/figma/game-placeholder.svg'">`
     : `<div class="cover-fallback"><img src="${TWITCH_LOGO_DATA}" alt="" aria-hidden="true"></div>`;
+  elements.modalMedia.style.removeProperty('background-image');
   elements.modalBadges.innerHTML = `<span class="coop-badge"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"></circle><path d="M6 20c0-4 2.4-7 6-7s6 3 6 7"></path></svg>${escapeHtml(playersLabel)}</span><span class="release-badge ${meta.badgeClass}"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14" rx="2"></rect><path d="M8 3v6M16 3v6M4 10h16"></path></svg>${escapeHtml(catalogReleaseLabel(game, meta))}</span>`;
   elements.modalTitle.textContent = game.title || 'Без названия';
   elements.modalRelease.textContent = `Добавлено: ${formatDate(game.created_at)}`;
@@ -213,20 +238,24 @@ function openGameModal(gameId) {
   elements.modalAdded.textContent = `Добавлено: ${formatDate(game.created_at)}`;
   elements.modalSteam.hidden = !steamUrl;
   if (steamUrl) elements.modalSteam.href = steamUrl;
+  modalCommentsCache = [];
+  const commentsCount = document.getElementById('modalCommentsCount');
+  if (commentsCount) commentsCount.textContent = '0';
   elements.modalCommentsList.innerHTML = '<p class="modal-comments-empty">Загружаем комментарии…</p>';
   resetModalCommentComposer();
   modalOwnComment = null;
   if (elements.modalCommentForm) elements.modalCommentForm.hidden = true;
   renderModalReactionState(game.id);
   fitGameModalToViewport();
+  elements.modal.classList.remove('is-closing');
   elements.modal.hidden = false;
   elements.modal.scrollTop = 0;
   const modalPanel = elements.modal.querySelector('.modal-panel');
   if (modalPanel) modalPanel.scrollTop = 0;
   elements.modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
+  elements.modal.classList.add('is-open');
   requestAnimationFrame(() => {
-    elements.modal.classList.add('is-open');
     elements.modal.querySelector('.modal-panel')?.focus({ preventScroll: true });
   });
   loadGameInteractions(game.id);
@@ -261,6 +290,24 @@ async function voteForGame(direction) {
 
 elements.modalVoteActions.forEach(button => button.addEventListener('click', () => voteForGame(Number(button.dataset.vote))));
 
+document.getElementById('modalCommentSort')?.addEventListener('click', event => {
+  const target = event.target instanceof Element ? event.target : null;
+  const button = target?.closest('[data-comment-sort]');
+  if (!button) return;
+  const nextMode = button.dataset.commentSort;
+  if (!MODAL_COMMENT_SORT_LABELS[nextMode]) return;
+
+  modalCommentSortMode = nextMode;
+  document.querySelectorAll('[data-comment-sort]').forEach(item => {
+    item.classList.toggle('is-active', item === button);
+  });
+  const label = document.getElementById('modalCommentSortLabel');
+  if (label) label.textContent = MODAL_COMMENT_SORT_LABELS[nextMode];
+  const details = document.getElementById('modalCommentSort');
+  if (details instanceof HTMLDetailsElement) details.open = false;
+  renderModalComments();
+});
+
 elements.modalCommentForm?.addEventListener('submit', async event => {
   event.preventDefault();
   const game = currentModalGame();
@@ -294,6 +341,35 @@ elements.modalCommentForm?.addEventListener('submit', async event => {
 
 elements.modalCommentsList?.addEventListener('click', async event => {
   const target = event.target instanceof Element ? event.target : null;
+  const reactionButton = target?.closest('[data-comment-reaction]');
+  if (reactionButton) {
+    const article = reactionButton.closest('.modal-comment-item[data-comment-id]');
+    const game = currentModalGame();
+    const commentId = article?.dataset.commentId;
+    const direction = Number(reactionButton.dataset.commentReaction);
+    if (!article || !game || !commentId || ![-1, 1].includes(direction)) return;
+
+    article.classList.add('is-busy');
+    article.querySelectorAll('button').forEach(item => { item.disabled = true; });
+    try {
+      const client = getConfiguredClient();
+      if (!client) throw new Error('Supabase не настроен.');
+      await getSignedInUser(client);
+      const { error } = await client.rpc('set_game_comment_reaction', {
+        p_comment_id: Number(commentId),
+        p_reaction: direction
+      });
+      if (error) throw error;
+      elements.modalReputationNotice.textContent = '';
+      await loadGameInteractions(game.id);
+    } catch (error) {
+      elements.modalReputationNotice.textContent = modalInteractionError(error);
+      article.classList.remove('is-busy');
+      article.querySelectorAll('button').forEach(item => { item.disabled = !modalViewerSignedIn; });
+    }
+    return;
+  }
+
   const button = target?.closest('[data-comment-action]');
   if (!button) return;
 
@@ -334,16 +410,20 @@ elements.modalCommentsList?.addEventListener('click', async event => {
 
 function closeGameModal() {
   if (elements.modal.hidden) return;
+  elements.modal.classList.add('is-closing');
   elements.modal.classList.remove('is-open');
   elements.modal.setAttribute('aria-hidden', 'true');
-  document.body.classList.remove('modal-open');
   resetModalCommentComposer();
   modalOwnComment = null;
+  modalCommentsCache = [];
+  modalViewerSignedIn = false;
   state.activeGameId = null;
   window.setTimeout(() => {
     elements.modal.hidden = true;
+    elements.modal.classList.remove('is-closing');
+    document.body.classList.remove('modal-open');
     if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
-  }, 180);
+  }, 150);
 }
 
 let revealObserver = null;

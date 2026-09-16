@@ -1,0 +1,122 @@
+body > footer.site-footer {
+  display: flex !important;
+  min-height: 82px !important;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 20px 26px !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+body > footer.site-footer::before {
+  display: none !important;
+}
+
+.footer-developers-inner {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-developers {
+  display: grid;
+  min-height: 32px;
+  place-items: center;
+  color: rgba(240, 240, 240, .56);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 7px, 0);
+  transition: opacity 420ms ease, transform 520ms cubic-bezier(.2, .75, .25, 1);
+}
+
+.footer-developers.is-visible {
+  opacity: .62;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0);
+}
+
+.footer-developers-trigger,
+.footer-developers-credits {
+  grid-area: 1 / 1;
+  transition: opacity 220ms ease, transform 280ms cubic-bezier(.2, .75, .25, 1);
+}
+
+.footer-developers-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 9px;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .01em;
+  cursor: default;
+}
+
+.footer-developers-trigger:focus-visible {
+  outline: 1px solid rgba(240, 240, 240, .24);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.footer-developers-trigger img {
+  width: 15px;
+  height: 15px;
+  opacity: .72;
+  object-fit: contain;
+}
+
+.footer-developers-credits {
+  margin: 0;
+  color: rgba(240, 240, 240, .72);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .015em;
+  line-height: 1.45;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 5px, 0);
+}
+
+.footer-developers.is-expanded .footer-developers-trigger {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, -5px, 0);
+}
+
+.footer-developers.is-expanded .footer-developers-credits {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.footer-developers.is-dismissed {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 6px, 0);
+}
+
+@media (max-width: 640px) {
+  body > footer.site-footer {
+    min-height: 76px !important;
+    padding: 16px 14px 22px !important;
+  }
+
+  .footer-developers-credits {
+    max-width: calc(100vw - 36px);
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-developers,
+  .footer-developers-trigger,
+  .footer-developers-credits {
+    transition-duration: 1ms;
+  }
+}

@@ -69,7 +69,6 @@ function catalogReleaseLabel(game, meta) {
         <article class="game-card${favorite ? ' is-favorite' : ''}${libraryStatus ? ` is-${escapeHtml(libraryStatus)}` : ''}" data-game-id="${escapeHtml(game.id)}" tabindex="0" role="button" aria-label="Открыть подробности игры ${escapeHtml(game.title)}" style="--delay:${Math.min(index * 45, 260)}ms">
           <div class="card-visual">${cover}</div>
           <div class="card-shade" aria-hidden="true"></div>
-          <span class="card-index" aria-hidden="true">${String(index + 1).padStart(2, '0')}</span>
           <span class="game-reputation visually-hidden" aria-label="Голосов за игру: ${reputation}">${reputation}</span>
           <div class="card-top">
             <span class="coop-badge"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"></circle><path d="M6 20c0-4 2.4-7 6-7s6 3 6 7"></path></svg>${escapeHtml(playersLabel)}</span>

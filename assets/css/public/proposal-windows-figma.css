@@ -558,3 +558,34 @@
     margin-bottom: 37.4375px !important;
   }
 }
+
+/* Keep both proposal windows visibly separated from every viewport edge. */
+@media (min-width: 901px) {
+  .suggestions-panel.is-figma-proposal,
+  .media-panel.is-figma-proposal {
+    box-sizing: border-box !important;
+    padding: 48px !important;
+  }
+
+  .suggestions-panel.is-figma-proposal .suggestions-dialog {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: calc(100vw - 96px) !important;
+    max-height: calc(100dvh - 96px) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .suggestions-panel.is-figma-proposal,
+  .media-panel.is-figma-proposal {
+    box-sizing: border-box !important;
+    padding: 16px !important;
+  }
+
+  .suggestions-panel.is-figma-proposal .suggestions-dialog,
+  .media-panel.is-figma-proposal .media-dialog {
+    width: calc(100vw - 32px) !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100dvh - 32px) !important;
+  }
+}

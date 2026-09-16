@@ -63,7 +63,7 @@
   if (mediaForm && !mediaForm.querySelector('.figma-proposal-title')) {
     const title = document.createElement('h3');
     title.className = 'figma-proposal-title';
-    title.textContent = 'Предложить фото/видео';
+    title.textContent = 'Предложить медиа';
     mediaForm.prepend(title);
   }
 

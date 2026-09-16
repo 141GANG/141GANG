@@ -165,11 +165,11 @@
 
 (function loadExactMediaProposalWindow() {
   const stylesheetId = 'proposalMediaFigmaExactStylesDirect';
-  if (!document.getElementById(stylesheetId)) {
+  if (!document.getElementById(stylesheetId) && !document.getElementById('proposalMediaFigmaExactStyles')) {
     const stylesheet = document.createElement('link');
     stylesheet.id = stylesheetId;
     stylesheet.rel = 'stylesheet';
-    stylesheet.href = './assets/css/public/proposal-media-figma-exact.css?v=4.1-upload-preview-layout';
+    stylesheet.href = './assets/css/public/proposal-media-figma-exact.css?v=4.2-no-fouc';
     document.head.appendChild(stylesheet);
   }
 

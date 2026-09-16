@@ -4,7 +4,6 @@
   const root = document.documentElement;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const panelSelector = [
-    '.game-modal',
     '.gang-panel',
     '.auction-panel',
     '.tier-panel',

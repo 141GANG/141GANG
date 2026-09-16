@@ -342,6 +342,17 @@ body.is-ready .site-header {
   opacity: .65;
 }
 
+.nav-dropdown > [aria-disabled="true"],
+.nav-dropdown > [aria-disabled="true"]:hover,
+.nav-dropdown > [aria-disabled="true"]:focus-visible {
+  color: #f0f0f0;
+  background: #202020;
+  box-shadow: none;
+  opacity: .42;
+  cursor: default;
+  pointer-events: none;
+}
+
 .hero {
   position: relative;
   width: min(1720rem, calc(100% - 40rem));
