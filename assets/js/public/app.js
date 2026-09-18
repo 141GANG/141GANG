@@ -154,6 +154,7 @@
       // Каталог не должен ждать необязательную RPC репутации: сначала показываем игры,
       // затем безопасно дорисовываем рейтинг отдельным запросом.
       render();
+      window.dispatchEvent(new CustomEvent('cr7:games-loaded'));
       refreshReputation(client);
     }
 

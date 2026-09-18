@@ -201,7 +201,7 @@ body.is-ready .site-header {
   transform: translateX(-50%);
 }
 
-.nav-center > .gang-trigger { width: 136rem; }
+.nav-center > .gang-trigger { width: 113rem; }
 .nav-center > a[href="#catalog"] { width: 113rem; }
 .nav-center > .nav-menu-wrap > .nav-menu-toggle { width: 145rem; }
 .nav-center > #adminPortalOpen { width: 149rem; }
@@ -351,6 +351,36 @@ body.is-ready .site-header {
   opacity: .42;
   cursor: default;
   pointer-events: none;
+}
+
+/* The available service entry is a solid menu surface; the disabled auction
+   control keeps its existing muted treatment above. */
+.nav-dropdown > a,
+.nav-dropdown > a:hover,
+.nav-dropdown > a:focus-visible {
+  opacity: 1;
+}
+
+/* The auction entry is available again and uses the same solid surface as
+   the tier-list entry. */
+.nav-dropdown > button.auction-trigger,
+.nav-dropdown > button.auction-trigger:hover,
+.nav-dropdown > button.auction-trigger:focus-visible {
+  opacity: 1;
+}
+
+/* Appeals is intentionally a visual placeholder. Keep it hoverable and
+   clearly available in the menu while its button remains actionless. */
+.nav-dropdown > button.appeals-trigger,
+.nav-dropdown > button.appeals-trigger:hover,
+.nav-dropdown > button.appeals-trigger:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.auction-panel:not([hidden]) .auction-dialog {
+  background: #121212 !important;
 }
 
 .hero {
@@ -1767,5 +1797,24 @@ footer {
 
 .game-modal .modal-steam {
   font-size: 28rem !important;
+}
+
+/* Keep the streams dialog typography ahead of the shared display rules. */
+.gang-head h2,
+.gang-card h3 {
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.gang-dialog,
+.gang-card,
+.gang-card p,
+.gang-card small,
+.gang-live,
+.gang-provider,
+.gang-category,
+.gang-uptime {
+  font-family: 'Manrope', sans-serif !important;
 }
 

@@ -282,6 +282,11 @@
   });
 
   servicesMenu?.addEventListener('click', event => {
+    if (event.target.closest('.appeals-trigger')) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
     if (event.target.closest('button')) setPopup(servicesToggle, servicesMenu, false);
   });
 

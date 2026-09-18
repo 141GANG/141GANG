@@ -43,10 +43,10 @@
           <img alt="" aria-hidden="true" class="gang-preview" decoding="async" loading="lazy" referrerpolicy="no-referrer"/>
         </span>
         <span class="gang-card-copy">
-          <span class="gang-card-topline"><span class="gang-live">Проверяем эфир</span><span class="gang-provider">${streamer.provider}</span></span>
+          <span class="gang-card-topline"><span class="gang-live">Проверяем эфир</span><span class="gang-provider">${streamer.provider === 'kick' ? 'KICK' : 'TWITCH'}</span></span>
           <h3>${label(streamer.channel)}</h3>
           <span class="gang-category" hidden></span>
-          <p class="gang-stream-title">Получаем актуальный статус…</p>
+          <p class="gang-stream-title">Загружаем статус канала…</p>
           <span class="gang-uptime" hidden></span>
           <small>${streamer.provider === 'kick' ? 'kick.com' : 'twitch.tv'}/${streamer.channel}</small>
         </span>
@@ -113,7 +113,7 @@
     card.classList.toggle('is-live',live);
     card.classList.remove('has-live-preview','is-checking');
     card.querySelector('.gang-live').textContent = live ? 'Сейчас в эфире' : nextStatus === 'unavailable' ? 'Статус недоступен' : 'Не в эфире';
-    card.querySelector('.gang-stream-title').textContent = live ? (item.title || 'Прямой эфир') : nextStatus === 'unavailable' ? 'Открой канал, чтобы проверить эфир' : 'Канал сейчас отдыхает';
+    card.querySelector('.gang-stream-title').textContent = live ? (item.title || 'Прямой эфир') : nextStatus === 'unavailable' ? 'Статус временно недоступен' : 'Сейчас не в эфире';
     category.textContent = item.category || '';
     category.hidden = !live || !item.category;
     const uptimeText = live ? formatUptime(item.startedAt) : '';

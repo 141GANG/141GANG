@@ -40,6 +40,15 @@ let modalCommentsCache = [];
 let modalViewerSignedIn = false;
 let modalCommentSortMode = 'popular';
 
+function setModalCommentsOpen(open) {
+  const nextOpen = Boolean(open);
+  elements.modal?.classList.toggle('comments-open', nextOpen);
+  elements.modalCommentsToggle?.classList.toggle('is-active', nextOpen);
+  elements.modalCommentsToggle?.setAttribute('aria-expanded', String(nextOpen));
+  elements.modalCommentsToggle?.setAttribute('aria-label', nextOpen ? 'Скрыть комментарии' : 'Показать комментарии');
+  elements.modalCommentsColumn?.setAttribute('aria-hidden', String(!nextOpen));
+}
+
 const MODAL_COMMENT_SORT_LABELS = {
   popular: 'По популярности',
   newest: 'Сначала новые',
@@ -245,6 +254,7 @@ function openGameModal(gameId) {
   resetModalCommentComposer();
   modalOwnComment = null;
   if (elements.modalCommentForm) elements.modalCommentForm.hidden = true;
+  setModalCommentsOpen(false);
   renderModalReactionState(game.id);
   fitGameModalToViewport();
   elements.modal.classList.remove('is-closing');
@@ -289,6 +299,10 @@ async function voteForGame(direction) {
 }
 
 elements.modalVoteActions.forEach(button => button.addEventListener('click', () => voteForGame(Number(button.dataset.vote))));
+
+elements.modalCommentsToggle?.addEventListener('click', () => {
+  setModalCommentsOpen(!elements.modal.classList.contains('comments-open'));
+});
 
 document.getElementById('modalCommentSort')?.addEventListener('click', event => {
   const target = event.target instanceof Element ? event.target : null;
@@ -417,6 +431,7 @@ function closeGameModal() {
   modalOwnComment = null;
   modalCommentsCache = [];
   modalViewerSignedIn = false;
+  setModalCommentsOpen(false);
   state.activeGameId = null;
   window.setTimeout(() => {
     elements.modal.hidden = true;

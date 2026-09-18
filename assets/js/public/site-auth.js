@@ -11,6 +11,10 @@
   const email = document.getElementById('siteAuthEmail');
   const logoutButton = document.getElementById('siteAuthLogout');
   const notice = document.getElementById('siteAuthNotice');
+  const twitchPrompt = document.getElementById('siteAuthTwitchPrompt');
+  const twitchConnectButton = document.getElementById('siteAuthTwitchConnect');
+  const twitchLaterButton = document.getElementById('siteAuthTwitchLater');
+  const toast = document.getElementById('siteAuthToast');
   if (
     !panel || !openButton || !closeButton || !providers || !account
     || !avatar || !name || !email || !logoutButton || !notice
@@ -20,11 +24,18 @@
   let lastFocusedElement = null;
   let authSubscription = null;
   let initialized = false;
+  let currentUser = null;
+  let dismissedTwitchPromptUser = '';
+  let twitchPromptUser = '';
+  let twitchPromptSyncToken = 0;
+  let toastTimer = 0;
+  let toastHideTimer = 0;
 
   const config = window.CR7_CONFIG || {};
   const providerLabels = Object.freeze({
     google: 'Google',
-    'custom:yandex': 'Яндекс ID'
+    'custom:yandex': 'Яндекс ID',
+    twitch: 'Twitch'
   });
 
   function getConfiguredClient() {
@@ -67,9 +78,120 @@
     return String(metadata.avatar_url || metadata.picture || '').trim();
   }
 
+  function identityProviders(user) {
+    const identities = Array.isArray(user?.identities) ? user.identities : [];
+    const providers = identities
+      .map(identity => String(identity?.provider || '').trim().toLowerCase())
+      .filter(Boolean);
+    const appProvider = String(user?.app_metadata?.provider || '').trim().toLowerCase();
+    if (appProvider) providers.push(appProvider);
+    return new Set(providers);
+  }
+
+  function needsTwitchLink(user) {
+    const providers = identityProviders(user);
+    const hasGoogleOrYandex = [...providers].some(provider => (
+      provider === 'google' || provider.includes('yandex')
+    ));
+    return hasGoogleOrYandex && !providers.has('twitch');
+  }
+
+  function hasGoogleOrYandexIdentity(user) {
+    const providers = identityProviders(user);
+    return [...providers].some(provider => (
+      provider === 'google' || provider.includes('yandex')
+    ));
+  }
+
+  function twitchPromptDismissed(userKey) {
+    if (!userKey) return false;
+    try {
+      return window.sessionStorage.getItem(`cr7:twitch-link-dismissed:${userKey}`) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  function rememberTwitchPromptDismissal(userKey) {
+    if (!userKey) return;
+    try {
+      window.sessionStorage.setItem(`cr7:twitch-link-dismissed:${userKey}`,'1');
+    } catch {
+      // A restricted storage context should not prevent the prompt from closing.
+    }
+  }
+
+  async function resolveSessionUser(session) {
+    const initialUser = session?.user;
+    if (!initialUser || initialUser.is_anonymous || !client?.auth?.getUser) return initialUser;
+    try {
+      const { data, error } = await client.auth.getUser();
+      if (!error && data?.user) return data.user;
+    } catch {
+      // The session user is still enough to render the account if refresh fails.
+    }
+    return initialUser;
+  }
+
+  async function syncTwitchPrompt(session,autoOpen = false) {
+    if (!twitchPrompt) return;
+    const syncToken = ++twitchPromptSyncToken;
+    const user = await resolveSessionUser(session);
+    if (syncToken !== twitchPromptSyncToken) return;
+    const userKey = String(user?.id || '');
+    const visible = Boolean(
+      user
+      && !user.is_anonymous
+      && needsTwitchLink(user)
+      && dismissedTwitchPromptUser !== userKey
+      && !twitchPromptDismissed(userKey)
+    );
+    twitchPromptUser = visible ? userKey : '';
+    twitchPrompt.hidden = !visible;
+    if (visible && autoOpen && panel.hidden) openPanel();
+  }
+
   function setNotice(message,type = '') {
-    notice.textContent = message || '';
-    notice.dataset.type = type;
+    if (!message) {
+      hideToast();
+      if (!toast) {
+        notice.textContent = '';
+        notice.dataset.type = '';
+      }
+      return;
+    }
+    showToast(message,type);
+  }
+
+  function hideToast() {
+    if (!toast) return;
+    window.clearTimeout(toastHideTimer);
+    toast.classList.remove('is-visible');
+    toastHideTimer = window.setTimeout(() => {
+      if (!toast.classList.contains('is-visible')) toast.hidden = true;
+    },260);
+  }
+
+  function showToast(message,type = 'error') {
+    if (!toast) {
+      notice.textContent = message || '';
+      notice.dataset.type = type;
+      return;
+    }
+    window.clearTimeout(toastTimer);
+    window.clearTimeout(toastHideTimer);
+    toast.replaceChildren();
+    if (type === 'loading') {
+      const spinner = document.createElement('span');
+      spinner.className = 'site-auth-toast-spinner';
+      spinner.setAttribute('aria-hidden','true');
+      toast.append(spinner);
+    }
+    toast.append(document.createTextNode(message || ''));
+    toast.dataset.type = type;
+    toast.hidden = false;
+    window.requestAnimationFrame(() => toast.classList.add('is-visible'));
+    toastTimer = window.setTimeout(hideToast,5000);
   }
 
   function setBusy(busy,label = '') {
@@ -78,19 +200,26 @@
       button.setAttribute('aria-busy',busy ? 'true' : 'false');
     });
     logoutButton.disabled = busy;
-    if (busy && label) setNotice(`Открываем ${label}…`);
+    [twitchConnectButton,twitchLaterButton].forEach(button => {
+      if (button) button.disabled = busy;
+    });
+    if (busy && label) setNotice(`Открываем ${label}…`,'loading');
   }
 
   function renderSession(session) {
     const user = session?.user;
     const signedIn = Boolean(user && !user.is_anonymous);
+    currentUser = signedIn ? user : null;
     providers.hidden = signedIn;
     account.hidden = !signedIn;
     openButton.classList.toggle('is-signed-in',signedIn);
 
     if (!signedIn) {
+      dismissedTwitchPromptUser = '';
+      twitchPromptUser = '';
+      if (twitchPrompt) twitchPrompt.hidden = true;
       openButton.textContent = 'Войти';
-      openButton.setAttribute('aria-label','Войти через Яндекс ID или Google');
+      openButton.setAttribute('aria-label','Войти через Яндекс ID, Google или Twitch');
       avatar.hidden = true;
       avatar.removeAttribute('src');
       name.textContent = '';
@@ -132,6 +261,10 @@
       setNotice('Авторизация временно недоступна: Supabase не подключён.','error');
       return;
     }
+    if (provider === 'twitch' && !hasGoogleOrYandexIdentity(currentUser)) {
+      showToast('Сначала нужно войти через Google или Яндекс ID, затем можно привязать Twitch.');
+      return;
+    }
     const label = providerLabels[provider] || 'сервис авторизации';
     setBusy(true,label);
     try {
@@ -147,10 +280,34 @@
     }
   }
 
+  async function linkTwitch() {
+    if (!client) {
+      setNotice('Авторизация временно недоступна: Supabase не подключён.','error');
+      return;
+    }
+    const user = await resolveSessionUser({ user: currentUser });
+    if (!hasGoogleOrYandexIdentity(user)) {
+      showToast('Сначала нужно войти через Google или Яндекс ID, затем можно привязать Twitch.');
+      return;
+    }
+    setBusy(true,'Twitch');
+    try {
+      const { error } = await client.auth.linkIdentity({
+        provider: 'twitch',
+        options: { redirectTo: redirectUrl() }
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Привязка Twitch:',error);
+      setNotice('Не удалось привязать Twitch. Проверь настройку провайдера в Supabase.','error');
+      setBusy(false);
+    }
+  }
+
   async function signOut() {
     if (!client) return;
     setBusy(true);
-    setNotice('Завершаем сеанс…');
+    setNotice('Завершаем сеанс…','loading');
     const { error } = await client.auth.signOut({ scope: 'local' });
     setBusy(false);
     if (error) {
@@ -180,11 +337,13 @@
     }
     window.CR7_AUTH?.cacheSession?.(sessionResult.data?.session || null);
     renderSession(sessionResult.data?.session || null);
+    await syncTwitchPrompt(sessionResult.data?.session || null,true);
 
-    const { data } = client.auth.onAuthStateChange((_event,session) => {
-      window.setTimeout(() => {
+    const { data } = client.auth.onAuthStateChange((event,session) => {
+      window.setTimeout(async () => {
         window.CR7_AUTH?.cacheSession?.(session);
         renderSession(session);
+        await syncTwitchPrompt(session,event === 'SIGNED_IN');
         setBusy(false);
       },0);
     });
@@ -200,6 +359,13 @@
     const button = event.target.closest('[data-auth-provider]');
     if (!button || button.disabled) return;
     signIn(button.dataset.authProvider);
+  });
+  twitchConnectButton?.addEventListener('click',linkTwitch);
+  twitchLaterButton?.addEventListener('click',() => {
+    dismissedTwitchPromptUser = twitchPromptUser;
+    rememberTwitchPromptDismissal(twitchPromptUser);
+    twitchPromptUser = '';
+    if (twitchPrompt) twitchPrompt.hidden = true;
   });
   logoutButton.addEventListener('click',signOut);
   document.addEventListener('keydown',event => {

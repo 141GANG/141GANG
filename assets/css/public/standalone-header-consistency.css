@@ -1,0 +1,284 @@
+/* Keep the shared header identical on catalog, management and service pages. */
+body.standalone-view .site-header .shell {
+  width: min(1720rem, calc(100% - 40rem)) !important;
+  margin-right: 0 !important;
+  margin-left: max(20rem, calc((100vw - 1720rem) / 2)) !important;
+}
+
+body.standalone-view .site-header .nav {
+  height: 50rem !important;
+  min-height: 50rem !important;
+  margin-top: 40rem !important;
+}
+
+body.standalone-view .site-header .brand {
+  width: 142rem !important;
+  height: 50rem !important;
+  flex-basis: 142rem !important;
+}
+
+@media (min-width: 721px) {
+  body.standalone-view .site-header :is(.nav-link, .nav-menu-toggle, .account-auth-trigger, #adminPortalOpen) {
+    height: 46rem !important;
+    min-height: 46rem !important;
+    padding: 8rem 15rem !important;
+    font-size: 18rem !important;
+    line-height: 1.25 !important;
+  }
+
+  body.standalone-view .site-header .account-auth-trigger {
+    width: 207rem !important;
+    flex-basis: 207rem !important;
+  }
+}
+
+@media (max-width: 1500px) {
+  body.standalone-view .site-header .shell {
+    width: min(1320rem, calc(100% - 80rem)) !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+  }
+
+  body.standalone-view .site-header .nav {
+    margin-top: 28rem !important;
+  }
+
+  body.standalone-view .site-header .brand {
+    width: 114rem !important;
+    height: 40rem !important;
+    flex-basis: 114rem !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  body.standalone-view .site-header .shell {
+    width: min(940rem, calc(100% - 40rem)) !important;
+  }
+
+  body.standalone-view .site-header .nav {
+    display: grid !important;
+    grid-template-columns: 114rem minmax(0, 1fr) 170rem;
+    align-items: center !important;
+    gap: clamp(8rem, 1.4vw, 18rem) !important;
+  }
+
+  body.standalone-view .site-header .nav-center {
+    position: static !important;
+    inset: auto !important;
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    gap: 6rem !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  body.standalone-view .site-header .nav-center > :is(.nav-link, .nav-menu-wrap, #adminPortalOpen),
+  body.standalone-view .site-header .nav-center > .nav-menu-wrap > .nav-menu-toggle {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: 1 1 0 !important;
+  }
+
+  body.standalone-view .site-header .nav-center > .nav-menu-wrap > .nav-menu-toggle {
+    width: 100% !important;
+  }
+
+  body.standalone-view .site-header :is(.nav-link, .nav-menu-toggle, #adminPortalOpen) {
+    gap: 5rem !important;
+    padding-inline: clamp(5rem, 1vw, 11rem) !important;
+    overflow: hidden;
+    font-size: clamp(10rem, 1.25vw, 14rem) !important;
+    text-overflow: ellipsis;
+  }
+
+  body.standalone-view .site-header .account-auth-trigger {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex-basis: auto !important;
+    padding-inline: 10rem !important;
+    overflow: hidden;
+    font-size: clamp(10rem, 1.25vw, 14rem) !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 720px) {
+  body.standalone-view .site-header .shell {
+    width: calc(100% - 24rem) !important;
+  }
+
+  body.standalone-view .site-header .nav {
+    margin-top: 16rem !important;
+    grid-template-columns: 85rem minmax(0, 1fr) 118rem;
+    gap: 6rem !important;
+  }
+
+  body.standalone-view .site-header .brand {
+    width: 85rem !important;
+    height: 30rem !important;
+    flex-basis: 85rem !important;
+  }
+
+  body.standalone-view .site-header :is(.nav-link, .nav-menu-toggle, #adminPortalOpen) {
+    height: 38rem !important;
+    min-height: 38rem !important;
+    padding: 6rem 4rem !important;
+    font-size: clamp(8rem, 1.8vw, 11rem) !important;
+  }
+
+  body.standalone-view .site-header .account-auth-trigger {
+    width: 118rem !important;
+    height: 36rem !important;
+    min-height: 36rem !important;
+    flex-basis: 118rem !important;
+    padding: 8rem 10rem !important;
+    font-size: 11rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body.standalone-view .site-header .nav {
+    grid-template-columns: 54rem minmax(0, 1fr) 72rem;
+    gap: 4rem !important;
+  }
+
+  body.standalone-view .site-header .brand {
+    width: 54rem !important;
+    height: 19rem !important;
+    flex-basis: 54rem !important;
+  }
+
+  body.standalone-view .site-header .nav-center {
+    gap: 2rem !important;
+  }
+
+  body.standalone-view .site-header :is(.nav-link, .nav-menu-toggle, #adminPortalOpen) {
+    gap: 2rem !important;
+    padding-inline: 1rem !important;
+    font-size: 7rem !important;
+  }
+
+  body.standalone-view .site-header .nav-menu-toggle img {
+    display: none;
+  }
+
+  body.standalone-view .site-header .account-auth-trigger {
+    width: 100% !important;
+    height: 32rem !important;
+    min-height: 32rem !important;
+    flex-basis: auto !important;
+    padding-inline: 4rem !important;
+    font-size: 8rem !important;
+  }
+}
+
+/* The catalog uses the same single-row responsive header as standalone views. */
+@media (max-width: 1100px) {
+  body:not(.standalone-view) .site-header .nav {
+    display: grid !important;
+    grid-template-columns: 114rem minmax(0, 1fr) 170rem;
+    align-items: center !important;
+    gap: clamp(8rem, 1.4vw, 18rem) !important;
+  }
+
+  body:not(.standalone-view) .site-header .nav-center {
+    position: static !important;
+    inset: auto !important;
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    gap: 6rem !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  body:not(.standalone-view) .site-header .nav-center > :is(.nav-link, .nav-menu-wrap, #adminPortalOpen),
+  body:not(.standalone-view) .site-header .nav-center > .nav-menu-wrap > .nav-menu-toggle {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: 1 1 0 !important;
+  }
+
+  body:not(.standalone-view) .site-header .nav-center > .nav-menu-wrap > .nav-menu-toggle {
+    width: 100% !important;
+  }
+
+  body:not(.standalone-view) .site-header :is(.nav-link, .nav-menu-toggle, #adminPortalOpen) {
+    gap: 5rem !important;
+    padding-inline: clamp(5rem, 1vw, 11rem) !important;
+    overflow: hidden;
+    font-size: clamp(10rem, 1.25vw, 14rem) !important;
+    text-overflow: ellipsis;
+  }
+
+  body:not(.standalone-view) .site-header .account-auth-trigger {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex-basis: auto !important;
+    padding-inline: 10rem !important;
+    overflow: hidden;
+    font-size: clamp(10rem, 1.25vw, 14rem) !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 720px) {
+  body:not(.standalone-view) .site-header .nav {
+    grid-template-columns: 85rem minmax(0, 1fr) 118rem;
+    gap: 6rem !important;
+  }
+
+  body:not(.standalone-view) .site-header :is(.nav-link, .nav-menu-toggle, #adminPortalOpen) {
+    height: 38rem !important;
+    min-height: 38rem !important;
+    padding: 6rem 4rem !important;
+    font-size: clamp(8rem, 1.8vw, 11rem) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body:not(.standalone-view) .site-header .nav {
+    grid-template-columns: 54rem minmax(0, 1fr) 72rem;
+    gap: 4rem !important;
+  }
+
+  body:not(.standalone-view) .site-header .brand {
+    width: 54rem !important;
+    height: 19rem !important;
+    flex-basis: 54rem !important;
+  }
+
+  body:not(.standalone-view) .site-header .nav-center {
+    gap: 2rem !important;
+  }
+
+  body:not(.standalone-view) .site-header :is(.nav-link, .nav-menu-toggle, #adminPortalOpen) {
+    gap: 2rem !important;
+    padding-inline: 1rem !important;
+    font-size: 7rem !important;
+  }
+
+  body:not(.standalone-view) .site-header .nav-menu-toggle img {
+    display: none;
+  }
+
+  body:not(.standalone-view) .site-header .account-auth-trigger {
+    width: 100% !important;
+    height: 32rem !important;
+    min-height: 32rem !important;
+    flex-basis: auto !important;
+    padding-inline: 4rem !important;
+    font-size: 8rem !important;
+  }
+}

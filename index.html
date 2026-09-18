@@ -19,15 +19,15 @@
 <link href="./assets/css/public/header-hero.css" rel="stylesheet"/>
 <link href="./assets/css/public/catalog.css" rel="stylesheet"/>
 <link href="./assets/css/public/modal.css" rel="stylesheet"/>
-<link href="./assets/css/public/gang.css?v=3.2" rel="stylesheet"/>
+<link href="./assets/css/public/gang.css?v=3.3-streams-window" rel="stylesheet"/>
 <link href="./assets/css/public/auction.css?v=4.4" rel="stylesheet"/>
 <link href="./assets/css/public/auction-pointauc.css?v=5.0" rel="stylesheet"/>
 <link href="./assets/css/public/responsive.css" rel="stylesheet"/>
 <link href="./assets/css/public/admin-portal.css?v=1.2-hidden-trigger" rel="stylesheet"/>
 <link href="./assets/css/public/suggestions.css?v=3.4-catalog-comments" rel="stylesheet"/>
 <link href="./assets/css/public/media-submissions.css?v=4.1" rel="stylesheet"/>
-<link href="./assets/css/public/figma-refresh.css?v=3.11-disabled-services" rel="stylesheet"/>
-<link href="./assets/css/public/site-auth.css?v=1.4-provider-icons" rel="stylesheet"/>
+<link href="./assets/css/public/figma-refresh.css?v=3.14-appeals-nav" rel="stylesheet"/>
+<link href="./assets/css/public/site-auth.css?v=1.8-toast-all" rel="stylesheet"/>
 <link href="./assets/css/public/figma-redesign.css?v=2.4" rel="stylesheet"/>
 <link href="./assets/css/public/admin-druk-title-final.css?v=1.0" rel="stylesheet"/>
 <link href="./assets/css/public/figma-main-final.css?v=2.3-management-sync" id="figmaMainFinalStyles" rel="stylesheet"/>
@@ -43,6 +43,10 @@
 <script>document.documentElement.classList.add('premium-motion-pending');</script>
 <link href="./assets/css/public/premium-motion.css?v=1.1" id="premiumMotionStyles" rel="stylesheet"/>
 <link href="./assets/css/public/footer-developers.css?v=1.0" id="footerDevelopersStyles" rel="stylesheet"/>
+<link href="./assets/css/public/feature-coming-soon.css?v=1.0" id="featureComingSoonStyles" rel="stylesheet"/>
+<link href="./assets/css/public/game-comments-drawer.css?v=1.0" id="gameCommentsDrawerStyles" rel="stylesheet"/>
+<link href="./assets/css/public/tier-list-figma.css?v=1.9-disabled-hover" id="tierListFigmaStyles" rel="stylesheet"/>
+<link href="./assets/css/public/standalone-header-consistency.css?v=1.2-shared-single-row" id="standaloneHeaderConsistencyStyles" rel="stylesheet"/>
 <script defer id="premiumMotionScript" src="./assets/js/public/premium-motion.js?v=1.5-independent-game-modal"></script>
 <noscript><style>.premium-motion-pending *{opacity:1!important;filter:none!important;transform:none!important}</style></noscript>
 </head>
@@ -66,8 +70,9 @@
 <div class="nav-menu-wrap">
 <button aria-controls="servicesMenu" aria-expanded="false" class="nav-link nav-menu-toggle" id="servicesToggle" type="button">Сервисы<img alt="" aria-hidden="true" src="./assets/images/figma/chevron.svg"/></button>
 <div aria-label="Сервисы" class="nav-dropdown" hidden id="servicesMenu">
-<a aria-disabled="true" class="tier-list-trigger" tabindex="-1">Тир-лист</a>
-<button aria-controls="auctionPanel" aria-disabled="true" aria-expanded="false" class="auction-trigger" disabled id="auctionOpen" type="button">Аукцион</button>
+<a class="tier-list-trigger" href="./index.html?view=tier">Тир-лист</a>
+<button aria-controls="auctionPanel" aria-expanded="false" class="auction-trigger" id="auctionOpen" type="button">Аукцион</button>
+<button aria-disabled="true" aria-label="Апелляции пока недоступны" class="appeals-trigger" id="appealsOpen" type="button">Апелляции</button>
 </div>
 </div>
 <a aria-label="Открыть управление сайтом" class="nav-link admin-portal-trigger" href="./admin.html" hidden id="adminPortalOpen" title="Управление сайтом">Управление</a>
@@ -142,7 +147,7 @@
 <div class="gang-backdrop" data-gang-close=""></div>
 <section aria-labelledby="gangTitle" aria-modal="true" class="gang-dialog" role="dialog">
 <header class="gang-head">
-<div><span class="gang-kicker">В эфире и вне эфира</span><h2 id="gangTitle">141 GANG</h2><p>Стримеры и участники сообщества в одном месте.</p></div>
+<div><h2 id="gangTitle">Стримеры сообщества 141GANG в одном месте.</h2></div>
 <button aria-label="Закрыть 141 GANG" class="gang-close" id="gangClose" type="button">×</button>
 </header>
 <div aria-live="polite" class="gang-status" id="gangStatus">Проверяем, кто сейчас в эфире…</div>
@@ -306,6 +311,7 @@
 <div class="site-auth-providers" id="siteAuthProviders">
 <button class="site-auth-provider is-yandex" data-auth-provider="custom:yandex" type="button"><span aria-hidden="true"><img alt="" src="./assets/images/figma/yandex-icon.png"/></span><strong>Войти через Яндекс ID</strong></button>
 <button class="site-auth-provider is-google" data-auth-provider="google" type="button"><span aria-hidden="true"><img alt="" src="./assets/images/figma/google-icon.png"/></span><strong>Войти через Google</strong></button>
+<button class="site-auth-provider is-twitch" data-auth-provider="twitch" type="button"><span aria-hidden="true"><img alt="" src="./assets/images/figma/twitch-icon.webp"/></span><strong>Войти через Twitch</strong></button>
 <a class="site-auth-provider is-admin" href="./admin.html"><span aria-hidden="true"><img alt="" src="./assets/images/figma/cheloveck.png"/></span><strong>Войти как администратор</strong></a>
 </div>
 <div class="site-auth-account" hidden id="siteAuthAccount">
@@ -313,10 +319,18 @@
 <div><strong id="siteAuthName"></strong><span id="siteAuthEmail"></span></div>
 <button class="site-auth-logout" id="siteAuthLogout" type="button">Выйти</button>
 </div>
+<section aria-labelledby="siteAuthTwitchPromptTitle" class="site-auth-twitch-prompt" hidden id="siteAuthTwitchPrompt">
+<div class="site-auth-twitch-prompt-head">
+<span aria-hidden="true" class="site-auth-twitch-badge"><img alt="" src="./assets/images/figma/twitch-icon.webp"/></span>
+<div><h3 id="siteAuthTwitchPromptTitle">Привязать Twitch?</h3><p>Свяжи Twitch с этим профилем, чтобы входить через него в дальнейшем.</p></div>
+</div>
+<div class="site-auth-twitch-prompt-actions"><button class="site-auth-twitch-connect" id="siteAuthTwitchConnect" type="button">Привязать Twitch</button><button class="site-auth-twitch-later" id="siteAuthTwitchLater" type="button">Позже</button></div>
+</section>
 <p aria-live="polite" class="site-auth-notice" id="siteAuthNotice" role="status"></p>
 </section>
 </div>
-<div aria-hidden="true" class="feature-panel" hidden id="featurePanel"><div class="feature-backdrop" data-feature-close=""></div><section aria-labelledby="featureTitle" aria-modal="true" class="feature-dialog" role="dialog"><button aria-label="Закрыть окно" class="feature-close" id="featureClose" type="button">×</button><span id="featureKicker">Новый раздел</span><h2 id="featureTitle">Скоро</h2><p id="featureDescription">Функция находится в разработке.</p></section></div>
+<div aria-live="polite" class="site-auth-toast" hidden id="siteAuthToast" role="status"></div>
+<div aria-hidden="true" class="feature-panel" hidden id="featurePanel"><div class="feature-backdrop" data-feature-close=""></div><section aria-describedby="featureDescription" aria-labelledby="featureTitle" aria-modal="true" class="feature-dialog" role="dialog" tabindex="-1"><span id="featureKicker">Новый раздел</span><h2 id="featureTitle">Скоро</h2><p id="featureDescription">Функция находится в разработке.</p></section></div>
 <div aria-hidden="true" class="admin-portal" hidden="" id="adminPortal">
 <div class="admin-portal-backdrop" data-admin-portal-close=""></div>
 <section aria-labelledby="adminPortalTitle" aria-modal="true" class="admin-portal-dialog" role="dialog">
@@ -494,7 +508,32 @@
 </section>
 </div>
 </div>
-<div aria-hidden="true" class="tier-panel" hidden id="tierListPanel"><div class="tier-backdrop" data-tier-close></div><section aria-labelledby="tierListTitle" aria-modal="true" class="tier-dialog" role="dialog"><button aria-label="Закрыть тир-лист" class="tier-close" id="tierListClose" type="button">×</button><header><span>Моя библиотека</span><h2 id="tierListTitle">Тир-лист игр</h2><p>Перетаскивай обложки между рядами, чтобы собрать рейтинг пройденных и дропнутых игр.</p><div class="tier-header-actions"><small id="tierAdminStatus">Публичный просмотр</small><button hidden id="tierReset" type="button">Сбросить тир-лист</button></div></header><div class="tier-board" id="tierBoard" aria-live="polite"></div><dialog class="tier-row-dialog" id="tierRowDialog"><form method="dialog"><button aria-label="Закрыть настройки ряда" class="tier-row-dialog-close" value="cancel">×</button><h3>Настройки тира</h3><label>Название ряда<input id="tierRowLabel" maxlength="30" required></label><fieldset><legend>Цвет фона</legend><div class="tier-color-presets" id="tierColorPresets"><button data-tier-color="#ff7f7f" style="--color:#ff7f7f" type="button"></button><button data-tier-color="#ffbf7f" style="--color:#ffbf7f" type="button"></button><button data-tier-color="#ffdf7f" style="--color:#ffdf7f" type="button"></button><button data-tier-color="#ffff7f" style="--color:#ffff7f" type="button"></button><button data-tier-color="#bfff7f" style="--color:#bfff7f" type="button"></button><button data-tier-color="#7fffff" style="--color:#7fffff" type="button"></button><button data-tier-color="#7fbfff" style="--color:#7fbfff" type="button"></button><button data-tier-color="#bf7fff" style="--color:#bf7fff" type="button"></button><button data-tier-color="#ff7fff" style="--color:#ff7fff" type="button"></button><input aria-label="Произвольный цвет" id="tierRowColor" type="color"></div></fieldset><button class="tier-row-save" id="tierRowSave" value="default">Сохранить</button></form></dialog><dialog class="tier-confirm-dialog" id="tierResetDialog"><form method="dialog"><span>Сброс пресета</span><h3>Вы действительно хотите сбросить заготовленный пресет?</h3><p>Все игры вернутся в раздел «Без оценки», а названия, цвета и порядок тиров — к исходным значениям.</p><div><button value="cancel">Отмена</button><button class="is-danger" id="tierResetConfirm" value="default">Да, сбросить</button></div></form></dialog></section></div>
+<div aria-hidden="true" class="tier-panel" hidden id="tierListPanel">
+<div class="tier-backdrop" data-tier-close></div>
+<section aria-labelledby="tierListTitle" aria-modal="true" class="tier-dialog" role="dialog">
+<button aria-label="Закрыть тир-лист" class="tier-close" id="tierListClose" type="button">×</button>
+<h1 class="visually-hidden" id="tierListTitle">Тир-лист</h1>
+<nav aria-label="Автор тир-листа" class="tier-creators">
+<button aria-current="page" class="is-active" data-tier-owner="sasaavot" type="button">Sasavot</button>
+<button aria-disabled="true" aria-label="Добавление стримера пока недоступно" class="tier-add-owner" disabled type="button">+</button>
+</nav>
+<div class="tier-workspace">
+<div class="tier-board" id="tierBoard" aria-live="polite"></div>
+<aside aria-label="Выбор тир-листа" class="tier-list-menu">
+<div class="tier-list-menu-options">
+<span>Тир-листы</span>
+<button aria-current="page" class="is-active" data-tier-list="games" type="button">Игры</button>
+<button data-tier-list="food" type="button">Еда</button>
+<button data-tier-list="cars" type="button">Машины</button>
+</div>
+<button aria-disabled="true" class="tier-new-list" disabled type="button"><b>Новый</b><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button>
+<div class="tier-admin-tools" hidden id="tierAdminTools"><small id="tierAdminStatus"></small><button hidden id="tierReset" type="button">Сбросить тир-лист</button></div>
+</aside>
+</div>
+<dialog class="tier-row-dialog" id="tierRowDialog"><form method="dialog"><button aria-label="Закрыть настройки ряда" class="tier-row-dialog-close" value="cancel">×</button><h3>Настройки тира</h3><label>Название ряда<input id="tierRowLabel" maxlength="30" required></label><fieldset><legend>Цвет фона</legend><div class="tier-color-presets" id="tierColorPresets"><button data-tier-color="#e63d3d" style="--color:#e63d3d" type="button"></button><button data-tier-color="#e6913d" style="--color:#e6913d" type="button"></button><button data-tier-color="#e6d23d" style="--color:#e6d23d" type="button"></button><button data-tier-color="#a5e63d" style="--color:#a5e63d" type="button"></button><button data-tier-color="#4be63d" style="--color:#4be63d" type="button"></button><button data-tier-color="#7fffff" style="--color:#7fffff" type="button"></button><button data-tier-color="#7fbfff" style="--color:#7fbfff" type="button"></button><button data-tier-color="#bf7fff" style="--color:#bf7fff" type="button"></button><button data-tier-color="#ff7fff" style="--color:#ff7fff" type="button"></button><input aria-label="Произвольный цвет" id="tierRowColor" type="color"></div></fieldset><button class="tier-row-save" id="tierRowSave" value="default">Сохранить</button></form></dialog>
+<dialog class="tier-confirm-dialog" id="tierResetDialog"><form method="dialog"><span>Сброс пресета</span><h3>Вы действительно хотите сбросить заготовленный пресет?</h3><p>Все игры вернутся в раздел «Без оценки», а названия, цвета и порядок тиров — к исходным значениям.</p><div><button value="cancel">Отмена</button><button class="is-danger" id="tierResetConfirm" value="default">Да, сбросить</button></div></form></dialog>
+</section>
+</div>
 <div aria-hidden="true" class="game-modal" hidden="" id="gameModal">
 <div class="modal-backdrop" data-modal-close=""></div>
 <div aria-labelledby="modalTitle" aria-modal="true" class="modal-panel" role="dialog" tabindex="-1">
@@ -510,13 +549,13 @@
 </section>
 <div class="modal-footer">
 <a class="modal-steam" href="#" id="modalSteam" rel="noopener noreferrer" target="_blank">Открыть в Steam <img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></a>
-<div aria-label="Оценка игры" class="modal-reactions"><button aria-label="Нравится" aria-pressed="false" data-vote="1" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/like.png"/><b id="modalLikeCount">0</b></button><button aria-label="Не нравится" aria-pressed="false" data-vote="-1" type="button"><img alt="" aria-hidden="true" class="thumb-down" src="./assets/images/figma/dislike.png"/><b id="modalDislikeCount">0</b></button></div>
+<div aria-label="Действия с игрой" class="modal-reactions"><button aria-label="Нравится" aria-pressed="false" data-vote="1" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/like.png"/><b id="modalLikeCount">0</b></button><button aria-label="Не нравится" aria-pressed="false" data-vote="-1" type="button"><img alt="" aria-hidden="true" class="thumb-down" src="./assets/images/figma/dislike.png"/><b id="modalDislikeCount">0</b></button><button aria-controls="modalCommentsColumn" aria-expanded="false" aria-label="Показать комментарии" class="modal-comments-toggle" id="modalCommentsToggle" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/comment-icon.png"/></button></div>
 </div>
 <p aria-live="polite" class="modal-reaction-notice" id="modalReputationNotice"></p>
 <span class="modal-added visually-hidden" id="modalAdded"></span>
 </div>
 </div>
-<aside class="modal-comments-column">
+<aside aria-hidden="true" class="modal-comments-column" id="modalCommentsColumn">
 <header class="modal-comments-header">
 <div><h3 id="modalCommentsTitle">Комментарии <b id="modalCommentsCount">0</b></h3></div>
 <details class="modal-comment-sort" id="modalCommentSort">
@@ -534,7 +573,7 @@
 </div>
 </div>
 <footer class="site-footer" id="siteFooter"><div class="shell footer-developers-inner"><div aria-live="polite" class="footer-developers" id="footerDevelopers"><button aria-expanded="false" class="footer-developers-trigger" id="footerDevelopersTrigger" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/inf-icon.png"/><span>О разработчиках</span></button><p aria-hidden="true" class="footer-developers-credits" id="footerDevelopersCredits">@tankzor, @archivebtw, @max_vopros, @OBWECTBO141</p></div></div></footer>
-<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.2"></script><script src="./assets/js/public/state.js?v=4.0"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.0"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.4-single-cover"></script><script src="./assets/js/public/tier-list.js?v=3.0"></script><script src="./assets/js/public/suggestions.js?v=4.10-catalog-comments"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script async id="twitchPlayerSdk" src="https://player.twitch.tv/js/embed/v1.js"></script><script src="./assets/js/public/gang.js?v=3.3"></script><script src="./assets/js/public/auction.js?v=5.0-pointauc"></script><script src="./assets/js/public/admin-portal.js?v=3.3"></script><script src="./assets/js/public/admin-portal-shell.js?v=4.8-login-reset"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.3-player-range"></script><script src="./assets/js/public/figma-ui.js?v=10.10-mobile-modal-scroll"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
+<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.7-toast-all"></script><script src="./assets/js/public/state.js?v=4.1-comment-drawer"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.0"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.5-comment-drawer"></script><script src="./assets/js/public/tier-list.js?v=5.2-configured-client"></script><script src="./assets/js/public/suggestions.js?v=4.10-catalog-comments"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script async id="twitchPlayerSdk" src="https://player.twitch.tv/js/embed/v1.js"></script><script src="./assets/js/public/gang.js?v=3.3"></script><script src="./assets/js/public/auction.js?v=5.1-feature-dialog"></script><script src="./assets/js/public/admin-portal.js?v=3.3"></script><script src="./assets/js/public/admin-portal-shell.js?v=4.7-resizable-gallery"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.4-tier-event"></script><script src="./assets/js/public/figma-ui.js?v=10.11-appeals-trigger"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
 (() => {
   const view = new URLSearchParams(location.search).get('view');
   const targets = {tier: 'tierListPanel', auction: 'auctionPanel', admin: 'adminPortal'};

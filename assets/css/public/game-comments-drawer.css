@@ -1,0 +1,145 @@
+.game-modal .modal-comments-toggle {
+  flex: 0 0 auto;
+}
+
+.game-modal .modal-comments-toggle img {
+  width: 34px;
+  height: 34px;
+  display: block;
+  object-fit: contain;
+}
+
+.game-modal .modal-comments-toggle.is-active {
+  color: #f0f0f0;
+  background: #292929 !important;
+}
+
+@media (min-width: 768px) {
+  .game-modal .modal-panel,
+  .game-modal.is-open .modal-panel,
+  .game-modal.is-closing .modal-panel {
+    width: min(720px, calc(100vw - 64px)) !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0fr) !important;
+    transition:
+      width .46s cubic-bezier(.22, 1, .36, 1),
+      grid-template-columns .46s cubic-bezier(.22, 1, .36, 1),
+      opacity .16s ease !important;
+  }
+
+  .game-modal.comments-open .modal-panel,
+  .game-modal.comments-open.is-open .modal-panel,
+  .game-modal.comments-open.is-closing .modal-panel {
+    width: min(1120px, calc(100vw - 64px)) !important;
+    grid-template-columns: minmax(0, 1.4fr) minmax(280px, .9fr) !important;
+  }
+
+  .game-modal .modal-comments-column {
+    min-width: 0 !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate3d(32px, 0, 0);
+    transition:
+      padding .4s cubic-bezier(.22, 1, .36, 1),
+      opacity .22s ease,
+      transform .46s cubic-bezier(.22, 1, .36, 1),
+      visibility 0s linear .46s;
+  }
+
+  .game-modal.comments-open .modal-comments-column {
+    padding-right: 30px !important;
+    padding-left: 30px !important;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate3d(0, 0, 0);
+    transition-delay: 0s;
+  }
+
+  .game-modal:not(.comments-open) .modal-comments-column > * {
+    opacity: 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .game-modal .modal-panel,
+  .game-modal.is-open .modal-panel,
+  .game-modal.is-closing .modal-panel {
+    width: 760px !important;
+    grid-template-columns: minmax(0, 760px) minmax(0, 0fr) !important;
+  }
+
+  .game-modal.comments-open .modal-panel,
+  .game-modal.comments-open.is-open .modal-panel,
+  .game-modal.comments-open.is-closing .modal-panel {
+    width: min(1160px, calc(100vw - 64px)) !important;
+    grid-template-columns: minmax(0, 760px) minmax(320px, 1fr) !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .game-modal .modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .game-modal .modal-steam {
+    flex: 1 1 280px;
+  }
+}
+
+@media (max-width: 767px) {
+  .game-modal .modal-comments-toggle img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .game-modal .modal-panel,
+  .game-modal.is-open .modal-panel,
+  .game-modal.is-closing .modal-panel {
+    grid-template-rows: auto minmax(0, 0fr) !important;
+    transition: grid-template-rows .46s cubic-bezier(.22, 1, .36, 1), opacity .16s ease !important;
+  }
+
+  .game-modal.comments-open .modal-panel,
+  .game-modal.comments-open.is-open .modal-panel,
+  .game-modal.comments-open.is-closing .modal-panel {
+    grid-template-rows: auto minmax(0, 1fr) !important;
+  }
+
+  .game-modal .modal-comments-column {
+    min-height: 0 !important;
+    max-height: 0;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate3d(0, -18px, 0);
+    transition:
+      max-height .46s cubic-bezier(.22, 1, .36, 1),
+      padding .4s cubic-bezier(.22, 1, .36, 1),
+      opacity .22s ease,
+      transform .46s cubic-bezier(.22, 1, .36, 1),
+      visibility 0s linear .46s;
+  }
+
+  .game-modal.comments-open .modal-comments-column {
+    max-height: 760px;
+    padding-top: 24px !important;
+    padding-bottom: 30px !important;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate3d(0, 0, 0);
+    transition-delay: 0s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-modal .modal-panel,
+  .game-modal .modal-comments-column {
+    transition-duration: 1ms !important;
+  }
+}

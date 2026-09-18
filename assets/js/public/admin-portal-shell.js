@@ -510,8 +510,6 @@
     portal.setAttribute('aria-hidden','false');
     openButton.setAttribute('aria-expanded','true');
     document.body.classList.add('admin-portal-open');
-    const dialog = portal.querySelector('.admin-portal-dialog');
-    if (dialog) dialog.scrollTop = 0;
     requestAnimationFrame(() => { portal.classList.add('is-open'); closeButton.focus(); });
   }
 

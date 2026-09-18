@@ -32,6 +32,8 @@
       modalVoteActions: [...document.querySelectorAll('[data-vote]')],
       modalLikeCount: document.getElementById('modalLikeCount'),
       modalDislikeCount: document.getElementById('modalDislikeCount'),
+      modalCommentsToggle: document.getElementById('modalCommentsToggle'),
+      modalCommentsColumn: document.getElementById('modalCommentsColumn'),
       modalCommentsList: document.getElementById('modalCommentsList'),
       modalCommentForm: document.getElementById('modalCommentForm'),
       modalCommentInput: document.getElementById('modalCommentInput'),

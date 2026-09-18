@@ -950,11 +950,11 @@
 (() => {
   const panel = document.getElementById('featurePanel');
   const buttons = [...document.querySelectorAll('.coming-soon-trigger')];
-  const closeButton = document.getElementById('featureClose');
+  const dialog = panel?.querySelector('.feature-dialog');
   const kicker = document.getElementById('featureKicker');
   const title = document.getElementById('featureTitle');
   const description = document.getElementById('featureDescription');
-  if (!panel || !buttons.length || !closeButton || !kicker || !title || !description) return;
+  if (!panel || !buttons.length || !dialog || !kicker || !title || !description) return;
   let activeButton = null;
 
   function close() {
@@ -973,9 +973,8 @@
     panel.hidden = false;
     panel.setAttribute('aria-hidden', 'false');
     button.setAttribute('aria-expanded', 'true');
-    closeButton.focus();
+    dialog.focus({ preventScroll: true });
   }));
-  closeButton.addEventListener('click', close);
   panel.addEventListener('click', event => {
     if (event.target.matches('[data-feature-close]')) close();
   });

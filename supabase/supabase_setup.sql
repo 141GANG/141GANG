@@ -156,3 +156,40 @@ create policy "tier settings admin insert" on public.tier_list_settings for inse
 drop policy if exists "tier settings admin update" on public.tier_list_settings;
 create policy "tier settings admin update" on public.tier_list_settings for update using (public.is_site_admin()) with check (public.is_site_admin());
 insert into public.tier_list_settings (id,config) values (1,'[]'::jsonb) on conflict (id) do nothing;
+
+create table if not exists public.tier_list_boards (
+  owner_key text not null check (owner_key in ('sasaavot', 'tankzor', 'rostikfacekid')),
+  list_key text not null check (list_key in ('games', 'food', 'cars')),
+  config jsonb not null default '[]'::jsonb check (jsonb_typeof(config) = 'array'),
+  placements jsonb not null default '[]'::jsonb check (jsonb_typeof(placements) = 'array'),
+  updated_at timestamptz not null default now(),
+  primary key (owner_key, list_key)
+);
+alter table public.tier_list_boards enable row level security;
+drop policy if exists "tier boards public read" on public.tier_list_boards;
+create policy "tier boards public read" on public.tier_list_boards for select using (true);
+drop policy if exists "tier boards admin insert" on public.tier_list_boards;
+create policy "tier boards admin insert" on public.tier_list_boards for insert with check (public.is_site_admin());
+drop policy if exists "tier boards admin update" on public.tier_list_boards;
+create policy "tier boards admin update" on public.tier_list_boards for update using (public.is_site_admin()) with check (public.is_site_admin());
+
+with boards(owner_key, list_key) as (
+  values
+    ('sasaavot', 'games'), ('sasaavot', 'food'), ('sasaavot', 'cars'),
+    ('tankzor', 'games'), ('tankzor', 'food'), ('tankzor', 'cars'),
+    ('rostikfacekid', 'games'), ('rostikfacekid', 'food'), ('rostikfacekid', 'cars')
+), default_config as (
+  select jsonb_build_array(
+    jsonb_build_object('id', 'S', 'label', 'S', 'color', '#e63d3d'),
+    jsonb_build_object('id', 'A', 'label', 'A', 'color', '#e6913d'),
+    jsonb_build_object('id', 'B', 'label', 'B', 'color', '#e6d23d'),
+    jsonb_build_object('id', 'C', 'label', 'C', 'color', '#a5e63d'),
+    jsonb_build_object('id', 'D', 'label', 'D', 'color', '#4be63d')
+  ) as value
+)
+insert into public.tier_list_boards (owner_key, list_key, config)
+select boards.owner_key, boards.list_key, default_config.value
+from boards cross join default_config
+on conflict (owner_key, list_key) do nothing;
+
+notify pgrst, 'reload schema';
