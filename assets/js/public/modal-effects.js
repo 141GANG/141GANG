@@ -8,6 +8,9 @@ function modalInteractionError(error) {
 }
 
 function currentModalGame() {
+  if (state.modalGameOverride && String(state.modalGameOverride.id) === String(state.activeGameId)) {
+    return state.modalGameOverride;
+  }
   return state.games.find(item => String(item.id) === String(state.activeGameId));
 }
 
@@ -77,9 +80,10 @@ function renderModalComments(comments = modalCommentsCache) {
   const count = document.getElementById('modalCommentsCount');
   if (count) count.textContent = String(sortedComments.length);
   elements.modalCommentsList.innerHTML = sortedComments.length ? sortedComments.map(comment => {
+    const pendingSuggestionComment = comment.is_pending_suggestion === true;
     const username = String(comment.username || 'Пользователь').trim();
     const initial = username.charAt(0).toLocaleUpperCase('ru-RU') || 'U';
-    const actions = comment.is_mine || comment.can_delete
+    const actions = !pendingSuggestionComment && (comment.is_mine || comment.can_delete)
       ? `<div class="modal-comment-actions" aria-label="Управление комментарием">
           ${comment.is_mine ? '<button type="button" class="modal-comment-action" data-comment-action="edit">Изменить</button>' : ''}
           <button type="button" class="modal-comment-action is-danger" data-comment-action="delete">Удалить</button>
@@ -87,10 +91,18 @@ function renderModalComments(comments = modalCommentsCache) {
       : '';
     const myReaction = Number(comment.my_reaction) || 0;
     const reactionDisabled = modalViewerSignedIn ? '' : ' disabled';
+    const reactions = pendingSuggestionComment ? '' : `
+          <div class="modal-comment-reactions" aria-label="Оценка комментария">
+            <button aria-label="Нравится" aria-pressed="${myReaction === 1}" class="${myReaction === 1 ? 'is-active' : ''}" data-comment-reaction="1" type="button"${reactionDisabled}><img alt="" aria-hidden="true" src="./assets/images/figma/like.png"><b>${Number(comment.likes) || 0}</b></button>
+            <button aria-label="Не нравится" aria-pressed="${myReaction === -1}" class="${myReaction === -1 ? 'is-active' : ''}" data-comment-reaction="-1" type="button"${reactionDisabled}><img alt="" aria-hidden="true" src="./assets/images/figma/dislike.png"><b>${Number(comment.dislikes) || 0}</b></button>
+          </div>`;
     const edited = comment.updated_at && comment.created_at && new Date(comment.updated_at).getTime() > new Date(comment.created_at).getTime() + 1000
       ? '<span class="modal-comment-edited">изменено</span>'
       : '';
-    return `<article class="modal-comment-item${comment.is_mine ? ' is-own' : ''}" data-comment-id="${escapeHtml(String(comment.id))}">
+    const hiddenNote = pendingSuggestionComment && comment.is_hidden
+      ? '<small>Комментарий скрыт из публичного обсуждения.</small>'
+      : '';
+    return `<article class="modal-comment-item${comment.is_mine ? ' is-own' : ''}${pendingSuggestionComment ? ' is-pending-suggestion' : ''}${comment.is_hidden ? ' is-hidden' : ''}" data-comment-id="${escapeHtml(String(comment.id))}">
       <span class="modal-comment-avatar" aria-hidden="true">${escapeHtml(initial)}</span>
       <div class="modal-comment-body">
         <div class="modal-comment-head"><strong>${escapeHtml(username)}</strong>${actions}</div>
@@ -98,11 +110,9 @@ function renderModalComments(comments = modalCommentsCache) {
         <div class="modal-comment-meta">
           <time datetime="${escapeHtml(String(comment.created_at || ''))}">${escapeHtml(formatDate(comment.created_at, { short: true }))}</time>
           ${edited}
-          <div class="modal-comment-reactions" aria-label="Оценка комментария">
-            <button aria-label="Нравится" aria-pressed="${myReaction === 1}" class="${myReaction === 1 ? 'is-active' : ''}" data-comment-reaction="1" type="button"${reactionDisabled}><img alt="" aria-hidden="true" src="./assets/images/figma/like.png"><b>${Number(comment.likes) || 0}</b></button>
-            <button aria-label="Не нравится" aria-pressed="${myReaction === -1}" class="${myReaction === -1 ? 'is-active' : ''}" data-comment-reaction="-1" type="button"${reactionDisabled}><img alt="" aria-hidden="true" src="./assets/images/figma/dislike.png"><b>${Number(comment.dislikes) || 0}</b></button>
-          </div>
+          ${reactions}
         </div>
+        ${hiddenNote}
       </div>
     </article>`;
   }).join('') : '<p class="modal-comments-empty">Пока нет комментариев. Начните обсуждение.</p>';
@@ -223,9 +233,59 @@ async function loadGameInteractions(gameId) {
   }
 }
 
-function openGameModal(gameId) {
-  const game = state.games.find(item => String(item.id) === String(gameId));
+let pendingSuggestionCommentsRequest = 0;
+
+async function loadPendingSuggestionComments(game) {
+  const requestId = ++pendingSuggestionCommentsRequest;
+  const suggestionId = Number(game?.id);
+  if (!Number.isFinite(suggestionId) || !elements.modalCommentsList) return;
+
+  const normalize = (comment, index) => ({
+    id: `suggestion-${comment.comment_id ?? comment.id ?? index}`,
+    username: comment.username || `Пользователь ${index + 1}`,
+    body: comment.body || '',
+    created_at: comment.created_at,
+    updated_at: comment.updated_at,
+    is_hidden: comment.is_hidden === true,
+    is_pending_suggestion: true,
+    likes: 0,
+    dislikes: 0,
+    my_reaction: 0,
+    is_mine: false,
+    can_delete: false
+  });
+
+  try {
+    const client = typeof getConfiguredClient === 'function' ? getConfiguredClient() : null;
+    let comments = [];
+    if (client) {
+      const { data, error } = await client.rpc('get_admin_suggestion_support_comments_v2', {
+        p_suggestion_id: suggestionId
+      });
+      if (error) throw error;
+      comments = Array.isArray(data) ? data : [];
+    } else {
+      comments = Array.isArray(window.CR7_PENDING_SUGGESTIONS?.[String(suggestionId)]?.suggestion_comments)
+        ? window.CR7_PENDING_SUGGESTIONS[String(suggestionId)].suggestion_comments
+        : [];
+    }
+
+    if (requestId !== pendingSuggestionCommentsRequest
+      || String(state.activeGameId) !== String(suggestionId)
+      || !state.modalGameOverride) return;
+    renderModalComments(comments.filter(comment => String(comment.body || '').trim()).map(normalize));
+  } catch (error) {
+    if (requestId !== pendingSuggestionCommentsRequest
+      || String(state.activeGameId) !== String(suggestionId)
+      || !state.modalGameOverride) return;
+    elements.modalCommentsList.innerHTML = `<p class="modal-comments-empty">${escapeHtml(modalInteractionError(error))}</p>`;
+  }
+}
+
+function openGameModal(gameId, gameOverride = null, options = {}) {
+  const game = gameOverride || state.games.find(item => String(item.id) === String(gameId));
   if (!game) return;
+  state.modalGameOverride = gameOverride ? game : null;
   const meta = getReleaseMeta(game);
   const coverUrl = safeExternalUrl(game.cover_url);
   const steamUrl = safeExternalUrl(game.steam_url, ['steampowered.com', 'steamcommunity.com']);
@@ -268,8 +328,26 @@ function openGameModal(gameId) {
   requestAnimationFrame(() => {
     elements.modal.querySelector('.modal-panel')?.focus({ preventScroll: true });
   });
-  loadGameInteractions(game.id);
+  if (state.modalGameOverride) {
+    // A pending suggestion has no published game row yet. Keep the shared
+    // modal usable without querying interaction RPCs for a non-catalog id.
+    modalViewerSignedIn = false;
+    elements.modalAuthHint.hidden = true;
+    if (elements.modalCommentForm) elements.modalCommentForm.hidden = true;
+    elements.modalVoteActions.forEach(button => { button.disabled = true; });
+    renderModalComments([]);
+    loadPendingSuggestionComments(game);
+    if (options.openComments) setModalCommentsOpen(true);
+  } else {
+    loadGameInteractions(game.id);
+  }
 }
+
+window.openAdminPendingGameModal = function openAdminPendingGameModal(game, options = {}) {
+  if (!game || game.id == null) return false;
+  openGameModal(game.id, game, options);
+  return true;
+};
 
 async function voteForGame(direction) {
   const game = currentModalGame();
@@ -433,6 +511,7 @@ function closeGameModal() {
   modalViewerSignedIn = false;
   setModalCommentsOpen(false);
   state.activeGameId = null;
+  state.modalGameOverride = null;
   window.setTimeout(() => {
     elements.modal.hidden = true;
     elements.modal.classList.remove('is-closing');

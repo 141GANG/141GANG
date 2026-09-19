@@ -240,14 +240,11 @@
 
     const steamAction = actions.querySelector('.moderation-steam[href]');
     const titleControl = card.querySelector('.moderation-title-open');
-    if (steamAction && titleControl && titleControl.tagName !== 'A') {
-      const titleLink = document.createElement('a');
-      titleLink.className = titleControl.className;
-      titleLink.href = steamAction.getAttribute('href');
-      titleLink.target = '_blank';
-      titleLink.rel = 'noopener noreferrer';
-      titleLink.textContent = titleControl.textContent;
-      titleControl.replaceWith(titleLink);
+    // Pending game titles open the same game modal as the published catalog.
+    // Steam remains available inside that modal, so the separate action can
+    // be removed below without turning the title into an external link.
+    if (titleControl && !titleControl.dataset.suggestionId) {
+      titleControl.dataset.suggestionId = card.dataset.suggestionId || '';
     }
 
     const publishButton = actions.querySelector('[data-action="approve"]');
@@ -467,6 +464,21 @@
 
   moderationList?.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
+    const pendingTrigger = target?.closest('.moderation-card:not(.admin-catalog-card) .moderation-title-open, .moderation-card:not(.admin-catalog-card) .moderation-support-comments-open');
+    if (pendingTrigger) {
+      const card = pendingTrigger.closest('.moderation-card');
+      const suggestionId = pendingTrigger.dataset.suggestionId || card?.dataset.suggestionId;
+      const game = window.CR7_PENDING_SUGGESTIONS?.[String(suggestionId || '')];
+      if (game && typeof window.openAdminPendingGameModal === 'function') {
+        event.preventDefault();
+        event.stopPropagation();
+        hoistCatalogGameModal();
+        window.openAdminPendingGameModal(game, {
+          openComments: pendingTrigger.classList.contains('moderation-support-comments-open')
+        });
+        return;
+      }
+    }
     const button = target?.closest('[data-published-comments]');
     if (!button) return;
     event.preventDefault();

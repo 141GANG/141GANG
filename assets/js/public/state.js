@@ -49,7 +49,7 @@
       libraryFiltersReset: document.getElementById('libraryFiltersReset')
     };
 
-    const state = { games: [], query: '', filter: 'all', libraryFilters: new Set(), sort: 'release-newest', channel: null, activeGameId: null, librarySchemaReady: true, tierSchemaReady: true, reputationSchemaReady: true, reputationScores: {}, reputationStats: {}, currentVotes: {} };
+    const state = { games: [], query: '', filter: 'all', libraryFilters: new Set(), sort: 'release-newest', channel: null, activeGameId: null, modalGameOverride: null, librarySchemaReady: true, tierSchemaReady: true, reputationSchemaReady: true, reputationScores: {}, reputationStats: {}, currentVotes: {} };
     const TWITCH_LOGO_DATA = './assets/images/figma/game-placeholder.svg';
     const EMPTY_AUTHOR_COMMENT = '\u2063';
     let lastFocusedElement = null;

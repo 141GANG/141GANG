@@ -910,6 +910,8 @@
     }
 
     elements.moderationList.innerHTML = items.map(item => {
+      window.CR7_PENDING_SUGGESTIONS = window.CR7_PENDING_SUGGESTIONS || {};
+      window.CR7_PENDING_SUGGESTIONS[String(item.id)] = item;
       const cover = safeUrl(item.cover_url);
       const steam = safeUrl(item.steam_url, ['steampowered.com', 'steamcommunity.com']);
       const reactions = moderationReactionStats(item);
