@@ -60,6 +60,46 @@ function setConnection(status, text) {
 
     }
 
+    function renderRecentLibraryGame() {
+      const button = elements.heroRecentGame;
+      if (!button) return;
+
+      const game = [...state.games]
+        .filter(item => ['completed', 'dropped'].includes(String(item.library_status || '')))
+        .sort((left, right) => {
+          const rightTime = Date.parse(right.updated_at || right.created_at || '') || 0;
+          const leftTime = Date.parse(left.updated_at || left.created_at || '') || 0;
+          return rightTime - leftTime || Number(right.id || 0) - Number(left.id || 0);
+        })[0] || null;
+
+      if (!game) {
+        button.disabled = true;
+        button.removeAttribute('data-game-id');
+        button.removeAttribute('data-status');
+        button.setAttribute('aria-label', 'Игр с отметкой пока нет');
+        elements.heroRecentLabel.textContent = 'Последнее сыгранное';
+        elements.heroRecentTitle.textContent = 'Игр с отметкой пока нет';
+        elements.heroRecentCover.src = './assets/images/figma/game-placeholder.svg';
+        elements.heroRecentCover.alt = '';
+        return;
+      }
+
+      const dropped = game.library_status === 'dropped';
+      const cover = safeExternalUrl(game.cover_url) || './assets/images/figma/game-placeholder.svg';
+      button.disabled = false;
+      button.dataset.gameId = String(game.id);
+      button.dataset.status = dropped ? 'dropped' : 'completed';
+      button.setAttribute('aria-label', `Открыть игру ${game.title}`);
+      elements.heroRecentLabel.textContent = dropped ? 'Последнее дропнутое' : 'Последнее сыгранное';
+      elements.heroRecentTitle.textContent = game.title;
+      elements.heroRecentCover.src = cover;
+      elements.heroRecentCover.alt = `Обложка игры ${game.title}`;
+      elements.heroRecentCover.onerror = () => {
+        elements.heroRecentCover.onerror = null;
+        elements.heroRecentCover.src = './assets/images/figma/game-placeholder.svg';
+      };
+    }
+
     function renderHero(sortedGames) {
       const upcoming = sortedGames.filter(game => {
         const meta = getReleaseMeta(game);
@@ -74,6 +114,7 @@ function setConnection(status, text) {
       const featured = nearest || newest;
 
       renderQuickGames(latestReleased, nearest);
+      renderRecentLibraryGame();
       elements.totalCount.textContent = String(state.games.length);
       elements.upcomingCount.textContent = String(upcoming.length);
       elements.nearestDate.textContent = nearest ? formatDate(nearest.release_date, { short: true }) : '—';

@@ -154,7 +154,7 @@ body.standalone-tier .tier-panel {
   cursor: default;
 }
 
-.tier-creators .tier-add-owner:disabled {
+.tier-creators .tier-add-owner {
   display: grid;
   width: 76rem;
   min-width: 76rem;
@@ -174,8 +174,37 @@ body.standalone-tier .tier-panel {
   user-select: none;
 }
 
-.tier-creators .tier-add-owner:disabled:hover,
-.tier-creators .tier-add-owner:disabled:focus-visible {
+.tier-creators .tier-add-owner-icon {
+  position: relative;
+  width: 18rem;
+  height: 18rem;
+  display: block;
+  pointer-events: none;
+}
+
+.tier-creators .tier-add-owner-icon::before,
+.tier-creators .tier-add-owner-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 2rem;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.tier-creators .tier-add-owner-icon::before {
+  width: 14rem;
+  height: 3rem;
+}
+
+.tier-creators .tier-add-owner-icon::after {
+  width: 3rem;
+  height: 14rem;
+}
+
+.tier-creators .tier-add-owner:hover,
+.tier-creators .tier-add-owner:focus-visible {
   color: #fff;
   background: #e63d3d;
   filter: brightness(1.08);
@@ -429,6 +458,75 @@ body.standalone-tier .tier-panel {
 body:not(.standalone-tier) .tier-panel .tier-dialog {
   background: #121212 !important;
   opacity: 1 !important;
+}
+
+/* Desktop standalone view is one continuous page. The browser/iframe owns
+   the only vertical scrollbar; the board and side menu move with the page. */
+@media (min-width: 1101px) {
+  html.standalone-tier,
+  html.standalone-tier.lenis-stopped {
+    width: 100%;
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  body.standalone-tier,
+  body.standalone-tier.tier-open,
+  body.standalone-tier.modal-scroll-locked {
+    width: 100%;
+    height: auto !important;
+    min-height: 100dvh !important;
+    display: block;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+
+  body.standalone-tier > .site-header {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 50;
+  }
+
+  body.standalone-tier .tier-panel {
+    position: relative !important;
+    inset: auto !important;
+    width: 100%;
+    height: auto !important;
+    min-height: calc(100dvh - 100rem) !important;
+    overflow: visible !important;
+  }
+
+  body.standalone-tier .tier-dialog,
+  body.standalone-tier .tier-panel.is-open .tier-dialog {
+    height: auto !important;
+    min-height: calc(100dvh - 100rem) !important;
+    display: block;
+    padding: 30rem 0 80rem !important;
+    overflow: visible !important;
+  }
+
+  body.standalone-tier .tier-workspace {
+    min-height: 0;
+    align-items: start;
+    overflow: visible;
+  }
+
+  body.standalone-tier .tier-board {
+    min-height: 0;
+    align-content: start;
+    overflow: visible !important;
+  }
+
+  body.standalone-tier .tier-list-menu {
+    position: static;
+    align-self: start;
+  }
+
+  body.standalone-tier .tier-creators {
+    justify-content: center;
+  }
 }
 
 .tier-admin-tools button {

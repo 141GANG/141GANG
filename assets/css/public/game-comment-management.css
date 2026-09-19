@@ -1206,3 +1206,104 @@ html body .game-modal:not([hidden]) .modal-panel {
     scrollbar-color: #393939 rgba(255, 255, 255, .025);
   }
 }
+
+/* On phones the game column always fills at least one screen. Its action row
+   sits at the bottom when the copy is short; longer copy remains fully visible
+   and naturally extends the modal's existing page-level scroll container. */
+@media (max-width: 767px) {
+  .game-modal .modal-game-column {
+    min-height: calc(100dvh - 24px) !important;
+    display: flex !important;
+    flex-direction: column;
+    overflow: visible !important;
+  }
+
+  .game-modal .modal-media {
+    flex: 0 0 auto;
+  }
+
+  .game-modal .modal-content {
+    min-height: 0;
+    display: flex !important;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .game-modal #modalDescription {
+    max-height: none !important;
+    display: block !important;
+    overflow: visible !important;
+    -webkit-box-orient: initial;
+    -webkit-line-clamp: unset;
+  }
+
+  .game-modal .modal-footer {
+    order: 2;
+    flex: 0 0 auto;
+    margin: auto 0 0 !important;
+    padding-top: 16px;
+  }
+
+  .game-modal .modal-reaction-notice {
+    order: 1;
+  }
+
+  .game-modal .modal-comments-header {
+    grid-template-columns: minmax(0, 1fr) 118px !important;
+    align-items: end !important;
+    gap: 8px !important;
+  }
+
+  .game-modal .modal-comments-header > div,
+  .game-modal .modal-comments-header h3 {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    font-size: clamp(24px, 7vw, 28px) !important;
+    white-space: nowrap;
+  }
+
+  .game-modal .modal-comments-header h3 b {
+    flex: 0 0 auto;
+    font-size: 20px !important;
+  }
+
+  .game-modal .modal-comment-sort {
+    width: 118px !important;
+    justify-self: end;
+  }
+
+  .game-modal .modal-comment-sort summary {
+    min-height: 44px;
+    padding: 6px 26px 6px 10px;
+  }
+
+  .game-modal .modal-comment-sort summary span {
+    font-size: 9px;
+  }
+
+  .game-modal .modal-comment-sort summary b {
+    font-size: 12px;
+  }
+
+  .game-modal .modal-comment-sort-menu {
+    right: 0 !important;
+    left: auto !important;
+    width: min(200px, calc(100vw - 64px)) !important;
+    max-width: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .game-modal .modal-comments-header {
+    grid-template-columns: minmax(0, 1fr) 104px !important;
+  }
+
+  .game-modal .modal-comment-sort {
+    width: 104px !important;
+  }
+
+  .game-modal .modal-comment-sort summary b {
+    font-size: 11px;
+  }
+}

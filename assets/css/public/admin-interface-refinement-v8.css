@@ -849,9 +849,81 @@
   }
 }
 
-/* Правая панель фильтров — исходная геометрия v8. */
+/* The game filters belong to the workspace grid, not to the viewport.
+   This keeps them aligned with the adjacent panels and moving on scroll. */
 @media (min-width: 1101px) {
-  .admin-portal .proposal-filter-box[open],
+  .admin-portal #adminSection[data-admin-view="games"] > .proposal-filter-box:not(.admin-media-filter-box)[open] {
+    position: absolute !important;
+    top: 16rem !important;
+    right: 0 !important;
+    left: auto !important;
+    width: 415rem !important;
+    max-height: none;
+    overflow: hidden;
+    margin: 0 !important;
+  }
+
+  /* Only the card list scrolls. Navigation, tabs, tools and filters remain
+     fixed inside the height-constrained management workspace. */
+  body.admin-portal-open {
+    overflow: hidden !important;
+  }
+
+  .admin-portal .admin-portal-dialog,
+  .admin-portal .admin-portal-body,
+  .admin-portal #adminSection[data-admin-view="games"] {
+    min-height: 0;
+    overflow: hidden !important;
+  }
+
+  .admin-portal[data-portal-mode="proposal"] .admin-portal-body {
+    box-sizing: border-box;
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+
+  .admin-portal #adminSection[data-admin-view="games"] {
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+
+  .admin-portal #adminSection[data-admin-view="games"] .suggestion-moderation {
+    display: grid !important;
+    grid-template-rows: auto auto minmax(0, 1fr) !important;
+    align-content: stretch;
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .admin-portal #adminSection[data-admin-view="games"] :is(
+    .proposal-admin-nav,
+    .suggestion-moderation-filters,
+    .proposal-game-tools
+  ) {
+    position: static !important;
+    inset: auto !important;
+  }
+
+  .admin-portal #adminSection[data-admin-view="games"] :is(
+    .proposal-admin-nav,
+    .suggestion-moderation-filters,
+    .proposal-game-tools,
+    .proposal-filter-box
+  ) {
+    overflow: hidden;
+  }
+
+  .admin-portal #adminSection[data-admin-view="games"] .suggestion-moderation-list,
+  .admin-portal #adminSection[data-admin-view="games"] .suggestion-moderation-list.is-catalog-list {
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
   .admin-portal .catalog-sort {
     position: fixed !important;
     top: 110rem !important;
@@ -863,7 +935,7 @@
 }
 
 @media (max-width: 1500px) and (min-width: 1101px) {
-  .admin-portal .proposal-filter-box[open],
+  .admin-portal #adminSection[data-admin-view="games"] > .proposal-filter-box:not(.admin-media-filter-box)[open],
   .admin-portal .catalog-sort {
     width: 330rem !important;
   }

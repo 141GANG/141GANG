@@ -9,7 +9,7 @@
     ['style','adminCardIconsStyles','./assets/css/public/admin-card-icons.css?v=1.1'],
     ['style','figmaTypographyFinalStyles','./assets/css/public/figma-typography-final.css?v=4.7'],
     ['style','e2eResponsiveP0Styles','./assets/css/public/e2e-responsive-p0.css?v=1.2-nav-center'],
-    ['style','gameCommentManagementStyles','./assets/css/public/game-comment-management.css?v=2.8-mobile-scroll'],
+    ['style','gameCommentManagementStyles','./assets/css/public/game-comment-management.css?v=2.12-mobile-compact-sort'],
     ['style','adminLoginFinalStyles','./assets/css/public/admin-login-final.css?v=1.2-fit-no-border'],
     ['script','proposalWindowsFigmaScript','./assets/js/public/proposal-windows-figma.js?v=3.7-flat-media'],
     ['script','adminCardIconsScriptV2','./assets/js/public/admin-card-icons-v2.js?v=2.0'],
@@ -201,7 +201,7 @@
     menu.addEventListener('click', event => event.stopPropagation());
   }
 
-  // The auction is live again, so the services menu behaves like the other menus.
+  // The services menu is available; its placeholder entries are blocked below.
   if (servicesToggle) servicesToggle.removeAttribute('aria-disabled');
   if (servicesMenu) servicesMenu.hidden = true;
   togglePopup(servicesToggle, servicesMenu, () => closeCatalogMenus());
@@ -282,13 +282,13 @@
   });
 
   servicesMenu?.addEventListener('click', event => {
-    if (event.target.closest('.appeals-trigger')) {
+    if (event.target.closest('.auction-trigger, .appeals-trigger')) {
       event.preventDefault();
-      event.stopPropagation();
+      event.stopImmediatePropagation();
       return;
     }
     if (event.target.closest('button')) setPopup(servicesToggle, servicesMenu, false);
-  });
+  }, true);
 
   document.addEventListener('click', event => {
     if (!event.target.closest('.nav-menu-wrap')) setPopup(servicesToggle, servicesMenu, false);

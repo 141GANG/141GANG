@@ -26,11 +26,11 @@
 <link href="./assets/css/public/admin-portal.css?v=1.2-hidden-trigger" rel="stylesheet"/>
 <link href="./assets/css/public/suggestions.css?v=3.4-catalog-comments" rel="stylesheet"/>
 <link href="./assets/css/public/media-submissions.css?v=4.1" rel="stylesheet"/>
-<link href="./assets/css/public/figma-refresh.css?v=3.14-appeals-nav" rel="stylesheet"/>
+<link href="./assets/css/public/figma-refresh.css?v=3.17-library-stamps" rel="stylesheet"/>
 <link href="./assets/css/public/site-auth.css?v=1.8-toast-all" rel="stylesheet"/>
 <link href="./assets/css/public/figma-redesign.css?v=2.4" rel="stylesheet"/>
 <link href="./assets/css/public/admin-druk-title-final.css?v=1.0" rel="stylesheet"/>
-<link href="./assets/css/public/figma-main-final.css?v=2.3-management-sync" id="figmaMainFinalStyles" rel="stylesheet"/>
+<link href="./assets/css/public/figma-main-final.css?v=2.4-services-state" id="figmaMainFinalStyles" rel="stylesheet"/>
 <link href="./assets/css/public/admin-figma-final.css?v=1.0" id="adminFigmaFinalStyles" rel="stylesheet"/>
 <link href="./assets/css/public/proposal-windows-figma.css?v=4.9-safe-area" id="proposalWindowsFigmaStyles" rel="stylesheet"/>
 <link href="./assets/css/public/proposal-media-figma-exact.css?v=4.2-no-fouc" id="proposalMediaFigmaExactStyles" rel="stylesheet"/>
@@ -38,15 +38,16 @@
 <link href="./assets/css/public/admin-card-icons.css?v=1.1" id="adminCardIconsStyles" rel="stylesheet"/>
 <link href="./assets/css/public/figma-typography-final.css?v=4.7" id="figmaTypographyFinalStyles" rel="stylesheet"/>
 <link href="./assets/css/public/e2e-responsive-p0.css?v=1.2-nav-center" id="e2eResponsiveP0Styles" rel="stylesheet"/>
-<link href="./assets/css/public/game-comment-management.css?v=2.8-mobile-scroll" id="gameCommentManagementStyles" rel="stylesheet"/>
+<link href="./assets/css/public/game-comment-management.css?v=2.12-mobile-compact-sort" id="gameCommentManagementStyles" rel="stylesheet"/>
 <link href="./assets/css/public/admin-login-final.css?v=1.2-fit-no-border" id="adminLoginFinalStyles" rel="stylesheet"/>
 <script>document.documentElement.classList.add('premium-motion-pending');</script>
 <link href="./assets/css/public/premium-motion.css?v=1.1" id="premiumMotionStyles" rel="stylesheet"/>
 <link href="./assets/css/public/footer-developers.css?v=1.0" id="footerDevelopersStyles" rel="stylesheet"/>
 <link href="./assets/css/public/feature-coming-soon.css?v=1.0" id="featureComingSoonStyles" rel="stylesheet"/>
 <link href="./assets/css/public/game-comments-drawer.css?v=1.0" id="gameCommentsDrawerStyles" rel="stylesheet"/>
-<link href="./assets/css/public/tier-list-figma.css?v=1.9-disabled-hover" id="tierListFigmaStyles" rel="stylesheet"/>
+<link href="./assets/css/public/tier-list-figma.css?v=2.3-centered-add-button" id="tierListFigmaStyles" rel="stylesheet"/>
 <link href="./assets/css/public/standalone-header-consistency.css?v=1.2-shared-single-row" id="standaloneHeaderConsistencyStyles" rel="stylesheet"/>
+<link href="./assets/css/public/hero-recent-game.css?v=1.0" id="heroRecentGameStyles" rel="stylesheet"/>
 <script defer id="premiumMotionScript" src="./assets/js/public/premium-motion.js?v=1.5-independent-game-modal"></script>
 <noscript><style>.premium-motion-pending *{opacity:1!important;filter:none!important;transform:none!important}</style></noscript>
 </head>
@@ -63,15 +64,15 @@
 
 <header class="site-header">
 <div class="shell nav">
-<a aria-label="141 Gang — на главную" class="brand" href="#top"><img alt="141 Gang" class="brand-logo" src="./assets/images/figma/141gang.svg"/></a>
+<a aria-label="141 Gang — на главную" class="brand" href="./index.html" target="_top"><img alt="141 Gang" class="brand-logo" src="./assets/images/figma/141gang.svg"/></a>
 <nav aria-label="Основная навигация" class="nav-center">
 <button aria-controls="gangPanel" aria-expanded="false" class="nav-link gang-trigger" id="gangOpen" type="button">Стримы</button>
 <a class="nav-link" href="#catalog">Каталог</a>
 <div class="nav-menu-wrap">
 <button aria-controls="servicesMenu" aria-expanded="false" class="nav-link nav-menu-toggle" id="servicesToggle" type="button">Сервисы<img alt="" aria-hidden="true" src="./assets/images/figma/chevron.svg"/></button>
 <div aria-label="Сервисы" class="nav-dropdown" hidden id="servicesMenu">
-<a class="tier-list-trigger" href="./index.html?view=tier">Тир-лист</a>
-<button aria-controls="auctionPanel" aria-expanded="false" class="auction-trigger" id="auctionOpen" type="button">Аукцион</button>
+<a class="tier-list-trigger" href="./tier-list.html">Тир-лист</a>
+<button aria-disabled="true" aria-label="Аукцион пока недоступен" class="auction-trigger" id="auctionOpen" type="button">Аукцион</button>
 <button aria-disabled="true" aria-label="Апелляции пока недоступны" class="appeals-trigger" id="appealsOpen" type="button">Апелляции</button>
 </div>
 </div>
@@ -88,6 +89,13 @@
 <p>От общества — для общества. Предлагай. Голосуй. Выбирай, что будет дальше.</p>
 <button aria-controls="contentMenuPanel" aria-label="Перейти к выбору контента" class="content-menu-toggle" id="contentMenuToggle" type="button"><span>Предложить контент</span><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button>
 </div>
+<button aria-live="polite" class="hero-recent-game" disabled id="heroRecentGame" type="button">
+<span class="hero-recent-label" id="heroRecentLabel">Последнее сыгранное</span>
+<span class="hero-recent-media">
+<img alt="" class="hero-recent-cover" id="heroRecentCover" src="./assets/images/figma/game-placeholder.svg"/>
+<span class="hero-recent-title" id="heroRecentTitle">Игр с отметкой пока нет</span>
+</span>
+</button>
 <div aria-hidden="true" class="hero-data-registry">
 <strong id="totalCount">0</strong><strong id="upcomingCount">0</strong><strong id="nearestDate">—</strong>
 <div id="nextRelease" tabindex="-1"><span id="nextLabel"></span><span id="nextTitle"></span><span id="nextDateText"></span><span id="nextCountdown"></span><span hidden id="nextCoop"></span></div>
@@ -515,7 +523,13 @@
 <h1 class="visually-hidden" id="tierListTitle">Тир-лист</h1>
 <nav aria-label="Автор тир-листа" class="tier-creators">
 <button aria-current="page" class="is-active" data-tier-owner="sasaavot" type="button">Sasavot</button>
-<button aria-disabled="true" aria-label="Добавление стримера пока недоступно" class="tier-add-owner" disabled type="button">+</button>
+<button data-tier-owner="rostikfacekid" type="button">Rostikfacekid</button>
+<button data-tier-owner="helin139" type="button">Helin139</button>
+<button data-tier-owner="formixyouknow" type="button">Formixyouknow</button>
+<button data-tier-owner="tankzor" type="button">Tankzor</button>
+<button data-tier-owner="r4dom1r" type="button">R4dom1r</button>
+<button data-tier-owner="poisonika" type="button">Poisonika</button>
+<button aria-disabled="true" aria-label="Добавление стримера пока недоступно" class="tier-add-owner" type="button"><span aria-hidden="true" class="tier-add-owner-icon"></span></button>
 </nav>
 <div class="tier-workspace">
 <div class="tier-board" id="tierBoard" aria-live="polite"></div>
@@ -573,7 +587,7 @@
 </div>
 </div>
 <footer class="site-footer" id="siteFooter"><div class="shell footer-developers-inner"><div aria-live="polite" class="footer-developers" id="footerDevelopers"><button aria-expanded="false" class="footer-developers-trigger" id="footerDevelopersTrigger" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/inf-icon.png"/><span>О разработчиках</span></button><p aria-hidden="true" class="footer-developers-credits" id="footerDevelopersCredits">@tankzor, @archivebtw, @max_vopros, @OBWECTBO141</p></div></div></footer>
-<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.7-toast-all"></script><script src="./assets/js/public/state.js?v=4.2-pending-game-modal"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.0"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.7-pending-suggestion-comments"></script><script src="./assets/js/public/tier-list.js?v=5.2-configured-client"></script><script src="./assets/js/public/suggestions.js?v=4.11-pending-game-modal"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script async id="twitchPlayerSdk" src="https://player.twitch.tv/js/embed/v1.js"></script><script src="./assets/js/public/gang.js?v=3.3"></script><script src="./assets/js/public/auction.js?v=5.1-feature-dialog"></script><script src="./assets/js/public/admin-portal.js?v=3.3"></script><script src="./assets/js/public/admin-portal-shell.js?v=4.9-pending-suggestion-comments"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.4-tier-event"></script><script src="./assets/js/public/figma-ui.js?v=10.11-appeals-trigger"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
+<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.7-toast-all"></script><script src="./assets/js/public/state.js?v=4.3-recent-game"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.1-recent-game"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.7-pending-suggestion-comments"></script><script src="./assets/js/public/tier-list.js?v=5.2-configured-client"></script><script src="./assets/js/public/suggestions.js?v=4.11-pending-game-modal"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script async id="twitchPlayerSdk" src="https://player.twitch.tv/js/embed/v1.js"></script><script src="./assets/js/public/gang.js?v=3.3"></script><script src="./assets/js/public/auction.js?v=5.1-feature-dialog"></script><script src="./assets/js/public/admin-portal.js?v=3.3"></script><script src="./assets/js/public/admin-portal-shell.js?v=5.4-filter-top-alignment"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.5-recent-game"></script><script src="./assets/js/public/figma-ui.js?v=10.14-mobile-compact-sort"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
 (() => {
   const view = new URLSearchParams(location.search).get('view');
   const targets = {tier: 'tierListPanel', auction: 'auctionPanel', admin: 'adminPortal'};
@@ -589,7 +603,8 @@
   }
   [...document.body.children].forEach(element => {
     const standaloneInteractive = ['site-header', 'gang-panel', 'suggestions-panel', 'suggestion-comments-panel', 'media-panel', 'site-auth-panel'].some(className => element.classList.contains(className));
-    if (element !== target && element.tagName !== 'SCRIPT' && element.tagName !== 'STYLE' && !(view === 'admin' && standaloneInteractive)) {
+    const keepTierHeader = view === 'tier' && window.matchMedia('(min-width: 1101px)').matches && element.classList.contains('site-header');
+    if (element !== target && element.tagName !== 'SCRIPT' && element.tagName !== 'STYLE' && !(view === 'admin' && standaloneInteractive) && !keepTierHeader) {
       element.hidden = true;
       element.style.setProperty('display', 'none', 'important');
     }

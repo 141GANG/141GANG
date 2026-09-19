@@ -11,7 +11,7 @@
       return window.CR7_SUPABASE_CLIENT;
     }
 
-    const PUBLIC_GAME_FIELDS = 'id,title,steam_url,cover_url,description,author_comment,created_at,display_order,steam_app_id,release_date,release_date_text,coming_soon,steam_synced_at,is_coop,coop_type,coop_min_players,coop_max_players,coop_source,players_min,players_max,player_count_source';
+    const PUBLIC_GAME_FIELDS = 'id,title,steam_url,cover_url,description,author_comment,created_at,updated_at,display_order,steam_app_id,release_date,release_date_text,coming_soon,steam_synced_at,is_coop,coop_type,coop_min_players,coop_max_players,coop_source,players_min,players_max,player_count_source';
 
     function runPublicRequest(client, operation) {
       return window.CR7_AUTH?.runPublicRequest
@@ -224,6 +224,10 @@
       const button = event.target.closest('.quick-game-card');
       if (!button || !button.dataset.gameId) return;
       openGameModal(button.dataset.gameId);
+    });
+
+    elements.heroRecentGame?.addEventListener('click', () => {
+      if (elements.heroRecentGame.dataset.gameId) openGameModal(elements.heroRecentGame.dataset.gameId);
     });
 
     elements.modalClose.addEventListener('click', closeGameModal);

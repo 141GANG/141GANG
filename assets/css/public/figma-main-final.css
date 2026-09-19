@@ -254,8 +254,7 @@ body > footer {
   }
 }
 
-/* Muted navigation tone from the Figma header; Management remains admin-only. */
-#servicesToggle,
+/* Management stays muted; Services is a fully opaque navigation control. */
 #adminPortalOpen {
   opacity: .5 !important;
 }
@@ -264,7 +263,7 @@ body > footer {
 #servicesToggle:hover,
 #servicesToggle:focus-visible,
 #servicesToggle[aria-expanded="true"] {
-  opacity: .5 !important;
+  opacity: 1 !important;
 }
 
 #servicesToggle {

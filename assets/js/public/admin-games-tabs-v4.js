@@ -194,6 +194,13 @@
     } else if (sort) {
       document.querySelector('.proposal-game-tools')?.appendChild(sort);
     }
+
+    // Keep the published-games filters in the same workspace column as the
+    // pending-games filters. This prevents viewport-fixed positioning and
+    // makes both panels follow the shared admin layout consistently.
+    if (adminSection && box.parentElement !== adminSection) {
+      adminSection.appendChild(box);
+    }
     return box;
   }
 

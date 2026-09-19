@@ -1,0 +1,147 @@
+.hero-recent-game {
+  position: absolute;
+  right: 0;
+  bottom: 40rem;
+  z-index: 2;
+  box-sizing: border-box;
+  width: 410rem;
+  min-height: 250rem;
+  display: flex;
+  flex-direction: column;
+  gap: 13rem;
+  padding: 18rem;
+  overflow: hidden;
+  border: 0;
+  border-radius: 6rem;
+  color: #0b0b0b;
+  background: #f0f0f0;
+  box-shadow: none;
+  text-align: left;
+  transition: transform .24s ease, background .24s ease;
+}
+
+.hero-recent-game:not(:disabled):hover,
+.hero-recent-game:not(:disabled):focus-visible {
+  background: #fff;
+  transform: translateY(-4rem);
+}
+
+.hero-recent-game:focus-visible {
+  outline: 3rem solid #e63d3d;
+  outline-offset: 4rem;
+}
+
+.hero-recent-game:disabled {
+  cursor: default;
+}
+
+.hero-recent-label {
+  display: block;
+  color: #0b0b0b;
+  font-family: var(--font-body);
+  font-size: 28rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+
+.hero-recent-media {
+  position: relative;
+  min-height: 185rem;
+  display: block;
+  overflow: hidden;
+  border-radius: 6rem;
+  background: #202020;
+}
+
+.hero-recent-media::after {
+  position: absolute;
+  inset: 32% 0 0;
+  z-index: 1;
+  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, .88));
+  content: '';
+  pointer-events: none;
+}
+
+.hero-recent-cover {
+  width: 100%;
+  height: 100%;
+  min-height: 185rem;
+  display: block;
+  object-fit: cover;
+  transition: transform .5s cubic-bezier(.16, 1, .3, 1);
+}
+
+.hero-recent-game:not(:disabled):hover .hero-recent-cover,
+.hero-recent-game:not(:disabled):focus-visible .hero-recent-cover {
+  transform: scale(1.035);
+}
+
+.hero-recent-title {
+  position: absolute;
+  right: 16rem;
+  bottom: 12rem;
+  left: 16rem;
+  z-index: 2;
+  overflow: hidden;
+  color: #fff;
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
+  font-size: 40rem;
+  font-weight: 900;
+  line-height: .88;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (max-width: 1500px) {
+  .hero-recent-game {
+    width: 360rem;
+    min-height: 220rem;
+    padding: 15rem;
+  }
+
+  .hero-recent-label { font-size: 24rem; }
+  .hero-recent-media,
+  .hero-recent-cover { min-height: 162rem; }
+  .hero-recent-title { font-size: 34rem; }
+}
+
+@media (max-width: 1100px) and (min-width: 721px) {
+  .hero-recent-game {
+    right: 0;
+    bottom: 30rem;
+    width: min(360rem, 38vw);
+  }
+
+  .hero-intro {
+    width: min(520rem, 54vw) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero {
+    min-height: 950rem !important;
+  }
+
+  .hero-recent-game {
+    right: 0;
+    bottom: 184rem;
+    left: 0;
+    width: 100%;
+    min-height: 194rem;
+    gap: 10rem;
+    padding: 12rem;
+  }
+
+  .hero-recent-label { font-size: 20rem; }
+  .hero-recent-media,
+  .hero-recent-cover { min-height: 148rem; }
+  .hero-recent-title {
+    right: 12rem;
+    bottom: 10rem;
+    left: 12rem;
+    font-size: 30rem;
+  }
+}

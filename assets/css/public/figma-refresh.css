@@ -308,8 +308,8 @@ body.is-ready .site-header {
   box-sizing: border-box;
   width: 100%;
   min-width: 100%;
-  height: 50rem;
-  min-height: 50rem;
+  height: 46rem;
+  min-height: 46rem;
   margin: 0;
   display: flex;
   align-items: center;
@@ -353,30 +353,40 @@ body.is-ready .site-header {
   pointer-events: none;
 }
 
-/* The available service entry is a solid menu surface; the disabled auction
-   control keeps its existing muted treatment above. */
-.nav-dropdown > a,
-.nav-dropdown > a:hover,
-.nav-dropdown > a:focus-visible {
+/* Services and Tier list are available, solid controls. */
+#servicesToggle,
+#servicesMenu > .tier-list-trigger {
+  background: #202020;
   opacity: 1;
 }
 
-/* The auction entry is available again and uses the same solid surface as
-   the tier-list entry. */
-.nav-dropdown > button.auction-trigger,
-.nav-dropdown > button.auction-trigger:hover,
-.nav-dropdown > button.auction-trigger:focus-visible {
+#servicesToggle:hover,
+#servicesToggle:focus-visible,
+#servicesToggle[aria-expanded="true"],
+#servicesMenu > .tier-list-trigger:hover,
+#servicesMenu > .tier-list-trigger:focus-visible {
+  background: #292929;
   opacity: 1;
 }
 
-/* Appeals is intentionally a visual placeholder. Keep it hoverable and
-   clearly available in the menu while its button remains actionless. */
-.nav-dropdown > button.appeals-trigger,
-.nav-dropdown > button.appeals-trigger:hover,
-.nav-dropdown > button.appeals-trigger:focus-visible {
+/* Auction and Appeals are visual placeholders: translucent until hovered,
+   then they look active while remaining actionless. */
+#servicesMenu > :is(.auction-trigger, .appeals-trigger),
+#servicesMenu > :is(.auction-trigger, .appeals-trigger)[aria-disabled="true"] {
+  color: rgba(240, 240, 240, .68);
+  background: rgba(32, 32, 32, .55);
   opacity: 1;
   pointer-events: auto;
   cursor: pointer;
+}
+
+#servicesMenu > :is(.auction-trigger, .appeals-trigger):hover,
+#servicesMenu > :is(.auction-trigger, .appeals-trigger):focus-visible,
+#servicesMenu > :is(.auction-trigger, .appeals-trigger)[aria-disabled="true"]:hover,
+#servicesMenu > :is(.auction-trigger, .appeals-trigger)[aria-disabled="true"]:focus-visible {
+  color: #fff;
+  background: #292929;
+  opacity: 1;
 }
 
 .auction-panel:not([hidden]) .auction-dialog {
@@ -1061,16 +1071,19 @@ body.is-ready .site-header {
   top: 50%;
   z-index: 4;
   padding: 16rem;
-  border: 4rem solid #e63d3d;
+  border: 6rem solid #e63d3d;
   border-radius: 6rem;
   color: #e63d3d;
   background: rgba(0, 0, 0, .08);
-  font-family: var(--font-display);
+  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif;
   font-size: clamp(34rem, 3.6458vw, 70rem);
   font-weight: 900;
-  line-height: 1;
+  line-height: .9;
+  letter-spacing: .015em;
   text-align: center;
   text-transform: uppercase;
+  -webkit-text-stroke: .45rem currentColor;
+  paint-order: stroke fill;
   white-space: nowrap;
   transform: translate(-50%, -50%) rotate(-10.04deg);
 }
@@ -1088,7 +1101,6 @@ body.is-ready .site-header {
 #catalog .library-stamp.ignored {
   border-color: #a1a1a1;
   color: #a1a1a1;
-  font-size: clamp(26rem, 2.4vw, 46rem);
 }
 
 #catalog .message {
