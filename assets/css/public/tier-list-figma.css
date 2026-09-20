@@ -6,28 +6,14 @@ html.standalone-tier.lenis-stopped {
   overflow-x: hidden !important;
   overflow-y: auto !important;
   overscroll-behavior-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #333 #0f0f0f;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 html.standalone-tier::-webkit-scrollbar {
-  display: block;
-  width: 9rem;
-  height: 9rem;
-}
-
-html.standalone-tier::-webkit-scrollbar-track {
-  background: #0f0f0f;
-}
-
-html.standalone-tier::-webkit-scrollbar-thumb {
-  border: 2rem solid #0f0f0f;
-  border-radius: 999rem;
-  background: #333;
-}
-
-html.standalone-tier::-webkit-scrollbar-thumb:hover {
-  background: #404040;
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 body.standalone-tier,
@@ -35,8 +21,9 @@ body.standalone-tier.tier-open,
 body.standalone-tier.modal-scroll-locked {
   height: auto !important;
   min-height: 100dvh;
-  overflow-x: hidden !important;
-  overflow-y: visible !important;
+  /* Keep a single Lenis scroll root. Mixing overflow-x:hidden with
+     overflow-y:visible makes browsers compute body overflow-y as auto. */
+  overflow: visible !important;
   overscroll-behavior-y: auto;
   background: #0f0f0f !important;
 }
@@ -55,6 +42,10 @@ body.standalone-tier > .site-header {
   position: relative !important;
   inset: auto !important;
   z-index: 50;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
 }
 
 .tier-panel[hidden] {
@@ -487,6 +478,14 @@ body:not(.standalone-tier) .tier-panel .tier-dialog {
 /* Desktop standalone view is one continuous page. The browser/iframe owns
    the only vertical scrollbar; the board and side menu move with the page. */
 @media (min-width: 1101px) {
+  /* Keep the navigation floating freely, with the creator window as a
+     separate surface below it, matching the desktop reference. */
+  body.standalone-tier > .site-header {
+    position: absolute !important;
+    inset: 0 0 auto !important;
+    width: 100%;
+  }
+
   html.standalone-tier,
   html.standalone-tier.lenis-stopped {
     width: 100%;
@@ -503,8 +502,7 @@ body:not(.standalone-tier) .tier-panel .tier-dialog {
     height: auto !important;
     min-height: 100dvh !important;
     display: block;
-    overflow-x: hidden !important;
-    overflow-y: visible !important;
+    overflow: visible !important;
   }
 
   body.standalone-tier .tier-panel {
@@ -521,7 +519,7 @@ body:not(.standalone-tier) .tier-panel .tier-dialog {
     height: auto !important;
     min-height: calc(100dvh - 100rem) !important;
     display: block;
-    padding: 30rem 0 80rem !important;
+    padding: 110rem 0 80rem !important;
     overflow: visible !important;
   }
 
@@ -543,6 +541,9 @@ body:not(.standalone-tier) .tier-panel .tier-dialog {
   }
 
   body.standalone-tier .tier-creators {
+    min-height: 95rem;
+    padding: 20rem;
+    align-items: center;
     justify-content: flex-start;
   }
 }

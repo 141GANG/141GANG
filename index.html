@@ -10,9 +10,9 @@
 <style>[hidden]{display:none!important}body.standalone-view{min-height:100vh;overflow:auto}body.standalone-view .tier-panel,body.standalone-view .auction-panel,body.standalone-view .admin-portal{position:relative;inset:auto;min-height:100vh}</style>
 <link href="./favicon.ico?v=141gang-1" rel="icon" sizes="any" type="image/x-icon"/>
 <link href="./assets/images/figma/favicon-141.png?v=141gang-1" rel="icon" sizes="512x512" type="image/png"/>
-<link href="./assets/vendor/lenis.css" rel="stylesheet"/>
+<link href="./assets/vendor/lenis.css?v=2.0-hidden-track" rel="stylesheet"/>
 <script defer src="./assets/vendor/lenis.min.js"></script>
-<script defer src="./assets/js/public/smooth-scroll.js?v=3.3-tier-page-scroll"></script>
+<script defer src="./assets/js/public/smooth-scroll.js?v=4.4-admin-catalog-content"></script>
 <link href="./assets/css/public/fonts.css?v=3.1" rel="stylesheet"/>
 <link href="./assets/css/public/variables.css?v=3.2" rel="stylesheet"/>
 <link href="./assets/css/public/base.css?v=3.0" rel="stylesheet"/>
@@ -29,7 +29,6 @@
 <link href="./assets/css/public/figma-refresh.css?v=3.17-library-stamps" rel="stylesheet"/>
 <link href="./assets/css/public/site-auth.css?v=1.8-toast-all" rel="stylesheet"/>
 <link href="./assets/css/public/figma-redesign.css?v=2.4" rel="stylesheet"/>
-<link href="./assets/css/public/admin-druk-title-final.css?v=1.0" rel="stylesheet"/>
 <link href="./assets/css/public/figma-main-final.css?v=2.4-services-state" id="figmaMainFinalStyles" rel="stylesheet"/>
 <link href="./assets/css/public/admin-figma-final.css?v=1.0" id="adminFigmaFinalStyles" rel="stylesheet"/>
 <link href="./assets/css/public/proposal-windows-figma.css?v=4.9-safe-area" id="proposalWindowsFigmaStyles" rel="stylesheet"/>
@@ -45,9 +44,10 @@
 <link href="./assets/css/public/footer-developers.css?v=1.0" id="footerDevelopersStyles" rel="stylesheet"/>
 <link href="./assets/css/public/feature-coming-soon.css?v=1.0" id="featureComingSoonStyles" rel="stylesheet"/>
 <link href="./assets/css/public/game-comments-drawer.css?v=1.0" id="gameCommentsDrawerStyles" rel="stylesheet"/>
-<link href="./assets/css/public/tier-list-figma.css?v=2.7-restored-header" id="tierListFigmaStyles" rel="stylesheet"/>
+<link href="./assets/css/public/tier-list-figma.css?v=3.2-reference-header" id="tierListFigmaStyles" rel="stylesheet"/>
 <link href="./assets/css/public/standalone-header-consistency.css?v=1.2-shared-single-row" id="standaloneHeaderConsistencyStyles" rel="stylesheet"/>
 <link href="./assets/css/public/hero-recent-game.css?v=1.0" id="heroRecentGameStyles" rel="stylesheet"/>
+<link href="./assets/css/public/admin-druk-title-final.css?v=2.0-fixed-header" rel="stylesheet"/>
 <script defer id="premiumMotionScript" src="./assets/js/public/premium-motion.js?v=1.5-independent-game-modal"></script>
 <noscript><style>.premium-motion-pending *{opacity:1!important;filter:none!important;transform:none!important}</style></noscript>
 </head>
@@ -394,7 +394,7 @@
 <label class="proposal-search"><img alt="" aria-hidden="true" src="./assets/images/figma/search.svg"/><input autocomplete="off" id="proposalGameSearch" placeholder="Поиск" type="search"/></label>
 <details class="proposal-filter-box" open><summary>Фильтры</summary><fieldset><legend>Дата выхода</legend><label><input data-proposal-release="released" type="checkbox"/> Вышла</label><label><input data-proposal-release="upcoming" type="checkbox"/> Скоро</label><label><input data-proposal-release="unknown" type="checkbox"/> Без даты</label></fieldset><fieldset><legend>Количество игроков</legend><div><label>От <input id="proposalPlayersMin" inputmode="numeric" min="1" placeholder="Мин" type="number"/></label><label>До <input id="proposalPlayersMax" inputmode="numeric" min="1" placeholder="Макс" type="number"/></label></div></fieldset><label class="proposal-sort"><span>Сортировка</span><select id="proposalGameSort"><option value="oldest">Сначала старые</option><option value="newest">Сначала новые</option><option value="title">По названию</option></select></label></details>
 </div>
-<div aria-live="polite" class="suggestion-moderation-list" id="suggestionModerationList"><div class="suggestions-empty">Войди, чтобы загрузить очередь.</div></div>
+<div aria-live="polite" class="suggestion-moderation-list" id="suggestionModerationList"><div class="admin-catalog-scroll-content"><div class="suggestions-empty">Войди, чтобы загрузить очередь.</div></div></div>
 </article>
 <article class="panel admin-media-panel" id="adminMediaPanel">
 <div class="admin-media-status-tabs" role="group" aria-label="Статус материалов">
@@ -587,10 +587,13 @@
 </div>
 </div>
 <footer class="site-footer" id="siteFooter"><div class="shell footer-developers-inner"><div aria-live="polite" class="footer-developers" id="footerDevelopers"><button aria-expanded="false" class="footer-developers-trigger" id="footerDevelopersTrigger" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/inf-icon.png"/><span>О разработчиках</span></button><p aria-hidden="true" class="footer-developers-credits" id="footerDevelopersCredits">@tankzor, @archivebtw, @max_vopros, @OBWECTBO141</p></div></div></footer>
-<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.7-toast-all"></script><script src="./assets/js/public/state.js?v=4.3-recent-game"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.1-recent-game"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.7-pending-suggestion-comments"></script><script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script><script src="./assets/js/public/suggestions.js?v=4.11-pending-game-modal"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script async id="twitchPlayerSdk" src="https://player.twitch.tv/js/embed/v1.js"></script><script src="./assets/js/public/gang.js?v=3.3"></script><script src="./assets/js/public/auction.js?v=5.1-feature-dialog"></script><script src="./assets/js/public/admin-portal.js?v=3.3"></script><script src="./assets/js/public/admin-portal-shell.js?v=5.4-filter-top-alignment"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.5-recent-game"></script><script src="./assets/js/public/figma-ui.js?v=10.16-admin-state-event"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
+<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.7-toast-all"></script><script src="./assets/js/public/state.js?v=4.3-recent-game"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.1-recent-game"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.7-pending-suggestion-comments"></script><script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script><script src="./assets/js/public/suggestions.js?v=4.12-catalog-scroll-content"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script async id="twitchPlayerSdk" src="https://player.twitch.tv/js/embed/v1.js"></script><script src="./assets/js/public/gang.js?v=3.3"></script><script src="./assets/js/public/auction.js?v=5.1-feature-dialog"></script><script src="./assets/js/public/admin-portal.js?v=3.3"></script><script src="./assets/js/public/admin-portal-shell.js?v=5.7-media-parity"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.5-recent-game"></script><script src="./assets/js/public/figma-ui.js?v=10.16-admin-state-event"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
 (() => {
-  const view = new URLSearchParams(location.search).get('view')
-    || (/\/tier-list\.html$/i.test(location.pathname) ? 'tier' : '');
+  const pageView = /\/tier-list\.html$/i.test(location.pathname) ? 'tier'
+    : /\/auction\.html$/i.test(location.pathname) ? 'auction'
+      : /\/admin\.html$/i.test(location.pathname) ? 'admin'
+        : '';
+  const view = new URLSearchParams(location.search).get('view') || pageView;
   const targets = {tier: 'tierListPanel', auction: 'auctionPanel', admin: 'adminPortal'};
   const targetId = targets[view];
   if (!targetId) return;
@@ -604,10 +607,12 @@
     document.querySelector('.site-header a[href="#catalog"]')?.setAttribute('href', './index.html#catalog');
   }
   if (view === 'admin') {
+    document.title = 'Управление — 141GANG';
     window.CR7_ADMIN_PORTAL?.setView('games', true);
     document.querySelector('.site-header .brand')?.setAttribute('href', './index.html');
     document.querySelector('.site-header a[href="#catalog"]')?.setAttribute('href', './index.html#catalog');
   }
+  if (view === 'auction') document.title = 'Аукцион — ПРЕДЛОЖКА141';
   [...document.body.children].forEach(element => {
     const standaloneInteractive = ['site-header', 'gang-panel', 'suggestions-panel', 'suggestion-comments-panel', 'media-panel', 'site-auth-panel'].some(className => element.classList.contains(className));
     const keepTierHeader = view === 'tier' && element.classList.contains('site-header');

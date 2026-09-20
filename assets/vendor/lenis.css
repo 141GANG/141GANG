@@ -3,6 +3,20 @@ html.lenis body {
   height: auto;
 }
 
+/* Lenis keeps native scrolling accessible; only the browser track is hidden. */
+html,
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 .lenis:not(.lenis-autoToggle).lenis-stopped {
   overflow: clip;
 }

@@ -5,7 +5,28 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <meta content="#040404" name="theme-color"/>
 <title>Аукцион — ПРЕДЛОЖКА141</title>
-<style>html,body{overflow:hidden}body{margin:0;background:#151515}.page-back{position:fixed;z-index:20;left:12px;bottom:16px;width:44px;height:44px;display:grid;place-items:center;overflow:hidden;border:1px solid #3a3a3a;border-radius:7px;color:transparent;background:#292929;text-decoration:none;font:0/0 Arial,sans-serif}.page-back::before{color:#eee;font:700 20px/1 Arial,sans-serif;content:"←"}.page-back:hover{border-color:#ef3d35;background:#33201f}iframe{display:block;width:100vw;height:100vh;border:0}</style>
+<style>
+html,body{min-height:100%;margin:0;background:#151515}
+.page-bootstrap{position:fixed;inset:0;display:grid;place-items:center;color:#777;font:14px Arial,sans-serif}
+</style>
 </head>
-<body><a class="page-back" href="./index.html">На главную</a><iframe aria-label="Аукцион" src="./index.html?view=auction"></iframe></body>
+<body>
+<div aria-live="polite" class="page-bootstrap">Загрузка аукциона…</div>
+<script>
+fetch('./index.html', { cache: 'no-cache' })
+  .then(response => {
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.text();
+  })
+  .then(html => {
+    document.open();
+    document.write(html);
+    document.close();
+  })
+  .catch(error => {
+    console.warn('Не удалось открыть страницу аукциона:', error);
+    location.replace('./index.html?view=auction');
+  });
+</script>
+</body>
 </html>

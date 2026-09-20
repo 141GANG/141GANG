@@ -124,6 +124,10 @@
     return elements.moderationList?.closest('#adminSection')?.dataset.catalogTab === 'true';
   }
 
+  function moderationListContent() {
+    return elements.moderationList?.querySelector(':scope > .admin-catalog-scroll-content') || elements.moderationList;
+  }
+
   function configuredClient() {
     const config = window.CR7_CONFIG || {};
     const url = String(config.supabaseUrl || '');
@@ -905,11 +909,11 @@
       });
 
     if (!items.length) {
-      elements.moderationList.innerHTML = '<div class="suggestions-empty">В этом разделе нет заявок.</div>';
+      moderationListContent().innerHTML = '<div class="suggestions-empty">В этом разделе нет заявок.</div>';
       return;
     }
 
-    elements.moderationList.innerHTML = items.map(item => {
+    moderationListContent().innerHTML = items.map(item => {
       window.CR7_PENDING_SUGGESTIONS = window.CR7_PENDING_SUGGESTIONS || {};
       window.CR7_PENDING_SUGGESTIONS[String(item.id)] = item;
       const cover = safeUrl(item.cover_url);
@@ -957,14 +961,14 @@
       if (!sessionData?.session?.user) {
         suggestionState.isAdmin = false;
         applyAdminAccess();
-        if (!publishedCatalogActive()) elements.moderationList.innerHTML = '<div class="suggestions-empty">Войди, чтобы загрузить очередь.</div>';
+        if (!publishedCatalogActive()) moderationListContent().innerHTML = '<div class="suggestions-empty">Войди, чтобы загрузить очередь.</div>';
         return;
       }
       const { data: isAdmin, error: adminError } = await suggestionState.client.rpc('is_site_admin');
       if (adminError || isAdmin !== true) {
         suggestionState.isAdmin = false;
         applyAdminAccess();
-        if (!publishedCatalogActive()) elements.moderationList.innerHTML = '<div class="suggestions-empty">Очередь доступна администратору.</div>';
+        if (!publishedCatalogActive()) moderationListContent().innerHTML = '<div class="suggestions-empty">Очередь доступна администратору.</div>';
         return;
       }
       suggestionState.isAdmin = true;
@@ -973,7 +977,7 @@
     } catch (error) {
       suggestionState.isAdmin = false;
       applyAdminAccess();
-      if (!publishedCatalogActive()) elements.moderationList.innerHTML = `<div class="suggestions-empty">${escapeHtml(errorMessage(error))}</div>`;
+      if (!publishedCatalogActive()) moderationListContent().innerHTML = `<div class="suggestions-empty">${escapeHtml(errorMessage(error))}</div>`;
     }
   }
 
@@ -1083,13 +1087,13 @@
       }
       return;
     }
-    if (!publishedCatalogActive()) elements.moderationList.innerHTML = '<div class="suggestions-empty">Загружаем очередь…</div>';
+    if (!publishedCatalogActive()) moderationListContent().innerHTML = '<div class="suggestions-empty">Загружаем очередь…</div>';
     const { data, error } = await suggestionState.client
       .from('game_suggestions')
       .select('*,suggestion_votes(reaction),suggestion_comments(id,body,is_hidden,created_at)')
       .order('created_at', { ascending: false });
     if (error) {
-      if (!publishedCatalogActive()) elements.moderationList.innerHTML = `<div class="suggestions-empty">${escapeHtml(errorMessage(error))}</div>`;
+      if (!publishedCatalogActive()) moderationListContent().innerHTML = `<div class="suggestions-empty">${escapeHtml(errorMessage(error))}</div>`;
       return;
     }
     const moderationItems = Array.isArray(data) ? data : [];

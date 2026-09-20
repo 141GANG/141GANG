@@ -42,6 +42,8 @@
     dislike: '<img class="admin-catalog-reaction-icon" src="./assets/images/figma/dislike.png" alt="" aria-hidden="true">'
   };
 
+  const listContent = () => list.querySelector(':scope > .admin-catalog-scroll-content') || list;
+
   function reactionMarkup(likes = 0, dislikes = 0) {
     return `<span>${CATALOG_ICONS.like}<b data-reaction-count="like">${Number(likes) || 0}</b></span><span>${CATALOG_ICONS.dislike}<b data-reaction-count="dislike">${Number(dislikes) || 0}</b></span>`;
   }
@@ -213,6 +215,7 @@
     state.active = active;
     adminSection.dataset.catalogTab = active ? 'true' : 'false';
     list.classList.toggle('is-catalog-list', active);
+    window.CR7_ADMIN_CATALOG_LENIS?.scrollTo(0, { immediate: true });
     const sort = ensureSort();
     const filters = ensureFilters();
     const proposalSort = document.querySelector('.proposal-game-tools > .proposal-sort');
@@ -250,11 +253,11 @@
     const games = filteredGames();
     publishedButton.dataset.catalogCount = String(state.games.filter(game => game.published !== false).length);
     if (!games.length) {
-      list.innerHTML = '<div class="suggestions-empty">В опубликованном каталоге нет подходящих игр.</div>';
+      listContent().innerHTML = '<div class="suggestions-empty">В опубликованном каталоге нет подходящих игр.</div>';
       return;
     }
 
-    list.innerHTML = games.map(game => {
+    listContent().innerHTML = games.map(game => {
       const current = String(game.library_status || '');
       const cover = game.cover_url || './assets/images/figma/game-placeholder.svg';
       const steam = String(game.steam_url || '');
@@ -358,11 +361,11 @@
     if (state.loading || (state.loaded && !force)) return;
     const supabase = client();
     if (!supabase) {
-      list.innerHTML = '<div class="suggestions-empty">Supabase не настроен.</div>';
+      listContent().innerHTML = '<div class="suggestions-empty">Supabase не настроен.</div>';
       return;
     }
     state.loading = true;
-    if (!silent) list.innerHTML = '<div class="suggestions-empty">Загружаем опубликованные игры…</div>';
+    if (!silent) listContent().innerHTML = '<div class="suggestions-empty">Загружаем опубликованные игры…</div>';
     try {
       const { data, error } = await supabase.from('games').select('id,title,steam_url,steam_app_id,cover_url,description,created_at,published,release_date,release_date_text,coming_soon,is_coop,coop_min_players,coop_max_players,players_min,players_max,player_count_source,library_status');
       if (error) throw error;
@@ -371,7 +374,7 @@
       state.loaded = true;
       render();
     } catch (error) {
-      list.innerHTML = `<div class="suggestions-empty">${escapeHtml(error?.message || 'Не удалось загрузить каталог.')}</div>`;
+      listContent().innerHTML = `<div class="suggestions-empty">${escapeHtml(error?.message || 'Не удалось загрузить каталог.')}</div>`;
     } finally {
       state.loading = false;
     }

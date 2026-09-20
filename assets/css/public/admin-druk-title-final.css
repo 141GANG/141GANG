@@ -1,23 +1,49 @@
 /* Final Druk restore for every game title in Management -> Games. */
-body.admin-portal-open .admin-portal[data-portal-mode="proposal"] #adminSection
+body:is(.admin-portal-open, .proposal-portal-open, .standalone-admin) .admin-portal[data-portal-mode="proposal"] #adminSection
 .moderation-card .moderation-card-copy h3,
-body.admin-portal-open .admin-portal[data-portal-mode="proposal"] #adminSection
+body:is(.admin-portal-open, .proposal-portal-open, .standalone-admin) .admin-portal[data-portal-mode="proposal"] #adminSection
 .moderation-card .moderation-card-copy h3 > .moderation-title-open,
-body.admin-portal-open .admin-portal[data-portal-mode="proposal"] #adminSection
+body:is(.admin-portal-open, .proposal-portal-open, .standalone-admin) .admin-portal[data-portal-mode="proposal"] #adminSection
 .admin-catalog-card .admin-catalog-card-copy h3,
-body.admin-portal-open .admin-portal[data-portal-mode="proposal"] #adminSection
+body:is(.admin-portal-open, .proposal-portal-open, .standalone-admin) .admin-portal[data-portal-mode="proposal"] #adminSection
 .admin-catalog-card .admin-catalog-card-copy h3 > .admin-catalog-title-open {
   font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif !important;
   font-weight: 900 !important;
   font-style: normal !important;
 }
 
-body.admin-portal-open .admin-portal[data-portal-mode="proposal"] #adminSection
+body:is(.admin-portal-open, .proposal-portal-open, .standalone-admin) .admin-portal[data-portal-mode="proposal"] #adminSection
 .moderation-card .moderation-card-copy h3 > .moderation-title-open,
-body.admin-portal-open .admin-portal[data-portal-mode="proposal"] #adminSection
+body:is(.admin-portal-open, .proposal-portal-open, .standalone-admin) .admin-portal[data-portal-mode="proposal"] #adminSection
 .admin-catalog-card .admin-catalog-card-copy h3 > .admin-catalog-title-open {
   font-size: inherit !important;
   line-height: inherit !important;
   letter-spacing: inherit !important;
   text-transform: inherit !important;
+}
+
+/* The standalone management workspace owns the scroll. Keep the document and
+   its shared header completely stationary. */
+html.standalone-admin,
+body.standalone-admin {
+  width: 100%;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+body.standalone-admin > .site-header {
+  position: fixed !important;
+  inset: 0 0 auto !important;
+  z-index: 1500;
+}
+
+/* Lenis needs a persistent content layer inside the fixed-height catalog
+   viewport. Keep the existing card layout on that layer. */
+.suggestion-moderation-list > .admin-catalog-scroll-content {
+  display: grid;
+  gap: inherit;
+  width: 100%;
+  min-width: 0;
 }
