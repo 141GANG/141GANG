@@ -54,6 +54,30 @@
     margin: 0 !important;
     align-self: start !important;
   }
+
+  /* Match the two visible status controls in Games exactly. Media keeps its
+     own labels and counts; only the button boxes share the reference sizes. */
+  .admin-portal #adminSection[data-admin-view="media"]
+  .admin-media-status-tabs button[data-admin-media-status="pending"] {
+    width: 257rem !important;
+    flex: 0 0 257rem !important;
+  }
+
+  .admin-portal #adminSection[data-admin-view="media"]
+  .admin-media-status-tabs button[data-admin-media-status="pending"] > span {
+    margin-left: 8rem !important;
+  }
+
+  .admin-portal #adminSection[data-admin-view="media"]
+  .admin-media-status-tabs button[data-admin-media-status="downloaded"] {
+    width: 242rem !important;
+    flex: 0 0 242rem !important;
+  }
+
+  .admin-portal #adminSection[data-admin-view="media"]
+  .admin-media-status-tabs button[data-admin-media-status="downloaded"] > span {
+    margin-left: 2rem !important;
+  }
 }
 
 /* Viewer submissions: thumbnail mosaics from the supplied management reference. */

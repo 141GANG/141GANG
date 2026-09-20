@@ -6,7 +6,7 @@
     ['adminPublishedIconsFixStyles', './assets/css/public/admin-published-icons-fix.css?v=1.2'],
     ['adminModeratorLayoutV5Styles', './assets/css/public/admin-moderator-layout-v5.css?v=1.2'],
     ['adminInterfaceRefinementV8Styles', './assets/css/public/admin-interface-refinement-v8.css?v=1.15-filter-top-alignment'],
-    ['adminMediaLayoutV6Styles', './assets/css/public/admin-media-layout-v6.css?v=2.3-games-parity']
+    ['adminMediaLayoutV6Styles', './assets/css/public/admin-media-layout-v6.css?v=2.5-status-gap-parity']
   ];
 
   styleLayers.forEach(([id, href]) => {
