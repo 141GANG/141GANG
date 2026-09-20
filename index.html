@@ -12,7 +12,7 @@
 <link href="./assets/images/figma/favicon-141.png?v=141gang-1" rel="icon" sizes="512x512" type="image/png"/>
 <link href="./assets/vendor/lenis.css" rel="stylesheet"/>
 <script defer src="./assets/vendor/lenis.min.js"></script>
-<script defer src="./assets/js/public/smooth-scroll.js?v=3.2"></script>
+<script defer src="./assets/js/public/smooth-scroll.js?v=3.3-tier-page-scroll"></script>
 <link href="./assets/css/public/fonts.css?v=3.1" rel="stylesheet"/>
 <link href="./assets/css/public/variables.css?v=3.2" rel="stylesheet"/>
 <link href="./assets/css/public/base.css?v=3.0" rel="stylesheet"/>
@@ -594,6 +594,7 @@
   const targets = {tier: 'tierListPanel', auction: 'auctionPanel', admin: 'adminPortal'};
   const targetId = targets[view];
   if (!targetId) return;
+  document.documentElement.classList.add('standalone-view', `standalone-${view}`);
   document.body.classList.add('standalone-view', `standalone-${view}`);
   const target = document.getElementById(targetId);
   if (!target) return;

@@ -32,6 +32,12 @@
 
   function syncModalScroll() {
     const shouldLock = getModalRoots().some(root => {
+      // On the dedicated tier-list URL this panel is the page itself, not a
+      // modal laid over another page. Locking the document here removes the
+      // only scrollbar and also stops Lenis.
+      if (document.body.classList.contains('standalone-tier') && root.id === 'tierListPanel') {
+        return false;
+      }
       if (root instanceof HTMLDialogElement) return root.open;
       return !root.hidden;
     });
