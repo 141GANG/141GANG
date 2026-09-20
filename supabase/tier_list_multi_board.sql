@@ -9,7 +9,7 @@ create table if not exists public.tier_list_boards (
   updated_at timestamptz not null default now(),
   primary key (owner_key, list_key),
   constraint tier_list_boards_owner_check
-    check (owner_key in ('sasaavot', 'tankzor', 'rostikfacekid')),
+    check (owner_key in ('sasaavot', 'rostikfacekid', 'helin139', 'formixyouknow', 'tankzor', 'r4dom1r', 'poisonika')),
   constraint tier_list_boards_list_check
     check (list_key in ('games', 'food', 'cars')),
   constraint tier_list_boards_config_array_check
@@ -83,7 +83,19 @@ boards(owner_key, list_key) as (
     ('tankzor', 'cars'),
     ('rostikfacekid', 'games'),
     ('rostikfacekid', 'food'),
-    ('rostikfacekid', 'cars')
+    ('rostikfacekid', 'cars'),
+    ('helin139', 'games'),
+    ('helin139', 'food'),
+    ('helin139', 'cars'),
+    ('formixyouknow', 'games'),
+    ('formixyouknow', 'food'),
+    ('formixyouknow', 'cars'),
+    ('r4dom1r', 'games'),
+    ('r4dom1r', 'food'),
+    ('r4dom1r', 'cars'),
+    ('poisonika', 'games'),
+    ('poisonika', 'food'),
+    ('poisonika', 'cars')
 )
 insert into public.tier_list_boards (owner_key, list_key, config, placements)
 select

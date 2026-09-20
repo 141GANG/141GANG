@@ -59,8 +59,13 @@
       .subscribe(status => {
         if (status === 'SUBSCRIBED') return;
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-          try { guardChannel?.unsubscribe?.(); } catch {}
+          const failedChannel = guardChannel;
           guardChannel = null;
+          // CLOSED is emitted by unsubscribe itself. Unsubscribing again from
+          // inside that callback recurses through the Supabase channel stack.
+          if (status !== 'CLOSED') {
+            try { failedChannel?.unsubscribe?.(); } catch {}
+          }
           window.setTimeout(subscribeGuard, 5000);
         }
       });

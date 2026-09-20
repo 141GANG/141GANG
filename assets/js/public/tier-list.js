@@ -15,7 +15,8 @@
   const rowSave = document.getElementById('tierRowSave');
   const ownerButtons = [...document.querySelectorAll('[data-tier-owner]')];
   const listButtons = [...document.querySelectorAll('[data-tier-list]')];
-  const standalone = new URLSearchParams(location.search).get('view') === 'tier';
+  const standalone = new URLSearchParams(location.search).get('view') === 'tier'
+    || /\/tier-list\.html$/i.test(location.pathname);
 
   function getConfiguredClient() {
     if (window.CR7_SUPABASE_CLIENT) return window.CR7_SUPABASE_CLIENT;
@@ -65,6 +66,7 @@
   let multiBoardReady = null;
   let lastFocus = null;
   let draggedId = '';
+  let dragPreview = null;
   let editingRow = '';
   let opening = null;
   let loadSequence = 0;
@@ -167,7 +169,33 @@
 
   function gameCard(game) {
     const cover = safeExternalUrl(game.cover_url) || './assets/images/figma/game-placeholder.svg';
-    return `<article class="tier-game" ${isAdmin ? 'draggable="true" tabindex="0"' : ''} data-tier-game="${escapeHtml(game.id)}" title="${escapeHtml(game.title)}"><img alt="Обложка ${escapeHtml(game.title)}" src="${escapeHtml(cover)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span>${escapeHtml(game.title)}</span></article>`;
+    return `<article class="tier-game" ${isAdmin ? 'draggable="true" tabindex="0"' : ''} data-tier-game="${escapeHtml(game.id)}" title="${escapeHtml(game.title)}"><img alt="Обложка ${escapeHtml(game.title)}" src="${escapeHtml(cover)}" draggable="false" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span>${escapeHtml(game.title)}</span></article>`;
+  }
+
+  function removeDragPreview() {
+    dragPreview?.remove();
+    dragPreview = null;
+  }
+
+  function useCardDragPreview(event, card) {
+    removeDragPreview();
+    const rect = card.getBoundingClientRect();
+    const preview = card.cloneNode(true);
+    preview.removeAttribute('id');
+    preview.removeAttribute('tabindex');
+    preview.removeAttribute('draggable');
+    preview.removeAttribute('data-tier-game');
+    preview.classList.remove('is-dragging');
+    preview.classList.add('tier-drag-preview');
+    preview.setAttribute('aria-hidden', 'true');
+    preview.style.width = `${rect.width}px`;
+    preview.style.height = `${rect.height}px`;
+    document.body.appendChild(preview);
+    dragPreview = preview;
+
+    const offsetX = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+    const offsetY = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
+    event.dataTransfer.setDragImage(preview, offsetX, offsetY);
   }
 
   function renderTierList() {
@@ -175,11 +203,34 @@
     board.innerHTML = allRows.map((row, index) => {
       const entries = itemsInTier(row.id);
       const empty = row.id === '' ? 'Здесь появятся новые элементы' : 'Перетащите элементы сюда';
-      const controls = isAdmin && row.id !== ''
-        ? `<div class="tier-row-actions"><button aria-label="Настроить ${escapeHtml(row.label)}" data-row-settings="${row.id}" type="button">⚙</button><span><button aria-label="Поднять ряд" data-row-move="up" data-row-id="${row.id}" ${index === 0 ? 'disabled' : ''} type="button">◀</button><i aria-hidden="true"></i><button aria-label="Опустить ряд" data-row-move="down" data-row-id="${row.id}" ${index === rows.length - 1 ? 'disabled' : ''} type="button">▶</button></span></div>`
-        : '';
-      return `<section class="tier-row${row.id === '' ? ' is-pool' : ''}" data-tier="${row.id}" style="--tier-color:${row.color}"><strong>${escapeHtml(row.label)}</strong><div class="tier-dropzone">${entries.length ? entries.map(gameCard).join('') : `<p>${empty}</p>`}</div>${controls}</section>`;
+      return `<section class="tier-row${row.id === '' ? ' is-pool' : ''}" data-tier="${row.id}" style="--tier-color:${row.color}"><strong>${escapeHtml(row.label)}</strong><div class="tier-dropzone">${entries.length ? entries.map(gameCard).join('') : `<p>${empty}</p>`}</div></section>`;
     }).join('');
+  }
+
+  function cardPositions() {
+    return new Map([...board.querySelectorAll('[data-tier-game]')].map(card => [
+      card.dataset.tierGame,
+      card.getBoundingClientRect()
+    ]));
+  }
+
+  function animateCardSwap(previousPositions) {
+    if (!previousPositions?.size || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    board.querySelectorAll('[data-tier-game]').forEach(card => {
+      const previous = previousPositions.get(card.dataset.tierGame);
+      if (!previous) return;
+      const current = card.getBoundingClientRect();
+      const deltaX = previous.left - current.left;
+      const deltaY = previous.top - current.top;
+      if (Math.abs(deltaX) < 1 && Math.abs(deltaY) < 1) return;
+      card.animate([
+        { transform: `translate(${deltaX}px, ${deltaY}px)`, zIndex: 2 },
+        { transform: 'translate(0, 0)', zIndex: 2 }
+      ], {
+        duration: 320,
+        easing: 'cubic-bezier(.22, 1, .36, 1)'
+      });
+    });
   }
 
   function syncSelectors() {
@@ -294,14 +345,30 @@
     renderTierList();
   }
 
+  function setAdminMode(nextValue) {
+    const nextAdmin = nextValue === true;
+    const changed = isAdmin !== nextAdmin;
+    isAdmin = nextAdmin;
+    // Editing stays intentionally invisible: admin mode only enables dragging.
+    adminTools.hidden = true;
+    resetButton.hidden = true;
+    adminStatus.textContent = '';
+    if (changed && !panel.hidden) renderTierList();
+  }
+
   async function checkAdmin() {
-    isAdmin = false;
     const client = getConfiguredClient();
-    if (!client) return;
+    if (!client) {
+      setAdminMode(false);
+      return;
+    }
     const { data: session } = await client.auth.getSession();
-    if (!session?.session?.user) return;
-    const { data } = await client.rpc('is_site_admin');
-    isAdmin = data === true;
+    if (!session?.session?.user || session.session.user.is_anonymous) {
+      setAdminMode(false);
+      return;
+    }
+    const { data, error } = await client.rpc('is_site_admin');
+    setAdminMode(!error && data === true);
   }
 
   function boardSnapshot() {
@@ -388,6 +455,7 @@
     const game = sourceItems().find(item => itemId(item) === String(id));
     if (!game) return;
 
+    const previousPositions = cardPositions();
     const movingId = itemId(game);
     const oldTier = placementFor(game).tier;
     const oldIds = itemsInTier(oldTier).map(itemId).filter(item => item !== movingId);
@@ -400,6 +468,7 @@
     targetIds.splice(index, 0, movingId);
     applyOrder(targetIds, targetTier);
     renderTierList();
+    animateCardSwap(previousPositions);
     queueSave();
   }
 
@@ -422,7 +491,6 @@
       }
     }
 
-    cards[index]?.classList.add('is-insert-before');
     return index;
   }
 
@@ -435,9 +503,6 @@
       openButton?.setAttribute('aria-expanded', 'true');
       if (!standalone) document.body.classList.add('tier-open');
       await checkAdmin();
-      adminTools.hidden = !isAdmin;
-      resetButton.hidden = !isAdmin;
-      adminStatus.textContent = isAdmin ? 'Редактор · перетаскивайте карточки' : '';
       await selectBoard(activeOwner, activeList);
       requestAnimationFrame(() => panel.classList.add('is-open'));
       if (!standalone) closeButton.focus();
@@ -479,6 +544,7 @@
     const card = event.target.closest('[data-tier-game]');
     if (!card || !isAdmin || activeList !== 'games') return;
     draggedId = card.dataset.tierGame;
+    useCardDragPreview(event, card);
     card.classList.add('is-dragging');
     board.classList.add('is-sorting');
     event.dataTransfer.effectAllowed = 'move';
@@ -488,6 +554,7 @@
   board.addEventListener('dragend', event => {
     event.target.closest('[data-tier-game]')?.classList.remove('is-dragging');
     draggedId = '';
+    removeDragPreview();
     board.classList.remove('is-sorting');
     clearDropIndicators();
   });
@@ -497,9 +564,7 @@
     if (!row || !isAdmin || !draggedId || activeList !== 'games') return;
     event.preventDefault();
     clearDropIndicators();
-    row.classList.add('is-over');
     const zone = row.querySelector('.tier-dropzone');
-    zone.classList.add('is-drop-target');
     insertionIndex(event, zone);
     event.dataTransfer.dropEffect = 'move';
   });
@@ -514,6 +579,7 @@
     clearDropIndicators();
     moveGame(id, row.dataset.tier, index);
     draggedId = '';
+    removeDragPreview();
   });
 
   board.addEventListener('click', event => {
@@ -577,6 +643,19 @@
   window.addEventListener('cr7:games-loaded', () => {
     if (!panel.hidden && activeList === 'games') renderTierList();
   });
+
+  // Authentication restoration is asynchronous. The standalone tier page can
+  // open before Supabase has restored the saved session, so keep editor access
+  // in sync with both the shared site-admin check and later auth events.
+  window.addEventListener('cr7:admin-state', event => {
+    setAdminMode(event.detail?.isAdmin === true);
+  });
+
+  const authClient = getConfiguredClient();
+  authClient?.auth?.onAuthStateChange?.(() => {
+    window.setTimeout(() => checkAdmin(), 0);
+  });
+  window.addEventListener('pageshow', () => checkAdmin());
 
   if (standalone) open();
 })();

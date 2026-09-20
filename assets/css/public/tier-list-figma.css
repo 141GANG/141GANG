@@ -51,6 +51,12 @@ body.standalone-tier::before {
   animation: none !important;
 }
 
+body.standalone-tier > .site-header {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 50;
+}
+
 .tier-panel[hidden] {
   display: none !important;
 }
@@ -108,6 +114,7 @@ body.standalone-tier .tier-panel {
   display: flex;
   min-height: 95rem;
   align-items: center;
+  justify-content: flex-start;
   gap: 10rem;
   padding: 20rem;
   overflow-x: auto;
@@ -293,8 +300,8 @@ body.standalone-tier .tier-panel {
 }
 
 .tier-row.is-over .tier-dropzone {
-  background: rgba(230, 61, 61, .16) !important;
-  box-shadow: inset 0 0 0 2rem #e63d3d;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .tier-game {
@@ -329,8 +336,24 @@ body.standalone-tier .tier-panel {
   transform: scale(.94);
 }
 
+.tier-drag-preview {
+  position: fixed !important;
+  top: -10000px !important;
+  left: -10000px !important;
+  z-index: 99999 !important;
+  margin: 0 !important;
+  opacity: .92 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 5rem !important;
+  background: #202020 !important;
+  box-shadow: none !important;
+  transform: scale(1.02) !important;
+  pointer-events: none !important;
+}
+
 .tier-game.is-insert-before {
-  box-shadow: -5rem 0 0 #e63d3d;
+  box-shadow: none !important;
 }
 
 .tier-game:focus-visible {
@@ -339,7 +362,8 @@ body.standalone-tier .tier-panel {
 }
 
 .tier-board.is-sorting .tier-dropzone.is-drop-target {
-  background: rgba(230, 61, 61, .08) !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .tier-game img {
@@ -483,12 +507,6 @@ body:not(.standalone-tier) .tier-panel .tier-dialog {
     overflow-y: visible !important;
   }
 
-  body.standalone-tier > .site-header {
-    position: relative !important;
-    inset: auto !important;
-    z-index: 50;
-  }
-
   body.standalone-tier .tier-panel {
     position: relative !important;
     inset: auto !important;
@@ -525,7 +543,7 @@ body:not(.standalone-tier) .tier-panel .tier-dialog {
   }
 
   body.standalone-tier .tier-creators {
-    justify-content: center;
+    justify-content: flex-start;
   }
 }
 

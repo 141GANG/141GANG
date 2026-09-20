@@ -158,7 +158,7 @@ create policy "tier settings admin update" on public.tier_list_settings for upda
 insert into public.tier_list_settings (id,config) values (1,'[]'::jsonb) on conflict (id) do nothing;
 
 create table if not exists public.tier_list_boards (
-  owner_key text not null check (owner_key in ('sasaavot', 'tankzor', 'rostikfacekid')),
+  owner_key text not null check (owner_key in ('sasaavot', 'rostikfacekid', 'helin139', 'formixyouknow', 'tankzor', 'r4dom1r', 'poisonika')),
   list_key text not null check (list_key in ('games', 'food', 'cars')),
   config jsonb not null default '[]'::jsonb check (jsonb_typeof(config) = 'array'),
   placements jsonb not null default '[]'::jsonb check (jsonb_typeof(placements) = 'array'),
@@ -177,7 +177,11 @@ with boards(owner_key, list_key) as (
   values
     ('sasaavot', 'games'), ('sasaavot', 'food'), ('sasaavot', 'cars'),
     ('tankzor', 'games'), ('tankzor', 'food'), ('tankzor', 'cars'),
-    ('rostikfacekid', 'games'), ('rostikfacekid', 'food'), ('rostikfacekid', 'cars')
+    ('rostikfacekid', 'games'), ('rostikfacekid', 'food'), ('rostikfacekid', 'cars'),
+    ('helin139', 'games'), ('helin139', 'food'), ('helin139', 'cars'),
+    ('formixyouknow', 'games'), ('formixyouknow', 'food'), ('formixyouknow', 'cars'),
+    ('r4dom1r', 'games'), ('r4dom1r', 'food'), ('r4dom1r', 'cars'),
+    ('poisonika', 'games'), ('poisonika', 'food'), ('poisonika', 'cars')
 ), default_config as (
   select jsonb_build_array(
     jsonb_build_object('id', 'S', 'label', 'S', 'color', '#e63d3d'),

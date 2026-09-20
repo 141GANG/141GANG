@@ -45,7 +45,7 @@
 <link href="./assets/css/public/footer-developers.css?v=1.0" id="footerDevelopersStyles" rel="stylesheet"/>
 <link href="./assets/css/public/feature-coming-soon.css?v=1.0" id="featureComingSoonStyles" rel="stylesheet"/>
 <link href="./assets/css/public/game-comments-drawer.css?v=1.0" id="gameCommentsDrawerStyles" rel="stylesheet"/>
-<link href="./assets/css/public/tier-list-figma.css?v=2.3-centered-add-button" id="tierListFigmaStyles" rel="stylesheet"/>
+<link href="./assets/css/public/tier-list-figma.css?v=2.7-restored-header" id="tierListFigmaStyles" rel="stylesheet"/>
 <link href="./assets/css/public/standalone-header-consistency.css?v=1.2-shared-single-row" id="standaloneHeaderConsistencyStyles" rel="stylesheet"/>
 <link href="./assets/css/public/hero-recent-game.css?v=1.0" id="heroRecentGameStyles" rel="stylesheet"/>
 <script defer id="premiumMotionScript" src="./assets/js/public/premium-motion.js?v=1.5-independent-game-modal"></script>
@@ -587,15 +587,21 @@
 </div>
 </div>
 <footer class="site-footer" id="siteFooter"><div class="shell footer-developers-inner"><div aria-live="polite" class="footer-developers" id="footerDevelopers"><button aria-expanded="false" class="footer-developers-trigger" id="footerDevelopersTrigger" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/inf-icon.png"/><span>О разработчиках</span></button><p aria-hidden="true" class="footer-developers-credits" id="footerDevelopersCredits">@tankzor, @archivebtw, @max_vopros, @OBWECTBO141</p></div></div></footer>
-<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.7-toast-all"></script><script src="./assets/js/public/state.js?v=4.3-recent-game"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.1-recent-game"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.7-pending-suggestion-comments"></script><script src="./assets/js/public/tier-list.js?v=5.2-configured-client"></script><script src="./assets/js/public/suggestions.js?v=4.11-pending-game-modal"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script async id="twitchPlayerSdk" src="https://player.twitch.tv/js/embed/v1.js"></script><script src="./assets/js/public/gang.js?v=3.3"></script><script src="./assets/js/public/auction.js?v=5.1-feature-dialog"></script><script src="./assets/js/public/admin-portal.js?v=3.3"></script><script src="./assets/js/public/admin-portal-shell.js?v=5.4-filter-top-alignment"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.5-recent-game"></script><script src="./assets/js/public/figma-ui.js?v=10.14-mobile-compact-sort"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
+<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.7-toast-all"></script><script src="./assets/js/public/state.js?v=4.3-recent-game"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.1-recent-game"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.7-pending-suggestion-comments"></script><script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script><script src="./assets/js/public/suggestions.js?v=4.11-pending-game-modal"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script async id="twitchPlayerSdk" src="https://player.twitch.tv/js/embed/v1.js"></script><script src="./assets/js/public/gang.js?v=3.3"></script><script src="./assets/js/public/auction.js?v=5.1-feature-dialog"></script><script src="./assets/js/public/admin-portal.js?v=3.3"></script><script src="./assets/js/public/admin-portal-shell.js?v=5.4-filter-top-alignment"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.5-recent-game"></script><script src="./assets/js/public/figma-ui.js?v=10.16-admin-state-event"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
 (() => {
-  const view = new URLSearchParams(location.search).get('view');
+  const view = new URLSearchParams(location.search).get('view')
+    || (/\/tier-list\.html$/i.test(location.pathname) ? 'tier' : '');
   const targets = {tier: 'tierListPanel', auction: 'auctionPanel', admin: 'adminPortal'};
   const targetId = targets[view];
   if (!targetId) return;
   document.body.classList.add('standalone-view', `standalone-${view}`);
   const target = document.getElementById(targetId);
   if (!target) return;
+  if (view === 'tier') {
+    document.title = 'Тир-лист — ПРЕДЛОЖКА141';
+    document.querySelector('.site-header .brand')?.setAttribute('href', './index.html');
+    document.querySelector('.site-header a[href="#catalog"]')?.setAttribute('href', './index.html#catalog');
+  }
   if (view === 'admin') {
     window.CR7_ADMIN_PORTAL?.setView('games', true);
     document.querySelector('.site-header .brand')?.setAttribute('href', './index.html');
@@ -603,8 +609,9 @@
   }
   [...document.body.children].forEach(element => {
     const standaloneInteractive = ['site-header', 'gang-panel', 'suggestions-panel', 'suggestion-comments-panel', 'media-panel', 'site-auth-panel'].some(className => element.classList.contains(className));
-    const keepTierHeader = view === 'tier' && window.matchMedia('(min-width: 1101px)').matches && element.classList.contains('site-header');
-    if (element !== target && element.tagName !== 'SCRIPT' && element.tagName !== 'STYLE' && !(view === 'admin' && standaloneInteractive) && !keepTierHeader) {
+    const keepTierHeader = view === 'tier' && element.classList.contains('site-header');
+    const keepStandaloneInteractive = ['admin', 'tier'].includes(view) && standaloneInteractive;
+    if (element !== target && element.tagName !== 'SCRIPT' && element.tagName !== 'STYLE' && !keepStandaloneInteractive && !keepTierHeader) {
       element.hidden = true;
       element.style.setProperty('display', 'none', 'important');
     }

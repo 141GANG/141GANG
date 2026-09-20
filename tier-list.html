@@ -5,37 +5,28 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <meta content="#040404" name="theme-color"/>
 <title>Тир-лист — ПРЕДЛОЖКА141</title>
-<style>html,body{overflow:hidden}body{margin:0;background:#0f0f0f}iframe{display:block;width:100vw;height:100vh;border:0}</style>
+<style>
+html,body{min-height:100%;margin:0;background:#0f0f0f}
+.tier-bootstrap{position:fixed;inset:0;display:grid;place-items:center;color:#777;font:14px Arial,sans-serif}
+</style>
 </head>
 <body>
-<iframe aria-label="Тир-лист игр" id="tierListFrame" src="./index.html?view=tier"></iframe>
+<div aria-live="polite" class="tier-bootstrap">Загрузка тир-листа…</div>
 <script>
-(() => {
-  const frame = document.getElementById('tierListFrame');
-  if (!frame) return;
-
-  frame.addEventListener('load', () => {
-    try {
-      const doc = frame.contentDocument;
-      if (!doc) return;
-
-      doc.querySelectorAll('.site-header a[href]').forEach(link => {
-        link.target = '_top';
-      });
-
-      const brand = doc.querySelector('.site-header .brand');
-      if (brand) brand.href = './index.html';
-
-      const catalog = doc.querySelector('.site-header .nav-link[href="#catalog"], .site-header .nav-link[href$="index.html#catalog"]');
-      if (catalog) catalog.href = './index.html#catalog';
-
-      const tier = doc.querySelector('.site-header .tier-list-trigger');
-      if (tier) tier.href = './tier-list.html';
-    } catch (error) {
-      console.warn('Не удалось синхронизировать навигацию страницы тир-листа:', error);
-    }
+fetch('./index.html', { cache: 'no-cache' })
+  .then(response => {
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.text();
+  })
+  .then(html => {
+    document.open();
+    document.write(html);
+    document.close();
+  })
+  .catch(error => {
+    console.warn('Не удалось открыть отдельную страницу тир-листа:', error);
+    location.replace('./index.html?view=tier');
   });
-})();
 </script>
 </body>
 </html>

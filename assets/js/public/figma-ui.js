@@ -13,7 +13,7 @@
     ['style','adminLoginFinalStyles','./assets/css/public/admin-login-final.css?v=1.2-fit-no-border'],
     ['script','proposalWindowsFigmaScript','./assets/js/public/proposal-windows-figma.js?v=3.7-flat-media'],
     ['script','adminCardIconsScriptV2','./assets/js/public/admin-card-icons-v2.js?v=2.0'],
-    ['script','catalogLiveRefreshScript','./assets/js/public/catalog-live-refresh.js?v=1.0'],
+    ['script','catalogLiveRefreshScript','./assets/js/public/catalog-live-refresh.js?v=1.1-safe-unsubscribe'],
     ['script','mediaAuthenticatedSubmitBridge','./assets/js/public/media-authenticated-submit-bridge.js?v=1.3-fullscreen-preview']
   ];
   assets.forEach(([type,id,src]) => {
@@ -26,7 +26,11 @@
   });
 
   document.addEventListener('dragstart', event => {
-    if (event.target instanceof Element && event.target.closest('img')) event.preventDefault();
+    if (!(event.target instanceof Element)) return;
+    // Tier-list cards deliberately use native drag-and-drop. Do not let the
+    // global image guard cancel a drag that starts over their cover image.
+    if (event.target.closest('[data-tier-game][draggable="true"]')) return;
+    if (event.target.closest('img')) event.preventDefault();
   }, true);
 
   const contentToggle = document.getElementById('contentMenuToggle');
@@ -316,6 +320,7 @@
       console.warn('Не удалось обновить состояние управления:', error?.message || error);
     }
     document.body.classList.toggle('is-site-admin', isAdmin);
+    window.dispatchEvent(new CustomEvent('cr7:admin-state', { detail: { isAdmin } }));
     if (managementButton) {
       managementButton.hidden = !isAdmin;
       managementButton.classList.toggle('is-admin', isAdmin);
