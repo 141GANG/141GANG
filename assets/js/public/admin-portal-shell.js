@@ -2,7 +2,7 @@
   const styleLayers = [
     ['adminFigmaTabsFixStyles', './assets/css/public/admin-figma-tabs-fix.css?v=1.0'],
     ['adminFigmaTemplateV3Styles', './assets/css/public/admin-figma-template-v3.css?v=1.0'],
-    ['adminGamesTabsV4Styles', './assets/css/public/admin-games-tabs-v4.css?v=1.6-shared-filter-column'],
+    ['adminGamesTabsV4Styles', './assets/css/public/admin-games-tabs-v4.css?v=1.7-direct-add'],
     ['adminPublishedIconsFixStyles', './assets/css/public/admin-published-icons-fix.css?v=1.2'],
     ['adminModeratorLayoutV5Styles', './assets/css/public/admin-moderator-layout-v5.css?v=1.2'],
     ['adminInterfaceRefinementV8Styles', './assets/css/public/admin-interface-refinement-v8.css?v=1.15-filter-top-alignment'],
@@ -46,7 +46,7 @@
   if (!document.getElementById('adminGamesTabsV4Script')) {
     const script = document.createElement('script');
     script.id = 'adminGamesTabsV4Script';
-    script.src = './assets/js/public/admin-games-tabs-v4.js?v=2.3-lenis-scroll';
+    script.src = './assets/js/public/admin-games-tabs-v4.js?v=2.4-direct-add';
     script.defer = true;
     document.head.appendChild(script);
   }

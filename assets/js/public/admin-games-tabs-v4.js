@@ -165,6 +165,10 @@
             <label><input data-admin-status-filter="ignored" type="checkbox"> Неинтересно</label>
           </div>
         </fieldset>
+        <button class="admin-catalog-add-game" type="button">
+          <span>Добавить</span>
+          <img src="./assets/images/figma/arrow-circle-white.svg" alt="" aria-hidden="true">
+        </button>
         <label class="admin-catalog-filter-sort">
           <span>Сортировка</span>
           <select data-admin-catalog-sort>
@@ -181,6 +185,14 @@
     box.querySelector('.admin-catalog-filter-actions')?.remove();
     bindLiveFilters(box);
     syncFiltersFromBox(box);
+
+    const addButton = box.querySelector('.admin-catalog-add-game');
+    if (addButton && !addButton.dataset.bound) {
+      addButton.dataset.bound = 'true';
+      addButton.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('cr7:open-direct-game-add'));
+      });
+    }
 
     const sort = box.querySelector('.admin-catalog-filter-sort');
     const select = sort?.querySelector('[data-admin-catalog-sort]');

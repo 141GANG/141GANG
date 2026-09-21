@@ -1,0 +1,192 @@
+/* Keep the header and its service menu above the management workspace. */
+body.admin-portal-open .site-header,
+body.standalone-admin > .site-header {
+  z-index: 1900 !important;
+  overflow: visible !important;
+}
+
+body.admin-portal-open .site-header :is(.shell.nav, .nav-center, .nav-menu-wrap),
+body.standalone-admin > .site-header :is(.shell.nav, .nav-center, .nav-menu-wrap) {
+  overflow: visible !important;
+}
+
+body.admin-portal-open .site-header .nav-dropdown,
+body.standalone-admin > .site-header .nav-dropdown {
+  z-index: 200 !important;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Compact direct-add dialog used from Management → Published. */
+.suggestions-panel.is-figma-proposal.is-admin-direct-add {
+  z-index: 2100;
+}
+
+.suggestions-panel.is-admin-direct-add label[for="suggestionComment"],
+.suggestions-panel.is-admin-direct-add #suggestionComment {
+  display: none !important;
+}
+
+@media (min-width: 901px) {
+  .suggestions-panel.is-figma-proposal.is-admin-direct-add {
+    padding: 20px !important;
+  }
+
+  .suggestions-panel.is-figma-proposal.is-admin-direct-add .suggestions-dialog {
+    width: min(650px, calc(100vw - 40px)) !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 650px !important;
+    max-height: calc(100dvh - 40px) !important;
+    padding: 32px !important;
+    border-radius: 10px !important;
+  }
+
+  .suggestions-panel.is-admin-direct-add .suggestion-form h3 {
+    min-height: 0 !important;
+    margin: 0 0 30px !important;
+    font-size: 40px !important;
+    line-height: .94 !important;
+  }
+
+  .suggestions-panel.is-admin-direct-add .suggestion-form label,
+  .suggestions-panel.is-admin-direct-add .figma-field-label {
+    margin-bottom: 6px !important;
+    font-size: 15px !important;
+    line-height: 1.25 !important;
+  }
+
+  .suggestions-panel.is-admin-direct-add .suggestion-steam-row {
+    margin-bottom: 20px !important;
+  }
+
+  .suggestions-panel.is-admin-direct-add .suggestion-form input {
+    min-height: 50px !important;
+    padding-block: 10px !important;
+    font-size: 15px !important;
+    line-height: 1.35 !important;
+  }
+
+  .suggestions-panel.is-admin-direct-add .figma-duration-field {
+    margin-bottom: 22px !important;
+  }
+
+  .suggestions-panel.is-admin-direct-add .figma-duration-row {
+    grid-template-columns: 120px 14px 120px !important;
+    gap: 8px !important;
+  }
+
+  .suggestions-panel.is-admin-direct-add .figma-duration-row input {
+    width: 120px !important;
+  }
+
+  .suggestions-panel.is-admin-direct-add #suggestionSubmitButton {
+    width: 300px !important;
+    min-height: 58px !important;
+    padding: 0 12px 0 18px !important;
+    font-size: 20px !important;
+  }
+
+  .suggestions-panel.is-admin-direct-add #suggestionSubmitButton::after {
+    width: 32px !important;
+    height: 32px !important;
+    flex-basis: 32px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .suggestions-panel.is-admin-direct-add .suggestions-dialog {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+}
+
+/* Pending cards inherit the exact media-column rhythm from Published cards. */
+.admin-portal[data-portal-mode="proposal"] .moderation-card-facts {
+  display: grid !important;
+  gap: 4px !important;
+  margin-top: 6px !important;
+  color: rgba(240, 240, 240, .55) !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-card-facts > span {
+  min-width: 0;
+  min-height: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  color: rgba(240, 240, 240, .55) !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-fact-icon {
+  width: 18px !important;
+  height: 18px !important;
+  flex: 0 0 18px !important;
+  display: block !important;
+  object-fit: contain !important;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-card-facts > .moderation-support-count {
+  min-height: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  color: rgba(240, 240, 240, .5) !important;
+  font-family: var(--font-ui) !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-support-count strong {
+  color: #f0f0f0;
+  font: inherit;
+  font-weight: 500;
+}
+
+/* Use the room freed by moving the vote counter into the media column. */
+.admin-portal[data-portal-mode="proposal"] .moderation-card-copy > .moderation-description {
+  display: -webkit-box !important;
+  max-height: calc(3 * 1.2em) !important;
+  overflow: hidden !important;
+  line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 3 !important;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-reactions-figma {
+  min-width: 0;
+  min-height: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-top: 2px !important;
+  overflow: hidden;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-reactions-figma > span {
+  min-width: 0;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  color: rgba(240, 240, 240, .42) !important;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-reaction-icon {
+  width: 18px !important;
+  height: 18px !important;
+  flex: 0 0 18px !important;
+  display: block !important;
+  object-fit: contain !important;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-reactions-figma b {
+  color: rgba(240, 240, 240, .42) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+}

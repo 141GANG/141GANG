@@ -282,6 +282,43 @@
   gap: 12rem 18rem !important;
 }
 
+.admin-portal .admin-catalog-add-game {
+  width: 100%;
+  min-height: 54rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rem;
+  margin-top: 26rem;
+  padding: 0 16rem;
+  border: 0;
+  border-radius: 4rem;
+  color: #fff;
+  background: #ef3d3f;
+  font-family: var(--font-display);
+  font-size: 17rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color .2s ease, transform .2s ease;
+}
+
+.admin-portal .admin-catalog-add-game:is(:hover, :focus-visible) {
+  background: #ff4a4c;
+  outline: none;
+}
+
+.admin-portal .admin-catalog-add-game:active {
+  transform: translateY(1rem);
+}
+
+.admin-portal .admin-catalog-add-game img {
+  width: 25rem;
+  height: 25rem;
+  flex: 0 0 auto;
+}
+
 .admin-portal .admin-catalog-filter-actions {
   display: grid;
   gap: 10rem;

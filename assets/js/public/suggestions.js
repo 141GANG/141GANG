@@ -51,6 +51,7 @@
     moderationStatus: 'pending',
     moderationQuery: '',
     moderationSort: 'oldest',
+    directAdd: false,
     isAdmin: false,
     eventsBound: false,
     started: false,
@@ -264,6 +265,19 @@
     if (target === 'rating') loadPublicSuggestions();
   }
 
+  function syncDirectAddPresentation() {
+    const title = elements.form?.querySelector('h3');
+    const commentLabel = elements.form?.querySelector('label[for="suggestionComment"]');
+    elements.panel.classList.toggle('is-admin-direct-add', suggestionState.directAdd);
+    if (title) title.textContent = suggestionState.directAdd ? 'Добавить игру' : 'Предложить игру';
+    if (commentLabel) commentLabel.hidden = suggestionState.directAdd;
+    if (elements.comment) elements.comment.hidden = suggestionState.directAdd;
+    if (elements.submitButton) {
+      elements.submitButton.dataset.defaultText = suggestionState.directAdd ? 'Добавить' : 'Отправить';
+      elements.submitButton.textContent = elements.submitButton.dataset.defaultText;
+    }
+  }
+
   function openPanel(view = 'rating') {
     if (suggestionState.localMode) suggestionState.isAdmin = true;
     const requestedAdminView = view === 'submit' && !suggestionState.isAdmin;
@@ -282,6 +296,8 @@
     elements.panel.setAttribute('aria-hidden', 'true');
     elements.triggers.forEach(trigger => trigger.setAttribute('aria-expanded', 'false'));
     document.documentElement.classList.remove('suggestions-open');
+    suggestionState.directAdd = false;
+    syncDirectAddPresentation();
   }
 
   async function ensureViewerSession() {
@@ -403,7 +419,9 @@
       showNotice(
         suggestionState.localMode && data.playerCountSource === 'local'
           ? 'Локальный режим: заявка готова. Мин/макс можно указать вручную.'
-          : 'Игра найдена. Можно добавить комментарий и отправить.',
+          : suggestionState.directAdd
+            ? 'Игра найдена. Можно добавить её в каталог.'
+            : 'Игра найдена. Можно добавить комментарий и отправить.',
         'success'
       );
     } catch (error) {
@@ -426,7 +444,7 @@
       return;
     }
 
-    setBusy(elements.submitButton, true, 'Отправляем…');
+    setBusy(elements.submitButton, true, suggestionState.directAdd ? 'Добавляем…' : 'Отправляем…');
     try {
       const minInput = document.getElementById('suggestionPlayersMin');
       const maxInput = document.getElementById('suggestionPlayersMax');
@@ -440,7 +458,7 @@
       if (suggestionState.localMode) {
         const now = new Date().toISOString();
         const steamUrl = elements.steamUrl.value.trim();
-        const comment = elements.comment.value.trim();
+        const comment = suggestionState.directAdd ? '' : elements.comment.value.trim();
         const localItems = readLocalSuggestions();
         const existingIndex = localItems.findIndex(item => Number(item.steam_app_id) === Number(preview.appId) && item.status === 'pending');
         const item = {
@@ -450,7 +468,7 @@
           title: preview.title,
           cover_url: preview.coverUrl || '',
           description: preview.description || '',
-          status: 'pending',
+          status: suggestionState.directAdd ? 'approved' : 'pending',
           rejection_reason: '',
           created_at: existingIndex >= 0 ? localItems[existingIndex].created_at : now,
           updated_at: now,
@@ -478,9 +496,18 @@
         writeLocalSuggestions(localItems);
         suggestionState.moderation = localItems;
         renderModeration();
-        showNotice(existingIndex >= 0 ? 'Локальная заявка обновлена.' : 'Локальная заявка добавлена в «На рассмотрении».', 'success');
+        showNotice(
+          suggestionState.directAdd
+            ? 'Игра добавлена в опубликованный каталог.'
+            : existingIndex >= 0 ? 'Локальная заявка обновлена.' : 'Локальная заявка добавлена в «На рассмотрении».',
+          'success'
+        );
         elements.form.reset();
         clearPreview();
+        if (suggestionState.directAdd) {
+          window.dispatchEvent(new CustomEvent('cr7:game-published', { detail: { suggestionId: item.id, gameId: null } }));
+          closePanel();
+        }
         return;
       }
 
@@ -490,7 +517,7 @@
         p_title: preview.title,
         p_cover_url: preview.coverUrl || '',
         p_description: preview.description || '',
-        p_comment: elements.comment.value.trim(),
+        p_comment: suggestionState.directAdd ? '' : elements.comment.value.trim(),
         p_release_date: preview.releaseDate || null,
         p_release_date_text: preview.releaseDateText || '',
         p_coming_soon: preview.comingSoon === true,
@@ -504,6 +531,28 @@
       if (error) throw error;
       const result = Array.isArray(data) ? data[0] : data;
       const status = result?.suggestion_status;
+      if (suggestionState.directAdd) {
+        if (!result?.suggestion_id) throw new Error('Сервер не вернул идентификатор добавленной игры.');
+        if (['rejected', 'completed', 'archived'].includes(status)) {
+          throw new Error('Эта игра уже есть в истории. Сначала восстанови её из соответствующего раздела.');
+        }
+        let published = { published: true, gameId: null };
+        if (status === 'pending') {
+          published = await invokeSteamFunction({
+            action: 'publish-suggestion',
+            suggestionId: Number(result.suggestion_id)
+          });
+          if (!published?.published) throw new Error(published?.error || 'Сервер не подтвердил добавление игры.');
+        }
+        showNotice(status === 'pending' ? 'Игра добавлена в опубликованный каталог.' : 'Эта игра уже опубликована.', 'success');
+        window.dispatchEvent(new CustomEvent('cr7:game-published', {
+          detail: { suggestionId: Number(result.suggestion_id), gameId: Number(published.gameId) || null }
+        }));
+        elements.form.reset();
+        clearPreview();
+        closePanel();
+        return;
+      }
       let message = result?.was_created
         ? 'Предложение отправлено модератору.'
         : 'Эта игра уже была предложена и повторно не добавлена.';
@@ -922,26 +971,25 @@
       const supportCount = proposalSupportCount(item);
       const supporterCommentCount = proposalSupportCommentCount(item);
       return `
-        <article class="moderation-card" data-suggestion-id="${Number(item.id)}">
+        <article class="moderation-card" data-figma-real-icons="1" data-suggestion-id="${Number(item.id)}">
           <div class="moderation-card-side">
             <img src="${escapeHtml(cover || './assets/images/figma/game-placeholder.svg')}" alt="Обложка ${escapeHtml(item.title)}">
-            <div class="moderation-card-facts"><span class="moderation-players">${escapeHtml(moderationPlayersLabel(item))}</span><span class="moderation-release">${escapeHtml(moderationReleaseLabel(item))}</span></div>
+            <div class="moderation-card-facts">
+              <span class="moderation-players"><img class="moderation-fact-icon" src="./assets/images/figma/cheloveck.png" alt="" aria-hidden="true"><span>${escapeHtml(moderationPlayersLabel(item))}</span></span>
+              <span class="moderation-release"><img class="moderation-fact-icon" src="./assets/images/figma/calendar.png" alt="" aria-hidden="true"><span>${escapeHtml(moderationReleaseLabel(item))}</span></span>
+              <span class="moderation-support-count">Голосов за игру: <strong>${supportCount}</strong></span>
+            </div>
           </div>
           <div class="moderation-card-copy">
             <h3><button class="moderation-title-open" data-supporter-comments data-suggestion-id="${Number(item.id)}" type="button">${escapeHtml(item.title)}</button></h3>
             <p class="moderation-description">${escapeHtml(item.description || 'Описание не указано.')}</p>
             <div class="moderation-card-meta"><span>Steam ID ${Number(item.steam_app_id)}</span><span>👍 ${reactions.likes}</span><span>👎 ${reactions.dislikes}</span><span>${reactions.likes + reactions.dislikes ? `${reactions.percent}% лайков` : 'Нет оценок'}</span><span>${escapeHtml(formatDate(item.created_at))}</span></div>
             ${item.rejection_reason ? `<p><strong>Причина:</strong> ${escapeHtml(item.rejection_reason)}</p>` : ''}
-            <div class="moderation-support-panel">
-              <div class="moderation-support-stats">
-                <span>Голосов за игру: <strong>${supportCount}</strong></span>
-              </div>
-              <button class="moderation-support-comments-open" data-supporter-comments data-suggestion-id="${Number(item.id)}" type="button">
-                <span>Комментарии</span>
-                <b>${supporterCommentCount}</b>
-                <img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg">
-              </button>
-            </div>
+            <button class="moderation-support-comments-open" data-supporter-comments data-suggestion-id="${Number(item.id)}" type="button">
+              <span>Комментарии</span>
+              <b>${supporterCommentCount}</b>
+              <img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg">
+            </button>
             <div class="moderation-actions">${steam ? `<a class="moderation-steam" href="${escapeHtml(steam)}" target="_blank" rel="noopener noreferrer">Открыть Steam <img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"></a>` : ''}${moderationActions(item)}</div>
           </div>
         </article>`;
@@ -1273,10 +1321,28 @@
       const actionButton = event.target.closest('[data-action][data-suggestion-id]');
       if (actionButton) moderateSuggestion(actionButton.dataset.suggestionId, actionButton.dataset.action, actionButton);
     });
+    window.addEventListener('cr7:open-direct-game-add', () => {
+      if (!suggestionState.isAdmin && !suggestionState.localMode) {
+        showNotice('Добавлять игры может только администратор.', 'error');
+        return;
+      }
+      suggestionState.directAdd = true;
+      elements.form.reset();
+      clearPreview();
+      syncDirectAddPresentation();
+      openPanel('submit');
+    });
     document.addEventListener('keydown', event => {
       if (event.key !== 'Escape') return;
-      if (!elements.commentsPanel.hidden) closeComments();
-      else if (!elements.panel.hidden) closePanel();
+      if (!elements.commentsPanel.hidden) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        closeComments();
+      } else if (!elements.panel.hidden) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        closePanel();
+      }
     });
   }
 

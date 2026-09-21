@@ -559,6 +559,15 @@
   }
 }
 
+.suggestions-panel.is-figma-proposal.is-admin-direct-add {
+  z-index: 2100;
+}
+
+.suggestions-panel.is-admin-direct-add label[for="suggestionComment"],
+.suggestions-panel.is-admin-direct-add #suggestionComment {
+  display: none !important;
+}
+
 /* Keep both proposal windows visibly separated from every viewport edge. */
 @media (min-width: 901px) {
   .suggestions-panel.is-figma-proposal,

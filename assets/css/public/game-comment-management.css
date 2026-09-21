@@ -259,7 +259,7 @@
   position: relative;
   z-index: 3;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 160rem;
+  grid-template-columns: minmax(0, 1fr) 112rem;
   align-items: flex-end;
   justify-content: space-between;
   gap: 18rem;
@@ -300,16 +300,16 @@
 
 .game-modal .modal-comment-sort {
   position: relative;
-  width: 160rem;
+  width: 112rem;
   min-width: 0;
 }
 
 .game-modal .modal-comment-sort summary {
-  min-height: 48rem;
+  min-height: 42rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 7rem 34rem 7rem 14rem;
+  padding: 5rem 26rem 5rem 10rem;
   border: 0;
   border-radius: 6rem;
   color: #f0f0f0;
@@ -347,7 +347,7 @@
 
 .game-modal .modal-comment-sort summary b {
   overflow: hidden;
-  font-size: 14rem;
+  font-size: 12rem;
   font-weight: 500;
   line-height: 1.25;
   text-overflow: ellipsis;
