@@ -7,13 +7,13 @@ body.gang-open { overflow: hidden; }
 .gang-panel { position: fixed; inset: 0; z-index: 1200; display: grid; place-items: center; padding: 16rem; }
 .gang-backdrop { position: absolute; inset: 0; background: rgba(4,4,4,.86); opacity: 0; backdrop-filter: blur(12rem); transition: opacity .35s ease; }
 .gang-dialog { position: relative; box-sizing: border-box; width: min(1180rem,100%); height: min(820rem,calc(100dvh - 32rem)); max-height: calc(100dvh - 32rem); overflow-y: auto; padding: clamp(24rem,4vw,52rem); border: 1rem solid rgba(240,240,240,.1); border-radius: 6rem; color: #f0f0f0; background: #121212; box-shadow: 0 30rem 90rem rgba(0,0,0,.56); opacity: 0; transform: translateY(24rem) scale(.98); transition: opacity .35s ease, transform .42s var(--ease); }
+#gangPanel .gang-dialog { border: 0 !important; border-radius: 12rem !important; background-color: #121212 !important; background-image: radial-gradient(circle at 15% 0, rgba(220, 44, 31, .12), transparent 544px), linear-gradient(145deg, #171515, #090909 58%, #120c0b) !important; box-shadow: none !important; }
+#gangPanel .gang-dialog:focus { outline: none; }
 .gang-panel.is-open .gang-backdrop { opacity: 1; }
 .gang-panel.is-open .gang-dialog { opacity: 1; transform: translateY(0) scale(1); }
-.gang-head { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 24rem; margin-bottom: 24rem; padding-bottom: 22rem; border-bottom: 1rem solid rgba(240,240,240,.1); background: transparent !important; transform: none !important; opacity: 1 !important; }
-.gang-head h2 { margin: 0; max-width: calc(100% - 70rem); color: #f0f0f0; font-family: 'DrukCyr-Heavy','Druk Cyr',sans-serif !important; font-size: clamp(30rem,4vw,56rem); font-weight: 900; line-height: .95; letter-spacing: 0; text-transform: uppercase; }
-.gang-close { flex: 0 0 auto; display: grid; width: 44rem; height: 44rem; place-items: center; border: 1rem solid rgba(240,240,240,.16); border-radius: 50%; color: #f0f0f0; background: #202020; font-family: 'Manrope',sans-serif; font-size: 25rem; transition: transform .2s ease, border-color .2s ease, background .2s ease; }
-.gang-close:hover { transform: rotate(8deg); border-color: rgba(240,240,240,.42); background: #292929; }
-.gang-status { min-height: 22rem; margin: 0 0 18rem; color: #a99a96; font-family: 'Manrope',sans-serif; font-size: 12rem; line-height: 1.35; }
+.gang-head { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16rem; margin-bottom: 24rem; padding: 0; border: 0; background: transparent !important; transform: none !important; opacity: 1 !important; }
+#gangPanel .gang-head { border: 0 !important; background: transparent !important; }
+#gangPanel .gang-head h2 { margin: 0; max-width: none; color: #f0f0f0; font-family: 'DrukCyr-Heavy','Druk Cyr',sans-serif !important; font-size: min(64rem,8vw); font-weight: 900; line-height: 1; letter-spacing: -.02em !important; text-transform: uppercase !important; white-space: nowrap; }
 .gang-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16rem; }
 .gang-card { position: relative; min-height: 224rem; overflow: hidden; border: 1rem solid rgba(240,240,240,.1); border-radius: 8rem; color: #f0f0f0; background: #121212; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
 .gang-card.is-live { min-height: 246rem; }
@@ -25,26 +25,23 @@ body.gang-open { overflow: hidden; }
 .gang-card.is-live.has-live-preview .gang-avatar { opacity: 0; }
 .gang-card.is-live.has-live-preview .gang-preview { opacity: .64; }
 .gang-card:hover .gang-card-media img { transform: scale(1.06); }
-.gang-avatar-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255,255,255,.15); background: #202020; font-family: 'DrukCyr-Heavy','Druk Cyr',sans-serif; font-size: 92rem; font-weight: 900; text-transform: uppercase; }
+.gang-avatar-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255,255,255,.15); background: #202020; font-family: 'DrukCyr-Heavy','Druk Cyr',sans-serif; font-size: clamp(48rem,8vw,92rem); font-weight: 900; letter-spacing: .02em; text-transform: uppercase; }
 .gang-card-media::after { position: absolute; inset: 0; background: linear-gradient(to top,rgba(5,5,5,.98),rgba(5,5,5,.16) 78%); content: ''; }
 .gang-card-copy { position: absolute; inset: auto 0 0; z-index: 1; padding: 20rem; }
-.gang-card-topline { display: flex; align-items: center; gap: 8rem; }
-.gang-live { display: inline-flex; align-items: center; gap: 7rem; margin-bottom: 10rem; color: #a99a96; font-family: 'Manrope',sans-serif; font-size: 9rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
-.gang-live::before { width: 7rem; height: 7rem; border-radius: 50%; background: #746965; content: ''; }
-.gang-card.is-live .gang-live { color: #ff7b68; }
-.gang-card.is-live .gang-live::before { background: #f04431; box-shadow: 0 0 12rem #e33324; animation: gang-pulse 1.6s ease infinite; }
-.gang-card.is-checking .gang-live { color: #c3aaa4; }
-.gang-card.is-checking .gang-live::before { background: #d26454; animation: gang-pulse 1.2s ease infinite; }
-.gang-provider { margin: 0 0 10rem; padding: 3rem 7rem; border: 1rem solid rgba(240,240,240,.16); border-radius: 999rem; color: #c0b5b1; font-family: 'Manrope',sans-serif; font-size: 8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-.gang-category { display: inline-flex; max-width: calc(100% - 48rem); margin-top: 7rem; padding: 5rem 9rem; overflow: hidden; border: 1rem solid rgba(255,123,104,.36); border-radius: 6rem; color: #ffd0c7; background: rgba(230,61,61,.12); font-family: 'Manrope',sans-serif; font-size: 10rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+#gangPanel .gang-card-badges { position: absolute; top: 20rem; left: 20rem; z-index: 2; display: flex; align-items: center; gap: 8rem; max-width: calc(100% - 40rem); opacity: 0; transform: translateY(-5rem); transition: opacity .2s ease, transform .2s ease; pointer-events: none; }
+#gangPanel .gang-card:is(:hover,:focus-visible) .gang-card-badges { opacity: 1; transform: translateY(0); }
+#gangPanel .gang-category { display: inline-flex; align-items: center; min-width: 0; max-width: 100%; min-height: 30rem; padding: 6rem 12rem; overflow: hidden; border: 0; border-radius: 6rem; color: #f0f0f0; background: #e63d3d; font-family: 'DrukCyr-Heavy','Druk Cyr',sans-serif !important; font-size: 15rem; font-weight: 900; line-height: 1; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
 .gang-category[hidden] { display: none; }
-.gang-uptime { display: block; margin-top: 7rem; color: #ffad9d; font-family: 'Manrope',sans-serif; font-size: 10rem; font-weight: 700; letter-spacing: .035em; }
+#gangPanel .gang-uptime { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; min-height: 30rem; padding: 6rem 12rem; border: 0; border-radius: 6rem; color: #111; background: #f8f9fa; font-family: 'DrukCyr-Heavy','Druk Cyr',sans-serif !important; font-size: 15rem; font-weight: 900; line-height: 1; letter-spacing: .02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .gang-uptime[hidden] { display: none; }
-.gang-card h3 { margin: 0; color: #f0f0f0; font-family: 'DrukCyr-Heavy','Druk Cyr',sans-serif !important; font-size: 30rem; font-weight: 900; line-height: .95; letter-spacing: 0; }
+.gang-card h3 { display: flex; align-items: center; gap: 9rem; margin: 0; color: #f0f0f0; font-family: 'DrukCyr-Heavy','Druk Cyr',sans-serif !important; font-size: 30rem; font-weight: 900; line-height: .95; letter-spacing: 0; }
+.gang-platform-icon { position: relative; display: inline-block; flex: 0 0 26rem; width: 26rem; height: 26rem; overflow: hidden; border-radius: 6rem; background: #9146ff; }
+.gang-platform-icon.is-kick { border: 1rem solid rgba(82, 244, 12, .55); background: #050505; }
+.gang-platform-icon img { position: absolute; top: 50%; left: 50%; display: block; width: 150%; height: 150%; max-width: none; object-fit: contain; transform: translate(-50%,-50%); }
+.gang-platform-icon.is-kick img { width: 120%; height: 120%; }
+#gangPanel .gang-card[data-provider="kick"] h3:not(:has(.gang-platform-icon))::after { display: inline-block; flex: 0 0 26rem; width: 26rem; height: 26rem; border: 1rem solid rgba(82, 244, 12, .55); border-radius: 6rem; background: #050505 url("../../images/figma/kick-icon.jpg") center / 120% no-repeat; content: ""; }
 .gang-card p { margin: 7rem 0 0; overflow: hidden; color: #c0b5b1; font-family: 'Manrope',sans-serif; font-size: 12rem; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
 .gang-card small { display: block; margin-top: 6rem; color: #8f817d; font-family: 'Manrope',sans-serif; font-size: 10rem; }
-.gang-card-arrow { position: absolute; right: 20rem; bottom: 20rem; z-index: 2; display: grid; width: 36rem; height: 36rem; place-items: center; border: 1rem solid rgba(240,240,240,.2); border-radius: 50%; color: #f0f0f0; background: rgba(0,0,0,.32); font-family: 'Manrope',sans-serif; font-size: 22rem; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
-.gang-card:hover .gang-card-arrow { border-color: rgba(240,240,240,.48); background: rgba(32,32,32,.8); transform: translate(2rem,-2rem); }
 .gang-detectors {
   position: fixed !important;
   top: 0 !important;
@@ -74,5 +71,7 @@ body.gang-open { overflow: hidden; }
 }
 @media (prefers-reduced-motion: reduce) {
   .gang-backdrop,.gang-dialog,.gang-card,.gang-card-media img { transition-duration: .001ms !important; }
-  .gang-card.is-live .gang-live::before { animation: none; }
+}
+@media (hover: none) {
+  #gangPanel .gang-card .gang-card-badges { opacity: 1; transform: none; }
 }

@@ -19,7 +19,7 @@
 <link href="./assets/css/public/header-hero.css" rel="stylesheet"/>
 <link href="./assets/css/public/catalog.css" rel="stylesheet"/>
 <link href="./assets/css/public/modal.css" rel="stylesheet"/>
-<link href="./assets/css/public/gang.css?v=3.3-streams-window" rel="stylesheet"/>
+<link href="./assets/css/public/gang.css?v=4.9-responsive-stream-title" rel="stylesheet"/>
 <link href="./assets/css/public/auction.css?v=4.4" rel="stylesheet"/>
 <link href="./assets/css/public/auction-pointauc.css?v=5.0" rel="stylesheet"/>
 <link href="./assets/css/public/responsive.css" rel="stylesheet"/>
@@ -46,7 +46,7 @@
 <link href="./assets/css/public/game-comments-drawer.css?v=1.0" id="gameCommentsDrawerStyles" rel="stylesheet"/>
 <link href="./assets/css/public/tier-list-figma.css?v=3.2-reference-header" id="tierListFigmaStyles" rel="stylesheet"/>
 <link href="./assets/css/public/standalone-header-consistency.css?v=1.2-shared-single-row" id="standaloneHeaderConsistencyStyles" rel="stylesheet"/>
-<link href="./assets/css/public/hero-recent-game.css?v=1.0" id="heroRecentGameStyles" rel="stylesheet"/>
+<link href="./assets/css/public/hero-recent-game.css?v=1.1-empty-black" id="heroRecentGameStyles" rel="stylesheet"/>
 <link href="./assets/css/public/admin-druk-title-final.css?v=2.0-fixed-header" rel="stylesheet"/>
 <link href="./assets/css/public/admin-direct-add.css?v=1.8-three-line-description" rel="stylesheet"/>
 <script defer id="premiumMotionScript" src="./assets/js/public/premium-motion.js?v=1.5-independent-game-modal"></script>
@@ -93,8 +93,8 @@
 <button aria-live="polite" class="hero-recent-game" disabled id="heroRecentGame" type="button">
 <span class="hero-recent-label" id="heroRecentLabel">Последнее сыгранное</span>
 <span class="hero-recent-media">
-<img alt="" class="hero-recent-cover" id="heroRecentCover" src="./assets/images/figma/game-placeholder.svg"/>
-<span class="hero-recent-title" id="heroRecentTitle">Игр с отметкой пока нет</span>
+<img alt="" class="hero-recent-cover" hidden id="heroRecentCover"/>
+<span class="hero-recent-title" hidden id="heroRecentTitle"></span>
 </span>
 </button>
 <div aria-hidden="true" class="hero-data-registry">
@@ -154,12 +154,10 @@
 </main>
 <div aria-hidden="true" class="gang-panel" hidden="" id="gangPanel">
 <div class="gang-backdrop" data-gang-close=""></div>
-<section aria-labelledby="gangTitle" aria-modal="true" class="gang-dialog" role="dialog">
+<section aria-labelledby="gangTitle" aria-modal="true" class="gang-dialog" role="dialog" tabindex="-1">
 <header class="gang-head">
-<div><h2 id="gangTitle">Стримеры сообщества 141GANG в одном месте.</h2></div>
-<button aria-label="Закрыть 141 GANG" class="gang-close" id="gangClose" type="button">×</button>
+<div><h2 id="gangTitle">Стримеры сообщества 141GANG</h2></div>
 </header>
-<div aria-live="polite" class="gang-status" id="gangStatus">Проверяем, кто сейчас в эфире…</div>
 <div class="gang-grid" id="gangGrid"></div>
 <div aria-hidden="true" class="gang-detectors" id="gangDetectors"></div>
 </section>
@@ -588,7 +586,7 @@
 </div>
 </div>
 <footer class="site-footer" id="siteFooter"><div class="shell footer-developers-inner"><div aria-live="polite" class="footer-developers" id="footerDevelopers"><button aria-expanded="false" class="footer-developers-trigger" id="footerDevelopersTrigger" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/inf-icon.png"/><span>О разработчиках</span></button><p aria-hidden="true" class="footer-developers-credits" id="footerDevelopersCredits">@tankzor, @archivebtw, @max_vopros, @OBWECTBO141</p></div></div></footer>
-<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.7-toast-all"></script><script src="./assets/js/public/state.js?v=4.3-recent-game"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.1-recent-game"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.7-pending-suggestion-comments"></script><script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script><script src="./assets/js/public/suggestions.js?v=4.17-left-support-count"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script async id="twitchPlayerSdk" src="https://player.twitch.tv/js/embed/v1.js"></script><script src="./assets/js/public/gang.js?v=3.3"></script><script src="./assets/js/public/auction.js?v=5.1-feature-dialog"></script><script src="./assets/js/public/admin-portal.js?v=3.3"></script><script src="./assets/js/public/admin-portal-shell.js?v=6.0-direct-add"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.5-recent-game"></script><script src="./assets/js/public/figma-ui.js?v=10.16-admin-state-event"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
+<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.7-toast-all"></script><script src="./assets/js/public/state.js?v=4.3-recent-game"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.2-empty-black"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.7-pending-suggestion-comments"></script><script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script><script src="./assets/js/public/suggestions.js?v=4.17-left-support-count"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script src="./assets/js/public/gang.js?v=4.6-no-stream-summary"></script><script src="./assets/js/public/auction.js?v=5.1-feature-dialog"></script><script src="./assets/js/public/admin-portal.js?v=3.3"></script><script src="./assets/js/public/admin-portal-shell.js?v=6.0-direct-add"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.5-recent-game"></script><script src="./assets/js/public/figma-ui.js?v=10.16-admin-state-event"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
 (() => {
   const pageView = /\/tier-list\.html$/i.test(location.pathname) ? 'tier'
     : /\/auction\.html$/i.test(location.pathname) ? 'auction'

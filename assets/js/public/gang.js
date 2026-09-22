@@ -12,9 +12,8 @@
   const grid = document.getElementById('gangGrid');
   const detectors = document.getElementById('gangDetectors');
   const openButton = document.getElementById('gangOpen');
-  const closeButton = document.getElementById('gangClose');
-  const status = document.getElementById('gangStatus');
-  if (!panel || !grid || !detectors || !openButton || !closeButton || !status) return;
+  const dialog = panel?.querySelector('.gang-dialog');
+  if (!panel || !grid || !detectors || !openButton || !dialog) return;
 
   let lastFocusedElement = null;
   let refreshTimer = 0;
@@ -22,9 +21,14 @@
   let players = [];
   let fallbackTimeout = 0;
   let uptimeTimer = 0;
-  const regionRestrictedChannels = new Set(['yurapivo','r4dom1r']);
-
+  const statusCacheKey = '141gang:stream-status:v1';
+  const statusCacheMaxAge = 120000;
   const label = channel => channel.replace(/(^|_)(\w)/g,(_,prefix,letter) => `${prefix}${letter.toUpperCase()}`);
+  const platformBadge = provider => provider === 'twitch'
+    ? '<span class="gang-platform-icon" role="img" aria-label="Twitch"><img alt="" src="./assets/images/figma/twitch-icon.webp"/></span>'
+    : provider === 'kick'
+      ? '<span class="gang-platform-icon is-kick" role="img" aria-label="Kick"><img alt="" src="./assets/images/figma/kick-icon.jpg"/></span>'
+      : '';
   const channelUrl = ({ provider,channel }) => `https://${provider === 'kick' ? 'kick.com' : 'www.twitch.tv'}/${channel}`;
   const fallbackAvatar = ({ provider,channel }) => `https://unavatar.io/${provider}/${encodeURIComponent(channel)}?fallback=false`;
   const imageUrl = value => {
@@ -34,23 +38,85 @@
     return /^https?:\/\//i.test(url) ? url : '';
   };
 
+  const streamerKey = item => `${item.provider}:${String(item.channel).toLowerCase()}`;
+
+  function rememberStatus(item) {
+    if (item.available !== true) return;
+    try {
+      const stored = JSON.parse(sessionStorage.getItem(statusCacheKey) || '{}');
+      const previous = Date.now() - Number(stored.checkedAt || 0) < statusCacheMaxAge
+        && Array.isArray(stored.streamers) ? stored.streamers : [];
+      const byChannel = new Map(previous.map(entry => [streamerKey(entry),entry]));
+      byChannel.set(streamerKey(item),item);
+      sessionStorage.setItem(statusCacheKey,JSON.stringify({
+        checkedAt: Date.now(),
+        streamers: [...byChannel.values()],
+      }));
+    } catch {}
+  }
+
+  function restoreCachedStatuses() {
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(statusCacheKey) || '{}');
+      if (Date.now() - Number(cached.checkedAt || 0) >= statusCacheMaxAge) return;
+      if (!Array.isArray(cached.streamers)) return;
+      const allowed = new Set(streamers.map(streamerKey));
+      cached.streamers.forEach(item => {
+        if (item && item.available === true && allowed.has(streamerKey(item))) {
+          applyStatus(item,false);
+        }
+      });
+      sortCards();
+    } catch {}
+  }
+
+  async function fetchSupabaseStatuses(signal) {
+    const baseUrl = String(window.CR7_CONFIG?.supabaseUrl || '').replace(/\/$/,'');
+    const apiKey = String(window.CR7_CONFIG?.supabasePublishableKey || '');
+    if (!baseUrl.startsWith('https://') || !apiKey) throw new Error('Supabase stream status is not configured');
+    const timeout = new AbortController();
+    const timer = window.setTimeout(() => timeout.abort(),7000);
+    const abort = () => timeout.abort();
+    if (signal?.aborted) abort();
+    signal?.addEventListener('abort',abort,{ once: true });
+    try {
+      const response = await fetch(`${baseUrl}/functions/v1/stream-status`,{
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: apiKey },
+        body: JSON.stringify({ streamers: streamers.map(({ provider,channel }) => ({ provider,channel })) }),
+        signal: timeout.signal,
+      });
+      if (!response.ok) throw new Error(`Supabase stream status: ${response.status}`);
+      const payload = await response.json();
+      if (!Array.isArray(payload.streamers)) throw new Error('Invalid Supabase stream status response');
+      const allowed = new Set(streamers.map(streamerKey));
+      return payload.streamers.filter(item => item
+        && allowed.has(streamerKey(item))
+        && typeof item.available === 'boolean'
+        && typeof item.live === 'boolean');
+    } finally {
+      window.clearTimeout(timer);
+      signal?.removeEventListener('abort',abort);
+    }
+  }
+
   function renderCards() {
     grid.innerHTML = streamers.map(streamer => `
       <a class="gang-card is-checking" data-channel="${streamer.channel}" data-provider="${streamer.provider}" data-order="${streamer.order}" data-status="checking" href="${channelUrl(streamer)}" rel="noopener noreferrer" target="_blank">
         <span class="gang-card-media">
-          <span aria-hidden="true" class="gang-avatar-fallback">${label(streamer.channel).slice(0,1)}</span>
+          <span aria-hidden="true" class="gang-avatar-fallback">OFFLINE</span>
           <img alt="Аватар канала ${label(streamer.channel)}" class="gang-avatar" decoding="async" loading="lazy" onerror="this.hidden=true" referrerpolicy="no-referrer" src="${fallbackAvatar(streamer)}"/>
           <img alt="" aria-hidden="true" class="gang-preview" decoding="async" loading="lazy" referrerpolicy="no-referrer"/>
         </span>
-        <span class="gang-card-copy">
-          <span class="gang-card-topline"><span class="gang-live">Проверяем эфир</span><span class="gang-provider">${streamer.provider === 'kick' ? 'KICK' : 'TWITCH'}</span></span>
-          <h3>${label(streamer.channel)}</h3>
+        <span class="gang-card-badges">
           <span class="gang-category" hidden></span>
+          <span class="gang-uptime" hidden title="Время эфира"></span>
+        </span>
+        <span class="gang-card-copy">
+          <h3><span>${label(streamer.channel)}</span>${platformBadge(streamer.provider)}</h3>
           <p class="gang-stream-title">Загружаем статус канала…</p>
-          <span class="gang-uptime" hidden></span>
           <small>${streamer.provider === 'kick' ? 'kick.com' : 'twitch.tv'}/${streamer.channel}</small>
         </span>
-        <span class="gang-card-arrow" aria-hidden="true">↗</span>
       </a>`).join('');
   }
 
@@ -65,29 +131,14 @@
       .forEach(card => grid.appendChild(card));
   }
 
-  function updateSummary(message = '') {
-    if (message) {
-      status.textContent = message;
-      return;
-    }
-    const cards = [...grid.children];
-    const liveCount = cards.filter(card => card.dataset.status === 'live').length;
-    const checkingCount = cards.filter(card => card.dataset.status === 'checking').length;
-    const unavailableCount = cards.filter(card => card.dataset.status === 'unavailable').length;
-    if (checkingCount) status.textContent = `Проверяем каналы: ${cards.length - checkingCount} из ${cards.length}`;
-    else if (liveCount) status.textContent = `Сейчас стримят: ${liveCount} · онлайн-каналы показаны первыми`;
-    else if (unavailableCount === cards.length) status.textContent = 'Статусы временно недоступны · каналы можно открыть вручную';
-    else status.textContent = 'Сейчас все участники вне эфира';
-  }
-
   function formatUptime(value) {
     const startedAt = Date.parse(value || '');
     if (!Number.isFinite(startedAt)) return '';
-    const totalMinutes = Math.max(0,Math.floor((Date.now() - startedAt) / 60000));
-    const days = Math.floor(totalMinutes / 1440);
-    const hours = Math.floor(totalMinutes % 1440 / 60);
-    const minutes = totalMinutes % 60;
-    return `В эфире ${days ? `${days} д ` : ''}${hours ? `${hours} ч ` : ''}${minutes} мин`;
+    const totalSeconds = Math.max(0,Math.floor((Date.now() - startedAt) / 1000));
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2,'0');
+    const minutes = String(Math.floor(totalSeconds % 3600 / 60)).padStart(2,'0');
+    const seconds = String(totalSeconds % 60).padStart(2,'0');
+    return `${hours}:${minutes}:${seconds}`;
   }
 
   function updateUptimes() {
@@ -99,7 +150,7 @@
     });
   }
 
-  function applyStatus(item) {
+  function applyStatus(item,remember = true) {
     const card = cardFor(item);
     if (!card) return;
     const live = item.live === true;
@@ -108,12 +159,15 @@
     const preview = card.querySelector('.gang-preview');
     const category = card.querySelector('.gang-category');
     const uptime = card.querySelector('.gang-uptime');
+    const fallback = card.querySelector('.gang-avatar-fallback');
     card.dataset.status = nextStatus;
     card.dataset.startedAt = live ? (item.startedAt || '') : '';
     card.classList.toggle('is-live',live);
     card.classList.remove('has-live-preview','is-checking');
-    card.querySelector('.gang-live').textContent = live ? 'Сейчас в эфире' : nextStatus === 'unavailable' ? 'Статус недоступен' : 'Не в эфире';
-    card.querySelector('.gang-stream-title').textContent = live ? (item.title || 'Прямой эфир') : nextStatus === 'unavailable' ? 'Статус временно недоступен' : 'Сейчас не в эфире';
+    fallback.textContent = live ? 'LIVE' : 'OFFLINE';
+    const streamTitle = card.querySelector('.gang-stream-title');
+    streamTitle.textContent = live ? (item.title || 'Прямой эфир') : nextStatus === 'unavailable' ? 'Статус временно недоступен' : '';
+    streamTitle.hidden = !streamTitle.textContent;
     category.textContent = item.category || '';
     category.hidden = !live || !item.category;
     const uptimeText = live ? formatUptime(item.startedAt) : '';
@@ -141,6 +195,7 @@
       preview.hidden = true;
       preview.removeAttribute('src');
     }
+    if (remember) rememberStatus(item);
   }
 
   function destroyFallbackPlayers() {
@@ -169,28 +224,70 @@
     return elapsed > 0 ? new Date(Date.now() - elapsed).toISOString() : '';
   }
 
+  async function fillMissingTwitchUptime(item,signal) {
+    if (item.provider !== 'twitch' || !item.live || Number.isFinite(Date.parse(item.startedAt || ''))) return;
+    const timeout = new AbortController();
+    const timer = window.setTimeout(() => timeout.abort(),6000);
+    const abort = () => timeout.abort();
+    if (signal?.aborted) abort();
+    signal?.addEventListener('abort',abort,{ once: true });
+    try {
+      const response = await fetch(
+        `https://decapi.me/twitch/uptime/${encodeURIComponent(item.channel)}`,
+        { signal: timeout.signal }
+      );
+      if (!response.ok) return;
+      const startedAt = startedAtFromUptime(await response.text());
+      const card = cardFor(item);
+      if (!startedAt || signal?.aborted || card?.dataset.status !== 'live' || card.dataset.startedAt) return;
+      card.dataset.startedAt = startedAt;
+      const uptime = card.querySelector('.gang-uptime');
+      uptime.textContent = formatUptime(startedAt);
+      uptime.hidden = false;
+      rememberStatus({ ...item,startedAt });
+    } catch (error) {
+      if (error?.name !== 'AbortError') console.warn(`141 GANG uptime (${item.channel}):`,error);
+    } finally {
+      window.clearTimeout(timer);
+      signal?.removeEventListener('abort',abort);
+    }
+  }
+
   async function twitchFallbackMetadata(channel) {
     const read = async path => {
-      const response = await fetch(
-        `https://decapi.me/twitch/${path}/${encodeURIComponent(channel)}`,
-        { signal: requestController?.signal }
-      );
-      if (!response.ok) throw new Error(`Twitch metadata: ${response.status}`);
-      return (await response.text()).trim();
+      const timeout = new AbortController();
+      const timer = window.setTimeout(() => timeout.abort(),6000);
+      const abort = () => timeout.abort();
+      const parentSignal = requestController?.signal;
+      if (parentSignal?.aborted) abort();
+      parentSignal?.addEventListener('abort',abort,{ once: true });
+      try {
+        const response = await fetch(
+          `https://decapi.me/twitch/${path}/${encodeURIComponent(channel)}`,
+          { signal: timeout.signal }
+        );
+        if (!response.ok) throw new Error(`Twitch metadata: ${response.status}`);
+        return (await response.text()).trim();
+      } finally {
+        window.clearTimeout(timer);
+        parentSignal?.removeEventListener('abort',abort);
+      }
     };
-    const [title,category,uptime] = await Promise.all([
-      read('title'),
-      read('game'),
-      read('uptime')
-    ]);
+    const uptime = await read('uptime');
     const offlinePattern = /(?:channel is offline|not live|currently offline|offline)/i;
     const startedAt = startedAtFromUptime(uptime);
-    if (!startedAt && !offlinePattern.test(uptime)) {
+    if (offlinePattern.test(uptime)) {
+      return { available: true, live: false, title: '', category: '', startedAt: '' };
+    }
+    if (!startedAt) {
       throw new Error(`Unknown Twitch uptime response: ${uptime}`);
     }
+    const [titleResult,categoryResult] = await Promise.allSettled([read('title'),read('game')]);
+    const title = titleResult.status === 'fulfilled' ? titleResult.value : '';
+    const category = categoryResult.status === 'fulfilled' ? categoryResult.value : '';
     return {
       available: true,
-      live: Boolean(startedAt),
+      live: true,
       title: offlinePattern.test(title) ? '' : title,
       category: offlinePattern.test(category) ? '' : category,
       startedAt,
@@ -214,7 +311,6 @@
     };
     applyStatus(fallback);
     sortCards();
-    updateSummary();
     if (!live) return;
     try {
       const metadata = await twitchFallbackMetadata(channel);
@@ -229,9 +325,10 @@
     }
   }
 
-  async function checkRegionRestrictedChannel(streamer) {
+  async function checkTwitchDirect(streamer) {
     try {
       const metadata = await twitchFallbackMetadata(streamer.channel);
+      if (requestController?.signal.aborted) return false;
       applyStatus({
         ...streamer,
         ...metadata,
@@ -240,10 +337,11 @@
           : '',
         avatarUrl: '',
       });
+      sortCards();
       return true;
     } catch (error) {
       if (error?.name !== 'AbortError') {
-        console.warn(`141 GANG regional check (${streamer.channel}):`,error);
+        console.warn(`141 GANG direct check (${streamer.channel}):`,error);
       }
       return false;
     }
@@ -251,6 +349,13 @@
 
   function waitForTwitchPlayer(signal) {
     if (window.Twitch?.Player) return Promise.resolve(true);
+    if (!document.getElementById('twitchPlayerSdk')) {
+      const script = document.createElement('script');
+      script.id = 'twitchPlayerSdk';
+      script.src = 'https://player.twitch.tv/js/embed/v1.js';
+      script.async = true;
+      document.head.appendChild(script);
+    }
     return new Promise(resolve => {
       const startedAt = Date.now();
       const poll = () => {
@@ -274,16 +379,13 @@
 
   async function checkTwitchWithPlayer(streamersToCheck,signal) {
     if (!streamersToCheck.length) return;
-    const restricted = streamersToCheck.filter(
-      streamer => regionRestrictedChannels.has(streamer.channel)
-    );
-    const regionalResults = await Promise.all(
-      restricted.map(checkRegionRestrictedChannel)
+    const directResults = await Promise.all(
+      streamersToCheck.map(checkTwitchDirect)
     );
     if (signal?.aborted) return;
     const resolved = new Set(
-      restricted
-        .filter((_,index) => regionalResults[index])
+      streamersToCheck
+        .filter((_,index) => directResults[index])
         .map(streamer => streamer.channel)
     );
     const playerStreamers = streamersToCheck.filter(
@@ -291,7 +393,6 @@
     );
     if (!playerStreamers.length) {
       sortCards();
-      updateSummary();
       return;
     }
 
@@ -300,7 +401,6 @@
     if (!playerReady) {
       playerStreamers.forEach(streamer => applyStatus({ ...streamer, available: false }));
       sortCards();
-      updateSummary();
       return;
     }
 
@@ -337,7 +437,6 @@
         }
       });
       sortCards();
-      updateSummary();
     },15000);
   }
 
@@ -383,22 +482,30 @@
     window.clearTimeout(refreshTimer);
     requestController?.abort();
     requestController = new AbortController();
+    const signal = requestController.signal;
     destroyFallbackPlayers();
-    [...grid.children].forEach(card => {
-      card.dataset.status = 'checking';
-      card.classList.add('is-checking');
-    });
-    sortCards();
-    updateSummary();
 
-    const twitch = streamers.filter(streamer => streamer.provider === 'twitch');
-    const kick = streamers.filter(streamer => streamer.provider === 'kick');
+    let verified = [];
+    try {
+      verified = (await fetchSupabaseStatuses(signal)).filter(item => item.available === true);
+      if (signal.aborted) return;
+      verified.forEach(item => applyStatus(item));
+      sortCards();
+    } catch (error) {
+      if (signal.aborted) return;
+      console.warn('141 GANG Supabase stream status:',error);
+    }
+
+    const resolved = new Set(verified.map(streamerKey));
+    const twitch = streamers.filter(streamer => streamer.provider === 'twitch' && !resolved.has(streamerKey(streamer)));
+    const kick = streamers.filter(streamer => streamer.provider === 'kick' && !resolved.has(streamerKey(streamer)));
     await Promise.all([
-      checkTwitchWithPlayer(twitch,requestController.signal),
-      Promise.all(kick.map(checkKickDirect))
+      checkTwitchWithPlayer(twitch,signal),
+      Promise.all(kick.map(checkKickDirect)),
+      Promise.all(verified.map(item => fillMissingTwitchUptime(item,signal)))
     ]);
+    if (signal.aborted) return;
     sortCards();
-    updateSummary();
 
     if (panel.getAttribute('aria-hidden') === 'false') {
       refreshTimer = window.setTimeout(checkLiveChannels,120000);
@@ -413,10 +520,11 @@
     document.body.classList.add('gang-open');
     requestAnimationFrame(() => {
       panel.classList.add('is-open');
-      closeButton.focus();
+      dialog.focus({ preventScroll: true });
     });
     window.clearInterval(uptimeTimer);
-    uptimeTimer = window.setInterval(updateUptimes,30000);
+    uptimeTimer = window.setInterval(updateUptimes,1000);
+    restoreCachedStatuses();
     checkLiveChannels();
   }
 
@@ -437,7 +545,6 @@
 
   renderCards();
   openButton.addEventListener('click',openPanel);
-  closeButton.addEventListener('click',closePanel);
   panel.addEventListener('click',event => {
     if (event.target.matches('[data-gang-close]')) closePanel();
   });
@@ -448,6 +555,11 @@
     const focusable = [...panel.querySelectorAll('button,a[href]')];
     const first = focusable[0];
     const last = focusable.at(-1);
+    if (document.activeElement === dialog) {
+      event.preventDefault();
+      (event.shiftKey ? last : first)?.focus();
+      return;
+    }
     if (event.shiftKey && document.activeElement === first) {
       event.preventDefault();
       last.focus();
