@@ -64,6 +64,20 @@ function setConnection(status, text) {
       const button = elements.heroRecentGame;
       if (!button) return;
 
+      const showEmptyRecentGame = () => {
+        button.disabled = true;
+        button.removeAttribute('data-game-id');
+        button.removeAttribute('data-status');
+        button.setAttribute('aria-label', 'Последняя сыгранная игра пока не загружена');
+        elements.heroRecentLabel.textContent = 'Последнее сыгранное';
+        elements.heroRecentTitle.textContent = '';
+        elements.heroRecentTitle.hidden = true;
+        elements.heroRecentCover.hidden = true;
+        elements.heroRecentCover.removeAttribute('src');
+        elements.heroRecentCover.alt = '';
+        elements.heroRecentCover.onerror = null;
+      };
+
       const game = [...state.games]
         .filter(item => ['completed', 'dropped'].includes(String(item.library_status || '')))
         .sort((left, right) => {
@@ -73,31 +87,44 @@ function setConnection(status, text) {
         })[0] || null;
 
       if (!game) {
-        button.disabled = true;
-        button.removeAttribute('data-game-id');
-        button.removeAttribute('data-status');
-        button.setAttribute('aria-label', 'Игр с отметкой пока нет');
-        elements.heroRecentLabel.textContent = 'Последнее сыгранное';
-        elements.heroRecentTitle.textContent = 'Игр с отметкой пока нет';
-        elements.heroRecentCover.src = './assets/images/figma/game-placeholder.svg';
-        elements.heroRecentCover.alt = '';
+        showEmptyRecentGame();
         return;
       }
 
       const dropped = game.library_status === 'dropped';
-      const cover = safeExternalUrl(game.cover_url) || './assets/images/figma/game-placeholder.svg';
+      const cover = safeExternalUrl(game.cover_url);
       button.disabled = false;
       button.dataset.gameId = String(game.id);
       button.dataset.status = dropped ? 'dropped' : 'completed';
       button.setAttribute('aria-label', `Открыть игру ${game.title}`);
       elements.heroRecentLabel.textContent = dropped ? 'Последнее дропнутое' : 'Последнее сыгранное';
       elements.heroRecentTitle.textContent = game.title;
-      elements.heroRecentCover.src = cover;
+      elements.heroRecentTitle.hidden = false;
+      elements.heroRecentCover.hidden = true;
+      elements.heroRecentCover.onerror = null;
+
+      if (!cover) {
+        elements.heroRecentCover.removeAttribute('src');
+        elements.heroRecentCover.alt = '';
+        return;
+      }
+
       elements.heroRecentCover.alt = `Обложка игры ${game.title}`;
-      elements.heroRecentCover.onerror = () => {
-        elements.heroRecentCover.onerror = null;
-        elements.heroRecentCover.src = './assets/images/figma/game-placeholder.svg';
+      elements.heroRecentCover.onload = () => {
+        elements.heroRecentCover.onload = null;
+        elements.heroRecentCover.hidden = false;
       };
+      elements.heroRecentCover.onerror = () => {
+        elements.heroRecentCover.onload = null;
+        elements.heroRecentCover.onerror = null;
+        elements.heroRecentCover.hidden = true;
+        elements.heroRecentCover.removeAttribute('src');
+      };
+      elements.heroRecentCover.src = cover;
+      if (elements.heroRecentCover.complete && elements.heroRecentCover.naturalWidth > 0) {
+        elements.heroRecentCover.onload = null;
+        elements.heroRecentCover.hidden = false;
+      }
     }
 
     function renderHero(sortedGames) {

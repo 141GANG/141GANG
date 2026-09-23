@@ -42,11 +42,10 @@
 <script>document.documentElement.classList.add('premium-motion-pending');</script>
 <link href="./assets/css/public/premium-motion.css?v=1.1" id="premiumMotionStyles" rel="stylesheet"/>
 <link href="./assets/css/public/footer-developers.css?v=1.0" id="footerDevelopersStyles" rel="stylesheet"/>
-<link href="./assets/css/public/feature-coming-soon.css?v=1.0" id="featureComingSoonStyles" rel="stylesheet"/>
 <link href="./assets/css/public/game-comments-drawer.css?v=1.0" id="gameCommentsDrawerStyles" rel="stylesheet"/>
 <link href="./assets/css/public/tier-list-figma.css?v=3.2-reference-header" id="tierListFigmaStyles" rel="stylesheet"/>
 <link href="./assets/css/public/standalone-header-consistency.css?v=1.2-shared-single-row" id="standaloneHeaderConsistencyStyles" rel="stylesheet"/>
-<link href="./assets/css/public/hero-recent-game.css?v=1.1-empty-black" id="heroRecentGameStyles" rel="stylesheet"/>
+<link href="./assets/css/public/hero-recent-game.css?v=1.2-supabase-black-state" id="heroRecentGameStyles" rel="stylesheet"/>
 <link href="./assets/css/public/admin-druk-title-final.css?v=2.0-fixed-header" rel="stylesheet"/>
 <link href="./assets/css/public/admin-direct-add.css?v=1.8-three-line-description" rel="stylesheet"/>
 <script defer id="premiumMotionScript" src="./assets/js/public/premium-motion.js?v=1.5-independent-game-modal"></script>
@@ -107,7 +106,7 @@
 <div class="shell content-menu">
 <button aria-controls="adminPortal" aria-expanded="false" class="content-menu-card proposal-desk-trigger" data-proposal-tab="games" type="button"><span>Предложить<br/>игру</span><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button>
 <button aria-controls="adminPortal" aria-expanded="false" class="content-menu-card content-menu-card-media proposal-desk-trigger" data-proposal-tab="media" type="button"><span>Предложить<br/>медиа</span><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button>
-<button aria-controls="featurePanel" aria-expanded="false" class="content-menu-card coming-soon-trigger" data-coming-description="Здесь появится отправка других форматов контента для будущих стримов." data-coming-kicker="Другой контент" data-coming-title="СКОРО" type="button"><span>Другой<br/>контент</span><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button>
+<button aria-label="Другой контент — скоро" class="content-menu-card" type="button"><span>Другой<br/>контент</span><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button>
 </div>
 </section>
 <section class="catalog-section" id="catalog">
@@ -337,7 +336,6 @@
 </section>
 </div>
 <div aria-live="polite" class="site-auth-toast" hidden id="siteAuthToast" role="status"></div>
-<div aria-hidden="true" class="feature-panel" hidden id="featurePanel"><div class="feature-backdrop" data-feature-close=""></div><section aria-describedby="featureDescription" aria-labelledby="featureTitle" aria-modal="true" class="feature-dialog" role="dialog" tabindex="-1"><span id="featureKicker">Новый раздел</span><h2 id="featureTitle">Скоро</h2><p id="featureDescription">Функция находится в разработке.</p></section></div>
 <div aria-hidden="true" class="admin-portal" hidden="" id="adminPortal">
 <div class="admin-portal-backdrop" data-admin-portal-close=""></div>
 <section aria-labelledby="adminPortalTitle" aria-modal="true" class="admin-portal-dialog" role="dialog">
@@ -586,7 +584,7 @@
 </div>
 </div>
 <footer class="site-footer" id="siteFooter"><div class="shell footer-developers-inner"><div aria-live="polite" class="footer-developers" id="footerDevelopers"><button aria-expanded="false" class="footer-developers-trigger" id="footerDevelopersTrigger" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/inf-icon.png"/><span>О разработчиках</span></button><p aria-hidden="true" class="footer-developers-credits" id="footerDevelopersCredits">@tankzor, @archivebtw, @max_vopros, @OBWECTBO141</p></div></div></footer>
-<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.7-toast-all"></script><script src="./assets/js/public/state.js?v=4.4-unlimited-games"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.2-empty-black"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.7-pending-suggestion-comments"></script><script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script><script src="./assets/js/public/suggestions.js?v=4.17-left-support-count"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script src="./assets/js/public/gang.js?v=4.6-no-stream-summary"></script><script src="./assets/js/public/auction.js?v=5.1-feature-dialog"></script><script src="./assets/js/public/admin-portal.js?v=3.4-unlimited-games"></script><script src="./assets/js/public/admin-portal-shell.js?v=6.1-unlimited-games"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.6-unlimited-games"></script><script src="./assets/js/public/figma-ui.js?v=10.16-admin-state-event"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
+<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.7-toast-all"></script><script src="./assets/js/public/state.js?v=4.4-unlimited-games"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.3-supabase-black-state"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.7-pending-suggestion-comments"></script><script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script><script src="./assets/js/public/suggestions.js?v=4.18-unlimited-admin-publish"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script src="./assets/js/public/gang.js?v=4.6-no-stream-summary"></script><script src="./assets/js/public/auction.js?v=5.2-static-other-content"></script><script src="./assets/js/public/admin-portal.js?v=3.4-unlimited-games"></script><script src="./assets/js/public/admin-portal-shell.js?v=6.1-unlimited-games"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.6-unlimited-games"></script><script src="./assets/js/public/figma-ui.js?v=10.16-admin-state-event"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
 (() => {
   const pageView = /\/tier-list\.html$/i.test(location.pathname) ? 'tier'
     : /\/auction\.html$/i.test(location.pathname) ? 'auction'

@@ -6,12 +6,25 @@
 <meta content="#040404" name="theme-color"/>
 <title>Управление — 141GANG</title>
 <style>
-html,body{min-height:100%;margin:0;background:#080808}
-.page-bootstrap{position:fixed;inset:0;display:grid;place-items:center;color:#777;font:14px Arial,sans-serif}
+html,body{min-height:100%;margin:0;background:#040404}
+.site-loader{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;color:#f0f0f0;background:#040404}
+.loader-content{width:min(640px,92vw);display:grid;justify-items:center}
+.loader-visual{width:min(360px,82vw);display:grid;gap:28px}
+.loader-brand{width:min(240px,62vw);height:auto;justify-self:center}
+.loader-line{position:relative;width:100%;height:3px;overflow:hidden;border-radius:999px;background:#202020}
+.loader-line::after{position:absolute;inset:0;width:42%;background:#e63d3d;content:"";animation:figmaLoaderLine 1s cubic-bezier(.16,1,.3,1) infinite alternate}
+@keyframes figmaLoaderLine{from{transform:translateX(-105%)}to{transform:translateX(240%)}}
 </style>
 </head>
 <body>
-<div aria-live="polite" class="page-bootstrap">Загрузка управления…</div>
+<div aria-label="Загрузка управления" aria-live="polite" class="site-loader" id="siteLoader" role="status">
+<div class="loader-content">
+<div aria-hidden="true" class="loader-visual">
+<img alt="" class="loader-brand" src="./assets/images/figma/141gang.svg"/>
+<span class="loader-line"></span>
+</div>
+</div>
+</div>
 <script>
 fetch('./index.html', { cache: 'no-cache' })
   .then(response => {

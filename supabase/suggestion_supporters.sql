@@ -103,7 +103,7 @@ begin
    for update;
 
   if not found then
-    if (
+    if not public.is_site_admin() and (
       select count(*)
       from public.game_suggestions
       where submitted_by = v_user_id

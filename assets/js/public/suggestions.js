@@ -432,6 +432,70 @@
     }
   }
 
+  async function publishGameDirectly(preview, playersMin, playersMax, coopMin, coopMax) {
+    const session = await requireAdminSession();
+    const steamAppId = Number(preview.appId);
+    const { data: existing, error: existingError } = await suggestionState.client
+      .from('games')
+      .select('id,published')
+      .eq('steam_app_id', steamAppId)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (existingError) throw existingError;
+    if (existing?.id && existing.published !== false) {
+      return { created: false, gameId: Number(existing.id) };
+    }
+
+    const isCoop = preview.isCoop === true || playersMax > 1;
+    const now = new Date().toISOString();
+    const payload = {
+      steam_app_id: steamAppId,
+      steam_url: `https://store.steampowered.com/app/${steamAppId}/`,
+      title: String(preview.title || '').trim(),
+      cover_url: preview.coverUrl || '',
+      description: String(preview.description || 'Описание не указано.').trim(),
+      author_comment: 'Добавлено администратором',
+      display_order: 0,
+      published: true,
+      release_date: preview.releaseDate || null,
+      release_date_text: preview.releaseDateText || '',
+      coming_soon: preview.comingSoon === true,
+      is_coop: isCoop,
+      coop_type: isCoop ? (preview.coopType || 'generic') : '',
+      coop_min_players: Number.isFinite(coopMin) && coopMin > 0
+        ? Math.trunc(coopMin)
+        : (playersMax > 1 ? Math.trunc(playersMin) : null),
+      coop_max_players: Number.isFinite(coopMax) && coopMax > 0
+        ? Math.trunc(coopMax)
+        : (playersMax > 1 ? Math.trunc(playersMax) : null),
+      coop_source: preview.coopSource || preview.playerCountSource || 'steam',
+      players_min: Math.trunc(playersMin),
+      players_max: Math.trunc(playersMax),
+      player_count_source: preview.playerCountSource || preview.coopSource || 'steam',
+      steam_synced_at: now,
+      created_by: session.user.id
+    };
+
+    if (existing?.id) {
+      const { created_by: _createdBy, ...updatePayload } = payload;
+      const { error: updateError } = await suggestionState.client
+        .from('games')
+        .update(updatePayload)
+        .eq('id', existing.id);
+      if (updateError) throw updateError;
+      return { created: true, gameId: Number(existing.id) };
+    }
+
+    const { data: inserted, error: insertError } = await suggestionState.client
+      .from('games')
+      .insert(payload)
+      .select('id')
+      .single();
+    if (insertError) throw insertError;
+    return { created: true, gameId: Number(inserted.id) };
+  }
+
   async function submitSuggestion(event) {
     event.preventDefault();
     if (!suggestionState.isAdmin && !suggestionState.localMode) {
@@ -511,13 +575,28 @@
         return;
       }
 
+      if (suggestionState.directAdd) {
+        const published = await publishGameDirectly(preview, playersMin, playersMax, coopMin, coopMax);
+        showNotice(
+          published.created ? 'Игра добавлена в опубликованный каталог.' : 'Эта игра уже опубликована.',
+          'success'
+        );
+        window.dispatchEvent(new CustomEvent('cr7:game-published', {
+          detail: { suggestionId: null, gameId: published.gameId }
+        }));
+        elements.form.reset();
+        clearPreview();
+        closePanel();
+        return;
+      }
+
       await requireAdminSession();
       const { data, error } = await suggestionState.client.rpc('submit_game_suggestion', {
         p_steam_app_id: Number(preview.appId),
         p_title: preview.title,
         p_cover_url: preview.coverUrl || '',
         p_description: preview.description || '',
-        p_comment: suggestionState.directAdd ? '' : elements.comment.value.trim(),
+        p_comment: elements.comment.value.trim(),
         p_release_date: preview.releaseDate || null,
         p_release_date_text: preview.releaseDateText || '',
         p_coming_soon: preview.comingSoon === true,
@@ -531,28 +610,6 @@
       if (error) throw error;
       const result = Array.isArray(data) ? data[0] : data;
       const status = result?.suggestion_status;
-      if (suggestionState.directAdd) {
-        if (!result?.suggestion_id) throw new Error('Сервер не вернул идентификатор добавленной игры.');
-        if (['rejected', 'completed', 'archived'].includes(status)) {
-          throw new Error('Эта игра уже есть в истории. Сначала восстанови её из соответствующего раздела.');
-        }
-        let published = { published: true, gameId: null };
-        if (status === 'pending') {
-          published = await invokeSteamFunction({
-            action: 'publish-suggestion',
-            suggestionId: Number(result.suggestion_id)
-          });
-          if (!published?.published) throw new Error(published?.error || 'Сервер не подтвердил добавление игры.');
-        }
-        showNotice(status === 'pending' ? 'Игра добавлена в опубликованный каталог.' : 'Эта игра уже опубликована.', 'success');
-        window.dispatchEvent(new CustomEvent('cr7:game-published', {
-          detail: { suggestionId: Number(result.suggestion_id), gameId: Number(published.gameId) || null }
-        }));
-        elements.form.reset();
-        clearPreview();
-        closePanel();
-        return;
-      }
       let message = result?.was_created
         ? 'Предложение отправлено модератору.'
         : 'Эта игра уже была предложена и повторно не добавлена.';

@@ -51,7 +51,7 @@
   display: block;
   overflow: hidden;
   border-radius: 6rem;
-  background: #202020;
+  background: #000;
 }
 
 .hero-recent-media::after {

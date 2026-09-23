@@ -214,7 +214,8 @@ begin
   select * into v_suggestion from public.game_suggestions where steam_app_id = p_steam_app_id for update;
 
   if not found then
-    if (select count(*) from public.game_suggestions where submitted_by = v_user_id and created_at >= now() - interval '24 hours') >= 5 then
+    if not public.is_site_admin()
+      and (select count(*) from public.game_suggestions where submitted_by = v_user_id and created_at >= now() - interval '24 hours') >= 5 then
       raise exception 'Можно предложить не больше пяти новых игр за 24 часа.';
     end if;
 
