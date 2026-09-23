@@ -1,3 +1,4 @@
+// @ts-nocheck -- Supabase Edge injects its database schema at runtime.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
