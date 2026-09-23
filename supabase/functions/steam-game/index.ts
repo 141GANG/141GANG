@@ -184,6 +184,15 @@ function normalizePlayerRange(minValue: number, maxValue: number): { min: number
   return { min, max };
 }
 
+function normalizeStoredCoopRange(isCoop: boolean, minValue: unknown, maxValue: unknown) {
+  if (!isCoop) return { min: null, max: null };
+  const max = Math.trunc(Number(maxValue));
+  if (!Number.isFinite(max) || max < 2 || max > 64) return { min: null, max: null };
+  const rawMin = Math.trunc(Number(minValue));
+  const min = Number.isFinite(rawMin) ? Math.max(2, Math.min(rawMin, max)) : 2;
+  return { min, max };
+}
+
 function addCandidate(candidates: PlayerCandidate[], min: number, max: number, score: number, source: string) {
   const normalized = normalizePlayerRange(min, max);
   if (!normalized) return;
@@ -301,19 +310,34 @@ function detectCoop(gameRu: SteamGame, gameEn: SteamGame) {
 }
 
 async function fetchSteamGame(appId: string, language: "russian" | "english") {
-  const endpoint = `https://store.steampowered.com/api/appdetails?appids=${encodeURIComponent(appId)}&l=${language}&cc=ru`;
-  const response = await fetch(endpoint, {
-    headers: {
-      "Accept": "application/json",
-      "User-Agent": "CR7-Suggestion-Site/1.1",
-    },
-    signal: AbortSignal.timeout(15000),
-  });
-  if (!response.ok) throw new Error(`Steam (${language}) ответил с кодом ${response.status}.`);
-  const payload = await response.json();
-  const entry = payload?.[appId];
-  if (!entry?.success || !entry?.data) throw new Error(`Steam (${language}) не вернул информацию об игре.`);
-  return entry.data as SteamGame;
+  const regions = ["ru", "us", "gb", "de", ""];
+  let lastError = "";
+
+  for (const region of regions) {
+    const country = region ? `&cc=${region}` : "";
+    const endpoint = `https://store.steampowered.com/api/appdetails?appids=${encodeURIComponent(appId)}&l=${language}${country}`;
+    try {
+      const response = await fetch(endpoint, {
+        headers: {
+          "Accept": "application/json",
+          "User-Agent": "CR7-Suggestion-Site/1.2",
+        },
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!response.ok) {
+        lastError = `код ${response.status}, регион ${region || "auto"}`;
+        continue;
+      }
+      const payload = await response.json();
+      const entry = payload?.[appId];
+      if (entry?.success && entry?.data) return entry.data as SteamGame;
+      lastError = `нет данных для региона ${region || "auto"}`;
+    } catch (error) {
+      lastError = String((error as Error)?.message || error);
+    }
+  }
+
+  throw new Error(`Steam (${language}) не вернул информацию об игре: ${lastError || "регион недоступен"}.`);
 }
 
 async function getSteamData(appId: string) {
@@ -412,7 +436,6 @@ async function publishSuggestion(
       ? (suggestion.player_count_source || "suggestion_snapshot")
       : (steam.playerCountSource || "steam_categories")
   ).slice(0, 120);
-
   const { data: existingGame, error: existingError } = await serviceClient
     .from("games")
     .select("id,title,cover_url,description,coop_source,is_coop,coop_type,coop_min_players,coop_max_players")
@@ -423,6 +446,12 @@ async function publishSuggestion(
   if (existingError) throw existingError;
 
   const manualCoop = existingGame?.coop_source === "manual_admin";
+  const finalIsCoop = manualCoop ? Boolean(existingGame?.is_coop) : Boolean(steam.isCoop);
+  const storedCoopRange = normalizeStoredCoopRange(
+    finalIsCoop,
+    manualCoop ? existingGame?.coop_min_players : steam.coopMinPlayers,
+    manualCoop ? existingGame?.coop_max_players : steam.coopMaxPlayers,
+  );
   const corePayload = {
     steam_app_id: Number(suggestion.steam_app_id),
     steam_url: String(steam.steamUrl || suggestion.steam_url).slice(0, 500),
@@ -435,10 +464,10 @@ async function publishSuggestion(
     release_date: steam.releaseDate || null,
     release_date_text: String(steam.releaseDateText || "").slice(0, 120),
     coming_soon: steam.comingSoon,
-    is_coop: manualCoop ? existingGame.is_coop : steam.isCoop,
+    is_coop: finalIsCoop,
     coop_type: manualCoop ? existingGame.coop_type : steam.isCoop ? (steam.coopType || "generic") : "",
-    coop_min_players: manualCoop ? existingGame.coop_min_players : steam.coopMinPlayers,
-    coop_max_players: manualCoop ? existingGame.coop_max_players : steam.coopMaxPlayers,
+    coop_min_players: storedCoopRange.min,
+    coop_max_players: storedCoopRange.max,
     coop_source: manualCoop ? existingGame.coop_source : steam.coopSource,
     players_min: playersMin,
     players_max: playersMax,
@@ -576,6 +605,12 @@ async function syncStaleGames(supabase: ReturnType<typeof createClient>) {
       const manualCoop = record.coop_source === "manual_admin";
       const steamPlayersMin = Math.max(1, Math.min(256, Number(steam.playersMin) || 1));
       const steamPlayersMax = Math.max(steamPlayersMin, Math.min(256, Number(steam.playersMax) || steamPlayersMin));
+      const finalIsCoop = manualCoop ? Boolean(record.is_coop) : Boolean(steam.isCoop);
+      const storedCoopRange = normalizeStoredCoopRange(
+        finalIsCoop,
+        manualCoop ? record.coop_min_players : steam.coopMinPlayers,
+        manualCoop ? record.coop_max_players : steam.coopMaxPlayers,
+      );
       const payload = {
         title: steam.title || record.title,
         cover_url: steam.coverUrl || record.cover_url,
@@ -583,10 +618,10 @@ async function syncStaleGames(supabase: ReturnType<typeof createClient>) {
         release_date: steam.releaseDate || null,
         release_date_text: steam.releaseDateText,
         coming_soon: steam.comingSoon,
-        is_coop: manualCoop ? record.is_coop : steam.isCoop,
+        is_coop: finalIsCoop,
         coop_type: manualCoop ? record.coop_type : steam.isCoop ? (steam.coopType || "generic") : "",
-        coop_min_players: manualCoop ? record.coop_min_players : steam.coopMinPlayers,
-        coop_max_players: manualCoop ? record.coop_max_players : steam.coopMaxPlayers,
+        coop_min_players: storedCoopRange.min,
+        coop_max_players: storedCoopRange.max,
         coop_source: manualCoop ? record.coop_source : steam.coopSource,
         players_min: steamPlayersMin,
         players_max: steamPlayersMax,

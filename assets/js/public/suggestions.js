@@ -448,31 +448,33 @@
     }
 
     const isCoop = preview.isCoop === true || playersMax > 1;
+    const rawCoopMax = Number.isFinite(coopMax) ? Math.trunc(coopMax) : Math.trunc(playersMax);
+    const storedCoopMax = isCoop && rawCoopMax >= 2 && rawCoopMax <= 64 ? rawCoopMax : null;
+    const rawCoopMin = Number.isFinite(coopMin) ? Math.trunc(coopMin) : 2;
+    const storedCoopMin = storedCoopMax === null
+      ? null
+      : Math.max(2, Math.min(rawCoopMin, storedCoopMax));
     const now = new Date().toISOString();
     const payload = {
       steam_app_id: steamAppId,
       steam_url: `https://store.steampowered.com/app/${steamAppId}/`,
-      title: String(preview.title || '').trim(),
-      cover_url: preview.coverUrl || '',
-      description: String(preview.description || 'Описание не указано.').trim(),
+      title: String(preview.title || '').trim().slice(0, 120),
+      cover_url: String(preview.coverUrl || '').slice(0, 1000),
+      description: String(preview.description || 'Описание не указано.').trim().slice(0, 2000),
       author_comment: 'Добавлено администратором',
       display_order: 0,
       published: true,
       release_date: preview.releaseDate || null,
-      release_date_text: preview.releaseDateText || '',
+      release_date_text: String(preview.releaseDateText || '').slice(0, 120),
       coming_soon: preview.comingSoon === true,
       is_coop: isCoop,
       coop_type: isCoop ? (preview.coopType || 'generic') : '',
-      coop_min_players: Number.isFinite(coopMin) && coopMin > 0
-        ? Math.trunc(coopMin)
-        : (playersMax > 1 ? Math.trunc(playersMin) : null),
-      coop_max_players: Number.isFinite(coopMax) && coopMax > 0
-        ? Math.trunc(coopMax)
-        : (playersMax > 1 ? Math.trunc(playersMax) : null),
-      coop_source: preview.coopSource || preview.playerCountSource || 'steam',
+      coop_min_players: storedCoopMin,
+      coop_max_players: storedCoopMax,
+      coop_source: String(preview.coopSource || preview.playerCountSource || 'steam').slice(0, 120),
       players_min: Math.trunc(playersMin),
       players_max: Math.trunc(playersMax),
-      player_count_source: preview.playerCountSource || preview.coopSource || 'steam',
+      player_count_source: String(preview.playerCountSource || preview.coopSource || 'steam').slice(0, 120),
       steam_synced_at: now,
       created_by: session.user.id
     };
