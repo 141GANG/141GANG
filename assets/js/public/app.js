@@ -122,10 +122,12 @@
     }
 
     async function loadGames(client) {
-      const selectGames = fields => runPublicRequest(client,() => client
+      const selectGames = fields => fetchAllSupabaseRows((from, to) => runPublicRequest(client, () => client
         .from('games')
         .select(fields)
-        .eq('published', true));
+        .eq('published', true)
+        .order('id', { ascending: true })
+        .range(from, to)));
       let result = await selectGames(`${PUBLIC_GAME_FIELDS},library_status,is_favorite,tier_rank,tier_order`);
 
       // Не скрываем весь каталог, если frontend опубликован раньше SQL-миграции.

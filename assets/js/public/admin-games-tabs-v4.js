@@ -379,7 +379,11 @@
     state.loading = true;
     if (!silent) listContent().innerHTML = '<div class="suggestions-empty">Загружаем опубликованные игры…</div>';
     try {
-      const { data, error } = await supabase.from('games').select('id,title,steam_url,steam_app_id,cover_url,description,created_at,published,release_date,release_date_text,coming_soon,is_coop,coop_min_players,coop_max_players,players_min,players_max,player_count_source,library_status');
+      const { data, error } = await fetchAllSupabaseRows((from, to) => supabase
+        .from('games')
+        .select('id,title,steam_url,steam_app_id,cover_url,description,created_at,published,release_date,release_date_text,coming_soon,is_coop,coop_min_players,coop_max_players,players_min,players_max,player_count_source,library_status')
+        .order('id', { ascending: true })
+        .range(from, to));
       if (error) throw error;
       state.games = Array.isArray(data) ? data : [];
       await loadReactionCounts(supabase, false);

@@ -57,3 +57,17 @@
     const TWITCH_LOGO_DATA = './assets/images/figma/game-placeholder.svg';
     const EMPTY_AUTHOR_COMMENT = '\u2063';
     let lastFocusedElement = null;
+
+    // PostgREST/Supabase projects commonly cap a single response at 1,000 rows.
+    // Read in deterministic pages so the catalog can grow without a UI limit.
+    const SUPABASE_ROWS_PAGE_SIZE = 500;
+    async function fetchAllSupabaseRows(fetchPage, pageSize = SUPABASE_ROWS_PAGE_SIZE) {
+      const rows = [];
+      for (let from = 0; ; from += pageSize) {
+        const result = await fetchPage(from, from + pageSize - 1);
+        if (result?.error) return { data: null, error: result.error };
+        const page = Array.isArray(result?.data) ? result.data : [];
+        rows.push(...page);
+        if (page.length < pageSize) return { data: rows, error: null };
+      }
+    }
