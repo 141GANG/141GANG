@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 *.log
+supabase/.temp/
 
 # Editor and operating-system files
 .vscode/

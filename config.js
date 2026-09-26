@@ -7,7 +7,7 @@ window.CR7_CONFIG = Object.freeze({
   if (document.getElementById('authenticatedSubmissionsFixScript')) return;
   const script = document.createElement('script');
   script.id = 'authenticatedSubmissionsFixScript';
-  script.src = './assets/js/public/authenticated-submissions-fix.js?v=1.6-twitch-entry-guard';
+  script.src = './assets/js/public/authenticated-submissions-fix.js?v=1.7-admin-feature-access';
   script.async = false;
   document.head.appendChild(script);
 })();

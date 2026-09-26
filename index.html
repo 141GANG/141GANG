@@ -25,7 +25,7 @@
 <link href="./assets/css/public/auction-pointauc.css?v=5.0" rel="stylesheet"/>
 <link href="./assets/css/public/responsive.css" rel="stylesheet"/>
 <link href="./assets/css/public/admin-portal.css?v=1.2-hidden-trigger" rel="stylesheet"/>
-<link href="./assets/css/public/suggestions.css?v=3.4-catalog-comments" rel="stylesheet"/>
+<link href="./assets/css/public/suggestions.css?v=3.5-comment-avatars" rel="stylesheet"/>
 <link href="./assets/css/public/media-submissions.css?v=4.1" rel="stylesheet"/>
 <link href="./assets/css/public/figma-refresh.css?v=3.21-auction-disabled" rel="stylesheet"/>
 <link href="./assets/css/public/site-auth.css?v=1.9-solid-dialog" rel="stylesheet"/>
@@ -38,7 +38,7 @@
 <link href="./assets/css/public/admin-card-icons.css?v=1.1" id="adminCardIconsStyles" rel="stylesheet"/>
 <link href="./assets/css/public/figma-typography-final.css?v=4.7" id="figmaTypographyFinalStyles" rel="stylesheet"/>
 <link href="./assets/css/public/e2e-responsive-p0.css?v=1.2-nav-center" id="e2eResponsiveP0Styles" rel="stylesheet"/>
-<link href="./assets/css/public/game-comment-management.css?v=2.16-full-description" id="gameCommentManagementStyles" rel="stylesheet"/>
+<link href="./assets/css/public/game-comment-management.css?v=2.17-comment-avatars" id="gameCommentManagementStyles" rel="stylesheet"/>
 <link href="./assets/css/public/admin-login-final.css?v=1.2-fit-no-border" id="adminLoginFinalStyles" rel="stylesheet"/>
 <script>document.documentElement.classList.add('premium-motion-pending');</script>
 <link href="./assets/css/public/premium-motion.css?v=1.2-static-media" id="premiumMotionStyles" rel="stylesheet"/>
@@ -299,7 +299,7 @@
 <button aria-label="Закрыть окно входа" class="site-auth-close" id="siteAuthClose" type="button">×</button>
 <span class="site-auth-kicker">Личный профиль</span>
 <h2 id="siteAuthTitle">Войти на сайт</h2>
-<p class="site-auth-description" id="siteAuthDescription">Авторизуйся через Twitch, чтобы открыть все возможности сайта.</p>
+<p class="site-auth-description" id="siteAuthDescription">Войди через Яндекс ID, Google или Twitch, чтобы предлагать игры и медиа, а также ставить лайки и дизлайки.</p>
 <div class="site-auth-providers" id="siteAuthProviders">
 <button class="site-auth-provider is-yandex" data-auth-provider="custom:yandex" type="button"><span aria-hidden="true"><img alt="" src="./assets/images/figma/yandex-icon.png"/></span><strong>Войти через Яндекс ID</strong></button>
 <button class="site-auth-provider is-google" data-auth-provider="google" type="button"><span aria-hidden="true"><img alt="" src="./assets/images/figma/google-icon.png"/></span><strong>Войти через Google</strong></button>
@@ -570,7 +570,7 @@
 </div>
 </div>
 <footer class="site-footer" id="siteFooter"><div class="shell footer-developers-inner"><div aria-live="polite" class="footer-developers" id="footerDevelopers"><button aria-expanded="false" class="footer-developers-trigger" id="footerDevelopersTrigger" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/inf-icon.png"/><span>О разработчиках</span></button><p aria-hidden="true" class="footer-developers-credits" id="footerDevelopersCredits">@tankzor, @archivebtw, @max_vopros, @OBWECTBO141</p></div></div></footer>
-<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.8-twitch-actions"></script><script src="./assets/js/public/state.js?v=4.4-unlimited-games"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.3-supabase-black-state"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.8-twitch-actions"></script><script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script><script src="./assets/js/public/suggestions.js?v=4.21-twitch-actions"></script><script src="./assets/js/public/media-submissions.js?v=5.17-private-delivery"></script><script src="./assets/js/public/auction.js?v=5.3-page-link"></script><script src="./assets/js/public/admin-portal.js?v=3.4-unlimited-games"></script><script src="./assets/js/public/admin-portal-shell.js?v=6.1-unlimited-games"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.6-unlimited-games"></script><script src="./assets/js/public/figma-ui.js?v=10.19-admin-nav"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
+<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.9-admin-access"></script><script src="./assets/js/public/state.js?v=4.4-unlimited-games"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.3-supabase-black-state"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.9-comment-avatars"></script><script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script><script src="./assets/js/public/suggestions.js?v=4.22-comment-avatars"></script><script src="./assets/js/public/media-submissions.js?v=5.17-private-delivery"></script><script src="./assets/js/public/auction.js?v=5.3-page-link"></script><script src="./assets/js/public/admin-portal.js?v=3.4-unlimited-games"></script><script src="./assets/js/public/admin-portal-shell.js?v=6.1-unlimited-games"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.6-unlimited-games"></script><script src="./assets/js/public/figma-ui.js?v=10.20-admin-access"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
 (() => {
   const pageView = /\/tier-list(?:\.html)?\/?$/i.test(location.pathname) ? 'tier'
     : /\/auction(?:\.html)?\/?$/i.test(location.pathname) ? 'auction'

@@ -341,18 +341,151 @@ async function fetchSteamGame(appId: string, language: "russian" | "english") {
   throw new Error(`Steam (${language}) не вернул информацию об игре: ${lastError || "регион недоступен"}.`);
 }
 
+function decodeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(Number.parseInt(code, 16)))
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">");
+}
+
+function metaContent(html: string, key: string): string {
+  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const patterns = [
+    new RegExp(`<meta[^>]+(?:property|name)=["']${escaped}["'][^>]+content=["']([^"']*)["'][^>]*>`, "i"),
+    new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["']${escaped}["'][^>]*>`, "i"),
+  ];
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) return cleanText(decodeHtml(match[1]));
+  }
+  return "";
+}
+
+function steamPageJsonLd(html: string): Record<string, any> | null {
+  for (const match of html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
+    try {
+      const parsed = JSON.parse(decodeHtml(match[1]).trim());
+      const entries = Array.isArray(parsed) ? parsed : [parsed];
+      const game = entries.find((entry) => /VideoGame|SoftwareApplication/i.test(String(entry?.["@type"] || "")));
+      if (game) return game;
+    } catch {
+      // Steam occasionally returns malformed optional JSON-LD; meta tags remain usable.
+    }
+  }
+  return null;
+}
+
+function steamPageData(appId: string, html: string): SteamGame | null {
+  const structured = steamPageJsonLd(html);
+  const rawTitle = cleanText(structured?.name || metaContent(html, "og:title"))
+    .replace(/\s+on Steam$/i, "")
+    .replace(/^Steam Community\s*::\s*/i, "")
+    .trim();
+  const title = rawTitle && !/^Steam Store$/i.test(rawTitle) ? rawTitle : "";
+  if (!title) return null;
+
+  const description = cleanText(
+    structured?.description
+    || metaContent(html, "og:description")
+    || metaContent(html, "description"),
+  );
+  const coverUrl = String(
+    structured?.image?.url
+    || structured?.image
+    || metaContent(html, "og:image")
+    || `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`,
+  ).trim();
+  const releaseDate = String(structured?.datePublished || "").trim();
+  const genres = (Array.isArray(structured?.genre) ? structured.genre : [structured?.genre])
+    .filter(Boolean)
+    .map((genre: unknown, index: number) => ({ id: 10000 + index, description: cleanText(genre) }));
+
+  return {
+    name: title,
+    short_description: description,
+    detailed_description: description,
+    header_image: coverUrl,
+    release_date: { coming_soon: !releaseDate, date: releaseDate },
+    categories: [],
+    genres,
+  };
+}
+
+async function fetchSteamPageGame(appId: string, language: "russian" | "english") {
+  const regions = ["us", "gb", "de", "ru", ""];
+  let lastError = "";
+  for (const region of regions) {
+    const params = new URLSearchParams({ l: language, agecheckage: "1-January-1990" });
+    if (region) params.set("cc", region);
+    const endpoint = `https://store.steampowered.com/app/${encodeURIComponent(appId)}/?${params}`;
+    try {
+      const response = await fetch(endpoint, {
+        redirect: "follow",
+        headers: {
+          "Accept": "text/html,application/xhtml+xml",
+          "Accept-Language": language === "russian" ? "ru,en;q=0.8" : "en;q=0.9",
+          "Cookie": "birthtime=0; lastagecheckage=1-January-1990; wants_mature_content=1",
+          "User-Agent": "Mozilla/5.0 (compatible; 141GANG-Steam-Resolver/2.0)",
+        },
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!response.ok) {
+        lastError = `код ${response.status}, регион ${region || "auto"}`;
+        continue;
+      }
+      const game = steamPageData(appId, await response.text());
+      if (game) return game;
+      lastError = `страница не содержит карточку игры, регион ${region || "auto"}`;
+    } catch (error) {
+      lastError = readableError(error);
+    }
+  }
+  throw new Error(`страница Steam недоступна: ${lastError || "нет данных"}`);
+}
+
+async function fetchSteamCommunityGame(appId: string) {
+  const response = await fetch(`https://steamcommunity.com/app/${encodeURIComponent(appId)}`, {
+    redirect: "follow",
+    headers: { "User-Agent": "Mozilla/5.0 (compatible; 141GANG-Steam-Resolver/2.0)" },
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!response.ok) throw new Error(`Steam Community вернул код ${response.status}`);
+  const game = steamPageData(appId, await response.text());
+  if (!game) throw new Error("Steam Community не вернул карточку игры");
+  return game;
+}
+
 async function getSteamData(appId: string) {
-  const [ruResult, enResult] = await Promise.allSettled([
+  let [ruResult, enResult] = await Promise.allSettled([
     fetchSteamGame(appId, "russian"),
     fetchSteamGame(appId, "english"),
   ]);
-  const gameRu = ruResult.status === "fulfilled" ? ruResult.value : null;
-  const gameEn = enResult.status === "fulfilled" ? enResult.value : null;
+  let gameRu = ruResult.status === "fulfilled" ? ruResult.value : null;
+  let gameEn = enResult.status === "fulfilled" ? enResult.value : null;
+  if (!gameRu && !gameEn) {
+    [ruResult, enResult] = await Promise.allSettled([
+      fetchSteamPageGame(appId, "russian"),
+      fetchSteamPageGame(appId, "english"),
+    ]);
+    gameRu = ruResult.status === "fulfilled" ? ruResult.value : null;
+    gameEn = enResult.status === "fulfilled" ? enResult.value : null;
+  }
+  if (!gameRu && !gameEn) {
+    try {
+      gameEn = await fetchSteamCommunityGame(appId);
+    } catch {
+      // The detailed error below remains more useful to the user.
+    }
+  }
   const game = gameRu ?? gameEn;
   if (!game) {
     const ruError = ruResult.status === "rejected" ? String(ruResult.reason?.message ?? ruResult.reason) : "";
     const enError = enResult.status === "rejected" ? String(enResult.reason?.message ?? enResult.reason) : "";
-    throw new Error(`Steam не вернул данные игры. ${ruError || enError}`.trim());
+    throw new Error(`Steam не вернул данные игры ни через API, ни через страницу магазина. ${ruError || enError}`.trim());
   }
   const releaseDateText = String(game.release_date?.date ?? "").trim();
   const parsedDate = parseSteamDate(releaseDateText);
