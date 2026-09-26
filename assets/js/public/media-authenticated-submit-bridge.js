@@ -1,8 +1,6 @@
 (() => {
   'use strict';
 
-  if (window.location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(window.location.hostname)) return;
-
   const BUCKET = 'stream-submissions';
   const MAX_FILES = 8;
   const MAX_FILE_SIZE = 100 * 1024 * 1024;
@@ -42,6 +40,16 @@
     return Boolean(user && !user.is_anonymous);
   }
 
+  function isTwitchUser(user) {
+    if (window.CR7_SITE_AUTH?.hasTwitchIdentity) return window.CR7_SITE_AUTH.hasTwitchIdentity(user);
+    const providers = [
+      ...(Array.isArray(user?.identities) ? user.identities.map(identity => identity?.provider) : []),
+      ...(Array.isArray(user?.app_metadata?.providers) ? user.app_metadata.providers : []),
+      user?.app_metadata?.provider
+    ].map(provider => String(provider || '').toLowerCase());
+    return isRealUser(user) && providers.includes('twitch');
+  }
+
   function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>'"]/g, char => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
@@ -72,6 +80,17 @@
     return normalized || 'file';
   }
 
+  function privateStoragePath(file) {
+    const extension = String(file?.name || '').match(/\.(?:jpe?g|png|webp|gif|mp4|webm|mov)$/i)?.[0]?.toLowerCase()
+      || ({
+        'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif',
+        'video/mp4': '.mp4', 'video/webm': '.webm', 'video/quicktime': '.mov'
+      })[String(file?.type || '').toLowerCase()]
+      || '.bin';
+    const unique = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    return `objects/${unique}${extension}`;
+  }
+
   function validateFile(file) {
     if (!file) return 'Файл не выбран.';
     if (!(ALLOWED_MIME.has(file.type) || (!file.type && ALLOWED_EXT.test(file.name)))) {
@@ -92,7 +111,10 @@
   }
 
   function desiredSubmitDisabled() {
-    return state.submitting || state.files.length === 0 || !Boolean(el.title?.value.trim());
+    return state.submitting
+      || !isTwitchUser(state.session?.user)
+      || state.files.length === 0
+      || !Boolean(el.title?.value.trim());
   }
 
   function syncSubmitState() {
@@ -106,7 +128,7 @@
     if (!el.selected || !el.submit || !el.title) return;
     const count = state.files.length;
     const hasTitle = Boolean(el.title.value.trim());
-    const signedIn = isRealUser(state.session?.user);
+    const signedIn = isTwitchUser(state.session?.user);
 
     el.selected.hidden = count === 0;
     el.dropzone?.classList.toggle('has-file', count > 0);
@@ -114,7 +136,7 @@
 
     if (el.hint) {
       el.hint.textContent = count === 0
-        ? signedIn ? 'Сначала выбери файлы и добавь название.' : 'Выбери файлы. Авторизация проверится при отправке.'
+        ? signedIn ? 'Сначала выбери файлы и добавь название.' : 'Войди через Twitch, чтобы отправить материал.'
         : !hasTitle
           ? `${count} ${count === 1 ? 'файл выбран' : count < 5 ? 'файла выбраны' : 'файлов выбраны'}. Осталось добавить название.`
           : `${count} ${count === 1 ? 'файл готов' : count < 5 ? 'файла готовы' : 'файлов готовы'} к отправке.`;
@@ -195,10 +217,18 @@
 
   async function requireUser() {
     await refreshSession();
-    const user = state.session?.user;
-    if (!isRealUser(user)) {
-      showNotice('Войди в аккаунт, чтобы отправить материал.', 'error');
-      document.getElementById('siteAuthOpen')?.focus?.();
+    let user = state.session?.user;
+    if (window.CR7_SITE_AUTH?.requireTwitchUser) {
+      try {
+        user = await window.CR7_SITE_AUTH.requireTwitchUser(state.client);
+      } catch {
+        showNotice('Войди через Twitch, чтобы отправить материал.', 'error');
+        return null;
+      }
+    }
+    if (!isTwitchUser(user)) {
+      showNotice('Войди через Twitch, чтобы отправить материал.', 'error');
+      window.CR7_SITE_AUTH?.open?.();
       return null;
     }
     return user;
@@ -311,11 +341,25 @@
       if (submissionError) throw submissionError;
       submissionId = submission.id;
 
-      const rows = [];
+      const rows = state.files.map((item, index) => {
+        const file = item.file;
+        return {
+          submission_id: submissionId,
+          storage_path: privateStoragePath(file),
+          file_name: file.name,
+          mime_type: file.type || 'application/octet-stream',
+          file_size: file.size,
+          sort_order: index,
+          created_by: user.id
+        };
+      });
+
+      const { error: filesError } = await state.client.from('media_submission_files').insert(rows);
+      if (filesError) throw filesError;
+
       for (let index = 0; index < state.files.length; index += 1) {
         const file = state.files[index].file;
-        const unique = window.crypto?.randomUUID?.() || `${Date.now()}-${index}-${Math.random().toString(16).slice(2)}`;
-        const path = `${user.id}/${submissionId}/${unique}-${safeFileName(file.name)}`;
+        const path = rows[index].storage_path;
         el.submit.textContent = `Загружаем ${index + 1} из ${state.files.length}…`;
         const { error: uploadError } = await state.client.storage.from(BUCKET).upload(path, file, {
           cacheControl: '3600',
@@ -324,19 +368,7 @@
         });
         if (uploadError) throw uploadError;
         uploadedPaths.push(path);
-        rows.push({
-          submission_id: submissionId,
-          storage_path: path,
-          file_name: file.name,
-          mime_type: file.type || 'application/octet-stream',
-          file_size: file.size,
-          sort_order: index,
-          created_by: user.id
-        });
       }
-
-      const { error: filesError } = await state.client.from('media_submission_files').insert(rows);
-      if (filesError) throw filesError;
 
       el.form.reset();
       clearFiles();

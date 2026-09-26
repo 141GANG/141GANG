@@ -658,14 +658,6 @@ Deno.serve(async (req) => {
       return jsonResponse(await syncStaleGames(serviceClient));
     }
 
-    // Preview is read-only Steam metadata. Keep it public so the local file://
-    // preview can still resolve real Steam cards without a Supabase auth session.
-    if (body?.action === "suggestion-preview") {
-      const previewAppId = extractAppId(body?.steamUrl ?? body?.appId);
-      if (!previewAppId) return jsonResponse({ error: "Не удалось определить Steam App ID из ссылки." }, 400);
-      return jsonResponse(await getSteamData(previewAppId));
-    }
-
     const authorization = req.headers.get("Authorization") ?? "";
     const token = authorization.replace(/^Bearer\s+/i, "").trim();
     if (!token) return jsonResponse({ error: "Требуется авторизованная сессия." }, 401);
@@ -681,6 +673,15 @@ Deno.serve(async (req) => {
 
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     if (userError || !userData.user) return jsonResponse({ error: "Сессия истекла. Войди заново." }, 401);
+    if (userData.user.is_anonymous) return jsonResponse({ error: "Требуется обычный аккаунт зрителя." }, 403);
+
+    // Steam lookups consume third-party and Edge Function resources. Requiring a
+    // real account prevents the endpoint from being used as an anonymous proxy.
+    if (body?.action === "suggestion-preview") {
+      const previewAppId = extractAppId(body?.steamUrl ?? body?.appId);
+      if (!previewAppId) return jsonResponse({ error: "Не удалось определить Steam App ID из ссылки." }, 400);
+      return jsonResponse(await getSteamData(previewAppId));
+    }
 
     const { data: isAdmin, error: adminError } = await supabase.rpc("is_site_admin");
     if (adminError || isAdmin !== true) return jsonResponse({ error: "У аккаунта нет прав администратора." }, 403);

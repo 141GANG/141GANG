@@ -3,6 +3,8 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"/>
+<meta content="no-referrer" name="referrer"/>
+<meta content="object-src 'none'; base-uri 'self'" http-equiv="Content-Security-Policy"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <meta content="#040404" name="theme-color"/>
 <meta content="ПРЕДЛОЖКА141 — каталог игр для будущих стримов Глеба Орлова (Sasavot) с данными из Steam." name="description"/>
@@ -19,35 +21,35 @@
 <link href="./assets/css/public/header-hero.css" rel="stylesheet"/>
 <link href="./assets/css/public/catalog.css" rel="stylesheet"/>
 <link href="./assets/css/public/modal.css" rel="stylesheet"/>
-<link href="./assets/css/public/gang.css?v=4.9-responsive-stream-title" rel="stylesheet"/>
 <link href="./assets/css/public/auction.css?v=4.4" rel="stylesheet"/>
 <link href="./assets/css/public/auction-pointauc.css?v=5.0" rel="stylesheet"/>
 <link href="./assets/css/public/responsive.css" rel="stylesheet"/>
 <link href="./assets/css/public/admin-portal.css?v=1.2-hidden-trigger" rel="stylesheet"/>
 <link href="./assets/css/public/suggestions.css?v=3.4-catalog-comments" rel="stylesheet"/>
 <link href="./assets/css/public/media-submissions.css?v=4.1" rel="stylesheet"/>
-<link href="./assets/css/public/figma-refresh.css?v=3.17-library-stamps" rel="stylesheet"/>
-<link href="./assets/css/public/site-auth.css?v=1.8-toast-all" rel="stylesheet"/>
+<link href="./assets/css/public/figma-refresh.css?v=3.21-auction-disabled" rel="stylesheet"/>
+<link href="./assets/css/public/site-auth.css?v=1.9-solid-dialog" rel="stylesheet"/>
 <link href="./assets/css/public/figma-redesign.css?v=2.4" rel="stylesheet"/>
-<link href="./assets/css/public/figma-main-final.css?v=2.4-services-state" id="figmaMainFinalStyles" rel="stylesheet"/>
+<link href="./assets/css/public/figma-main-final.css?v=3.0-smaller-hero" id="figmaMainFinalStyles" rel="stylesheet"/>
 <link href="./assets/css/public/admin-figma-final.css?v=1.0" id="adminFigmaFinalStyles" rel="stylesheet"/>
 <link href="./assets/css/public/proposal-windows-figma.css?v=5.0-direct-add" id="proposalWindowsFigmaStyles" rel="stylesheet"/>
 <link href="./assets/css/public/proposal-media-figma-exact.css?v=4.2-no-fouc" id="proposalMediaFigmaExactStyles" rel="stylesheet"/>
-<link href="./assets/css/public/proposal-media-upload-v2.css?v=2.1-centered-delete" id="proposalMediaUploadV2Styles" rel="stylesheet"/>
+<link href="./assets/css/public/proposal-media-upload-v2.css?v=2.2-admin-close" id="proposalMediaUploadV2Styles" rel="stylesheet"/>
 <link href="./assets/css/public/admin-card-icons.css?v=1.1" id="adminCardIconsStyles" rel="stylesheet"/>
 <link href="./assets/css/public/figma-typography-final.css?v=4.7" id="figmaTypographyFinalStyles" rel="stylesheet"/>
 <link href="./assets/css/public/e2e-responsive-p0.css?v=1.2-nav-center" id="e2eResponsiveP0Styles" rel="stylesheet"/>
-<link href="./assets/css/public/game-comment-management.css?v=2.14-compact-comment-sort" id="gameCommentManagementStyles" rel="stylesheet"/>
+<link href="./assets/css/public/game-comment-management.css?v=2.16-full-description" id="gameCommentManagementStyles" rel="stylesheet"/>
 <link href="./assets/css/public/admin-login-final.css?v=1.2-fit-no-border" id="adminLoginFinalStyles" rel="stylesheet"/>
 <script>document.documentElement.classList.add('premium-motion-pending');</script>
-<link href="./assets/css/public/premium-motion.css?v=1.1" id="premiumMotionStyles" rel="stylesheet"/>
+<link href="./assets/css/public/premium-motion.css?v=1.2-static-media" id="premiumMotionStyles" rel="stylesheet"/>
 <link href="./assets/css/public/footer-developers.css?v=1.0" id="footerDevelopersStyles" rel="stylesheet"/>
-<link href="./assets/css/public/game-comments-drawer.css?v=1.0" id="gameCommentsDrawerStyles" rel="stylesheet"/>
+<link href="./assets/css/public/game-comments-drawer.css?v=2.0-vertical-comments" id="gameCommentsDrawerStyles" rel="stylesheet"/>
 <link href="./assets/css/public/tier-list-figma.css?v=3.2-reference-header" id="tierListFigmaStyles" rel="stylesheet"/>
-<link href="./assets/css/public/standalone-header-consistency.css?v=1.2-shared-single-row" id="standaloneHeaderConsistencyStyles" rel="stylesheet"/>
+<link href="./assets/css/public/standalone-header-consistency.css?v=1.3-index-match" id="standaloneHeaderConsistencyStyles" rel="stylesheet"/>
 <link href="./assets/css/public/hero-recent-game.css?v=1.2-supabase-black-state" id="heroRecentGameStyles" rel="stylesheet"/>
 <link href="./assets/css/public/admin-druk-title-final.css?v=2.0-fixed-header" rel="stylesheet"/>
 <link href="./assets/css/public/admin-direct-add.css?v=1.8-three-line-description" rel="stylesheet"/>
+<link href="./assets/css/public/popup-solid-backgrounds.css?v=1.0" id="popupSolidBackgroundsStyles" rel="stylesheet"/>
 <script defer id="premiumMotionScript" src="./assets/js/public/premium-motion.js?v=1.5-independent-game-modal"></script>
 <noscript><style>.premium-motion-pending *{opacity:1!important;filter:none!important;transform:none!important}</style></noscript>
 </head>
@@ -66,16 +68,10 @@
 <div class="shell nav">
 <a aria-label="141 Gang — на главную" class="brand" href="./index.html" target="_top"><img alt="141 Gang" class="brand-logo" src="./assets/images/figma/141gang.svg"/></a>
 <nav aria-label="Основная навигация" class="nav-center">
-<button aria-controls="gangPanel" aria-expanded="false" class="nav-link gang-trigger" id="gangOpen" type="button">Стримы</button>
 <a class="nav-link" href="#catalog">Каталог</a>
-<div class="nav-menu-wrap">
-<button aria-controls="servicesMenu" aria-expanded="false" class="nav-link nav-menu-toggle" id="servicesToggle" type="button">Сервисы<img alt="" aria-hidden="true" src="./assets/images/figma/chevron.svg"/></button>
-<div aria-label="Сервисы" class="nav-dropdown" hidden id="servicesMenu">
-<a class="tier-list-trigger" href="./tier-list.html">Тир-лист</a>
-<button aria-disabled="true" aria-label="Аукцион пока недоступен" class="auction-trigger" id="auctionOpen" type="button">Аукцион</button>
-<button aria-disabled="true" aria-label="Апелляции пока недоступны" class="appeals-trigger" id="appealsOpen" type="button">Апелляции</button>
-</div>
-</div>
+<a class="nav-link nav-service-link tier-list-trigger" href="./tier-list.html">Тир-лист</a>
+<a class="nav-link nav-service-link auction-trigger" data-admin-nav hidden href="./auction.html">Аукцион</a>
+<button aria-label="Открыть апелляции" class="nav-link nav-service-link appeals-trigger" data-admin-nav hidden id="appealsOpen" type="button">Апелляции</button>
 <a aria-label="Открыть управление сайтом" class="nav-link admin-portal-trigger" href="./admin.html" hidden id="adminPortalOpen" title="Управление сайтом">Управление</a>
 </nav>
 <button aria-controls="siteAuthPanel" aria-expanded="false" class="account-auth-trigger" id="siteAuthOpen" type="button">Войти</button>
@@ -86,7 +82,7 @@
 <section class="shell hero">
 <h1><span>141 Gang</span><span>Предложка</span></h1>
 <div class="hero-intro">
-<p>От общества — для общества. Предлагай. Голосуй. Выбирай, что будет дальше.</p>
+<p>Здесь решаешь ты. Делись идеями, голосуй и выбирай, что появится дальше.</p>
 <button aria-controls="contentMenuPanel" aria-label="Перейти к выбору контента" class="content-menu-toggle" id="contentMenuToggle" type="button"><span>Предложить контент</span><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button>
 </div>
 <button aria-live="polite" class="hero-recent-game" disabled id="heroRecentGame" type="button">
@@ -151,16 +147,6 @@
 </div>
 </section>
 </main>
-<div aria-hidden="true" class="gang-panel" hidden="" id="gangPanel">
-<div class="gang-backdrop" data-gang-close=""></div>
-<section aria-labelledby="gangTitle" aria-modal="true" class="gang-dialog" role="dialog" tabindex="-1">
-<header class="gang-head">
-<div><h2 id="gangTitle">Стримеры сообщества 141GANG</h2></div>
-</header>
-<div class="gang-grid" id="gangGrid"></div>
-<div aria-hidden="true" class="gang-detectors" id="gangDetectors"></div>
-</section>
-</div>
 <div aria-hidden="true" class="auction-panel" hidden="" id="auctionPanel">
 <div class="auction-backdrop" data-auction-close=""></div>
 <section aria-labelledby="auctionTitle" aria-modal="true" class="auction-dialog" role="dialog">
@@ -234,7 +220,7 @@
 <form class="suggestion-form" id="suggestionForm" novalidate>
 <span class="suggestion-step">Шаг 1 · Steam</span>
 <h3>Предложить игру</h3>
-<p>Вставь ссылку на страницу игры. Отправка доступна только аккаунту из таблицы <code>site_admins</code>.</p>
+<p>Вставь ссылку на страницу игры. Отправка доступна после авторизации через Twitch.</p>
 <label for="suggestionSteamUrl">Ссылка на Steam</label>
 <div class="suggestion-steam-row"><input id="suggestionSteamUrl" maxlength="500" placeholder="https://store.steampowered.com/app/..." required type="url"><button id="suggestionPreviewButton" type="button">Проверить</button></div>
 <div class="suggestion-preview" hidden id="suggestionPreview">
@@ -247,8 +233,8 @@
 </form>
 <aside class="suggestion-rules">
 <span>Как это работает</span>
-<ol><li>Steam ID защищает список от дубликатов.</li><li>Добавлять игры может только администратор.</li><li>Игра проходит проверку перед публикацией.</li><li>После одобрения она появляется в рейтинге.</li></ol>
-<p>Добавлять и модерировать игры может только администратор. После одобрения любой зритель может поставить один лайк или дизлайк и изменить свою оценку.</p>
+<ol><li>Steam ID защищает список от дубликатов.</li><li>Предлагать игры могут пользователи, вошедшие через Twitch.</li><li>Игра проходит проверку перед публикацией.</li><li>После одобрения она появляется в рейтинге.</li></ol>
+<p>Предложения проверяет администратор. После одобрения авторизованный через Twitch зритель может поставить один лайк или дизлайк и изменить свою оценку.</p>
 </aside>
 </div>
 </section>
@@ -313,7 +299,7 @@
 <button aria-label="Закрыть окно входа" class="site-auth-close" id="siteAuthClose" type="button">×</button>
 <span class="site-auth-kicker">Личный профиль</span>
 <h2 id="siteAuthTitle">Войти на сайт</h2>
-<p class="site-auth-description" id="siteAuthDescription">Выбери способ входа. Для администратора используется отдельная защищённая форма.</p>
+<p class="site-auth-description" id="siteAuthDescription">Авторизуйся через Twitch, чтобы открыть все возможности сайта.</p>
 <div class="site-auth-providers" id="siteAuthProviders">
 <button class="site-auth-provider is-yandex" data-auth-provider="custom:yandex" type="button"><span aria-hidden="true"><img alt="" src="./assets/images/figma/yandex-icon.png"/></span><strong>Войти через Яндекс ID</strong></button>
 <button class="site-auth-provider is-google" data-auth-provider="google" type="button"><span aria-hidden="true"><img alt="" src="./assets/images/figma/google-icon.png"/></span><strong>Войти через Google</strong></button>
@@ -328,7 +314,7 @@
 <section aria-labelledby="siteAuthTwitchPromptTitle" class="site-auth-twitch-prompt" hidden id="siteAuthTwitchPrompt">
 <div class="site-auth-twitch-prompt-head">
 <span aria-hidden="true" class="site-auth-twitch-badge"><img alt="" src="./assets/images/figma/twitch-icon.webp"/></span>
-<div><h3 id="siteAuthTwitchPromptTitle">Привязать Twitch?</h3><p>Свяжи Twitch с этим профилем, чтобы входить через него в дальнейшем.</p></div>
+<div><h3 id="siteAuthTwitchPromptTitle">Подключить Twitch</h3><p>Привяжи Twitch, чтобы предлагать контент и ставить оценки.</p></div>
 </div>
 <div class="site-auth-twitch-prompt-actions"><button class="site-auth-twitch-connect" id="siteAuthTwitchConnect" type="button">Привязать Twitch</button><button class="site-auth-twitch-later" id="siteAuthTwitchLater" type="button">Позже</button></div>
 </section>
@@ -560,13 +546,13 @@
 </section>
 <div class="modal-footer">
 <a class="modal-steam" href="#" id="modalSteam" rel="noopener noreferrer" target="_blank">Открыть в Steam <img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></a>
-<div aria-label="Действия с игрой" class="modal-reactions"><button aria-label="Нравится" aria-pressed="false" data-vote="1" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/like.png"/><b id="modalLikeCount">0</b></button><button aria-label="Не нравится" aria-pressed="false" data-vote="-1" type="button"><img alt="" aria-hidden="true" class="thumb-down" src="./assets/images/figma/dislike.png"/><b id="modalDislikeCount">0</b></button><button aria-controls="modalCommentsColumn" aria-expanded="false" aria-label="Показать комментарии" class="modal-comments-toggle" id="modalCommentsToggle" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/comment-icon.png"/></button></div>
+<div aria-label="Действия с игрой" class="modal-reactions"><button aria-label="Нравится" aria-pressed="false" data-vote="1" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/like.png"/><b id="modalLikeCount">0</b></button><button aria-label="Не нравится" aria-pressed="false" data-vote="-1" type="button"><img alt="" aria-hidden="true" class="thumb-down" src="./assets/images/figma/dislike.png"/><b id="modalDislikeCount">0</b></button></div>
 </div>
 <p aria-live="polite" class="modal-reaction-notice" id="modalReputationNotice"></p>
 <span class="modal-added visually-hidden" id="modalAdded"></span>
 </div>
 </div>
-<aside aria-hidden="true" class="modal-comments-column" id="modalCommentsColumn">
+<aside aria-hidden="false" class="modal-comments-column" id="modalCommentsColumn">
 <header class="modal-comments-header">
 <div><h3 id="modalCommentsTitle">Комментарии <b id="modalCommentsCount">0</b></h3></div>
 <details class="modal-comment-sort" id="modalCommentSort">
@@ -579,16 +565,16 @@
 </div>
 </details>
 </header>
-<section class="modal-comments" aria-labelledby="modalCommentsTitle"><div class="modal-comments-list" id="modalCommentsList"></div><form class="modal-comment-form" id="modalCommentForm"><span aria-hidden="true" class="modal-comment-composer-avatar" id="modalCommentComposerAvatar">П</span><label class="visually-hidden" for="modalCommentInput">Написать комментарий</label><textarea id="modalCommentInput" maxlength="500" placeholder="Написать комментарий" required></textarea><button aria-label="Отправить комментарий" type="submit"><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button></form><p class="modal-auth-hint" id="modalAuthHint">Войдите, чтобы оценивать игры и оставлять комментарии.</p></section>
+<section class="modal-comments" aria-labelledby="modalCommentsTitle"><div class="modal-comments-list" id="modalCommentsList"></div><form class="modal-comment-form" id="modalCommentForm"><span aria-hidden="true" class="modal-comment-composer-avatar" id="modalCommentComposerAvatar">П</span><label class="visually-hidden" for="modalCommentInput">Написать комментарий</label><textarea id="modalCommentInput" maxlength="500" placeholder="Написать комментарий" required></textarea><button aria-label="Отправить комментарий" type="submit"><img alt="" aria-hidden="true" src="./assets/images/figma/arrow-circle-white.svg"/></button></form><p class="modal-auth-hint" id="modalAuthHint">Войдите через Twitch, чтобы оценивать игры и оставлять комментарии.</p></section>
 </aside>
 </div>
 </div>
 <footer class="site-footer" id="siteFooter"><div class="shell footer-developers-inner"><div aria-live="polite" class="footer-developers" id="footerDevelopers"><button aria-expanded="false" class="footer-developers-trigger" id="footerDevelopersTrigger" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/inf-icon.png"/><span>О разработчиках</span></button><p aria-hidden="true" class="footer-developers-credits" id="footerDevelopersCredits">@tankzor, @archivebtw, @max_vopros, @OBWECTBO141</p></div></div></footer>
-<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.7-toast-all"></script><script src="./assets/js/public/state.js?v=4.4-unlimited-games"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.3-supabase-black-state"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.7-pending-suggestion-comments"></script><script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script><script src="./assets/js/public/suggestions.js?v=4.19-all-steam-games"></script><script src="./assets/js/public/media-submissions.js?v=5.16-upload-media-mosaic"></script><script src="./assets/js/public/gang.js?v=4.6-no-stream-summary"></script><script src="./assets/js/public/auction.js?v=5.2-static-other-content"></script><script src="./assets/js/public/admin-portal.js?v=3.4-unlimited-games"></script><script src="./assets/js/public/admin-portal-shell.js?v=6.1-unlimited-games"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.6-unlimited-games"></script><script src="./assets/js/public/figma-ui.js?v=10.16-admin-state-event"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
+<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.8-twitch-actions"></script><script src="./assets/js/public/state.js?v=4.4-unlimited-games"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.3-supabase-black-state"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.8-twitch-actions"></script><script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script><script src="./assets/js/public/suggestions.js?v=4.21-twitch-actions"></script><script src="./assets/js/public/media-submissions.js?v=5.17-private-delivery"></script><script src="./assets/js/public/auction.js?v=5.3-page-link"></script><script src="./assets/js/public/admin-portal.js?v=3.4-unlimited-games"></script><script src="./assets/js/public/admin-portal-shell.js?v=6.1-unlimited-games"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.6-unlimited-games"></script><script src="./assets/js/public/figma-ui.js?v=10.19-admin-nav"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
 (() => {
-  const pageView = /\/tier-list\.html$/i.test(location.pathname) ? 'tier'
-    : /\/auction\.html$/i.test(location.pathname) ? 'auction'
-      : /\/admin\.html$/i.test(location.pathname) ? 'admin'
+  const pageView = /\/tier-list(?:\.html)?\/?$/i.test(location.pathname) ? 'tier'
+    : /\/auction(?:\.html)?\/?$/i.test(location.pathname) ? 'auction'
+      : /\/admin(?:\.html)?\/?$/i.test(location.pathname) ? 'admin'
         : '';
   const view = new URLSearchParams(location.search).get('view') || pageView;
   const targets = {tier: 'tierListPanel', auction: 'auctionPanel', admin: 'adminPortal'};

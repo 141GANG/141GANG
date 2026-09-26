@@ -953,6 +953,22 @@ html body .game-modal:not([hidden]) .modal-panel {
   }
 }
 
+/* Game descriptions must never be shortened below the title. */
+.game-modal #modalDescription {
+  max-height: none !important;
+  display: block !important;
+  overflow: visible !important;
+  -webkit-box-orient: initial !important;
+  -webkit-line-clamp: unset !important;
+}
+
+@media (min-width: 768px) {
+  .game-modal .modal-game-column {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+}
+
 .game-modal .modal-comments-header h3,
 .game-modal .modal-comments-header h3 b {
   font-family: 'DrukCyr-Heavy', sans-serif !important;
@@ -1015,7 +1031,8 @@ html body .game-modal:not([hidden]) .modal-panel {
   }
 
   .game-modal #modalDescription {
-    max-height: 70px !important;
+    max-height: none !important;
+    height: auto !important;
     font-size: 17px !important;
     line-height: 1.35 !important;
   }

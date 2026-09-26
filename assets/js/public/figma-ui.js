@@ -14,7 +14,7 @@
     ['script','proposalWindowsFigmaScript','./assets/js/public/proposal-windows-figma.js?v=3.7-flat-media'],
     ['script','adminCardIconsScriptV2','./assets/js/public/admin-card-icons-v2.js?v=2.0'],
     ['script','catalogLiveRefreshScript','./assets/js/public/catalog-live-refresh.js?v=1.1-safe-unsubscribe'],
-    ['script','mediaAuthenticatedSubmitBridge','./assets/js/public/media-authenticated-submit-bridge.js?v=1.3-fullscreen-preview']
+    ['script','mediaAuthenticatedSubmitBridge','./assets/js/public/media-authenticated-submit-bridge.js?v=1.5-twitch-actions']
   ];
   assets.forEach(([type,id,src]) => {
     if (document.getElementById(id)) return;
@@ -43,6 +43,7 @@
   const sortMenu = document.getElementById('catalogSortMenu');
   const sortSelect = document.getElementById('publicCatalogSort');
   const managementButton = document.getElementById('adminPortalOpen');
+  const adminNavigation = [...document.querySelectorAll('[data-admin-nav]')];
 
   const mediaSelected = document.getElementById('mediaSelected');
 
@@ -205,7 +206,7 @@
     menu.addEventListener('click', event => event.stopPropagation());
   }
 
-  // The services menu is available; its placeholder entries are blocked below.
+  // The services menu is available; only explicitly disabled placeholders are blocked below.
   if (servicesToggle) servicesToggle.removeAttribute('aria-disabled');
   if (servicesMenu) servicesMenu.hidden = true;
   togglePopup(servicesToggle, servicesMenu, () => closeCatalogMenus());
@@ -286,7 +287,7 @@
   });
 
   servicesMenu?.addEventListener('click', event => {
-    if (event.target.closest('.auction-trigger, .appeals-trigger')) {
+    if (event.target.closest('[aria-disabled="true"]')) {
       event.preventDefault();
       event.stopImmediatePropagation();
       return;
@@ -321,6 +322,10 @@
     }
     document.body.classList.toggle('is-site-admin', isAdmin);
     window.dispatchEvent(new CustomEvent('cr7:admin-state', { detail: { isAdmin } }));
+    adminNavigation.forEach(item => {
+      item.hidden = !isAdmin;
+      item.classList.toggle('is-admin', isAdmin);
+    });
     if (managementButton) {
       managementButton.hidden = !isAdmin;
       managementButton.classList.toggle('is-admin', isAdmin);

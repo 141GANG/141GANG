@@ -1,7 +1,8 @@
 -- ПРЕДЛОЖКА CR7 — фото и видео для будущих стримов.
 -- Сначала выполни supabase/supabase_setup.sql, затем целиком этот файл.
 -- Загружать и модерировать материалы могут только site_admins.
--- Опубликованные материалы доступны посетителям через временные signed URL.
+-- Опубликованные материалы доступны посетителям только через Edge Function
+-- public-media, которая не раскрывает UUID пользователей и storage_path.
 
 create table if not exists public.media_submissions (
   id uuid primary key default gen_random_uuid(),
@@ -120,6 +121,9 @@ create index if not exists media_submissions_type_status_idx
 create index if not exists media_submission_files_submission_idx
   on public.media_submission_files (submission_id, sort_order);
 
+create unique index if not exists media_submission_files_submission_sort_unique
+  on public.media_submission_files (submission_id, sort_order);
+
 create or replace function public.set_media_submission_updated_at()
 returns trigger
 language plpgsql
@@ -131,18 +135,61 @@ begin
 end;
 $$;
 
+create or replace function public.enforce_media_submission_quota()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+begin
+  if auth.role() = 'service_role' then return new; end if;
+  if v_user_id is null
+    or new.created_by is distinct from v_user_id
+    or coalesce((auth.jwt() ->> 'is_anonymous')::boolean, false) then
+    raise exception 'Требуется обычный аккаунт зрителя.' using errcode = '42501';
+  end if;
+  if public.is_site_admin() then return new; end if;
+
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(v_user_id::text, 141));
+  if (
+    select count(*)
+    from public.media_submissions submission
+    where submission.created_by = v_user_id
+      and submission.status = 'pending'
+  ) >= 3 then
+    raise exception 'У тебя уже есть три материала на модерации.' using errcode = '23514';
+  end if;
+  if (
+    select count(*)
+    from public.media_submissions submission
+    where submission.created_by = v_user_id
+      and submission.created_at >= pg_catalog.now() - interval '24 hours'
+  ) >= 10 then
+    raise exception 'За 24 часа можно отправить не больше десяти материалов.' using errcode = '23514';
+  end if;
+  return new;
+end;
+$$;
+
+revoke all on function public.enforce_media_submission_quota() from public, anon, authenticated;
+
 drop trigger if exists media_submissions_set_updated_at on public.media_submissions;
 create trigger media_submissions_set_updated_at
 before update on public.media_submissions
 for each row execute function public.set_media_submission_updated_at();
+
+drop trigger if exists media_submissions_enforce_quota on public.media_submissions;
+create trigger media_submissions_enforce_quota
+before insert on public.media_submissions
+for each row execute function public.enforce_media_submission_quota();
 
 alter table public.media_submissions enable row level security;
 alter table public.media_submission_files enable row level security;
 
 revoke all on table public.media_submissions from anon, authenticated;
 revoke all on table public.media_submission_files from anon, authenticated;
-grant select on table public.media_submissions to anon;
-grant select on table public.media_submission_files to anon;
 grant select, insert, update, delete on table public.media_submissions to authenticated;
 grant select, insert, delete on table public.media_submission_files to authenticated;
 
@@ -152,20 +199,11 @@ drop policy if exists "Media submissions admin insert" on public.media_submissio
 drop policy if exists "Media submissions admin update" on public.media_submissions;
 drop policy if exists "Media submissions admin delete" on public.media_submissions;
 
-create policy "Media submissions public read"
-on public.media_submissions
-for select
-to anon
-using (status = 'published');
-
 create policy "Media submissions admin read"
 on public.media_submissions
 for select
 to authenticated
-using (
-  status = 'published'
-  or (select public.is_site_admin())
-);
+using ((select public.is_site_admin()));
 
 create policy "Media submissions admin insert"
 on public.media_submissions
@@ -199,32 +237,11 @@ drop policy if exists "Media files admin read" on public.media_submission_files;
 drop policy if exists "Media files admin insert" on public.media_submission_files;
 drop policy if exists "Media files admin delete" on public.media_submission_files;
 
-create policy "Media files public read"
-on public.media_submission_files
-for select
-to anon
-using (
-  exists (
-    select 1
-    from public.media_submissions submission
-    where submission.id = submission_id
-      and submission.status = 'published'
-  )
-);
-
 create policy "Media files admin read"
 on public.media_submission_files
 for select
 to authenticated
-using (
-  (select public.is_site_admin())
-  or exists (
-    select 1
-    from public.media_submissions submission
-    where submission.id = submission_id
-      and submission.status = 'published'
-  )
-);
+using ((select public.is_site_admin()));
 
 create policy "Media files admin insert"
 on public.media_submission_files
@@ -282,37 +299,13 @@ drop policy if exists "Media bucket admin read" on storage.objects;
 drop policy if exists "Media bucket admin upload" on storage.objects;
 drop policy if exists "Media bucket admin delete" on storage.objects;
 
-create policy "Media bucket public read"
-on storage.objects
-for select
-to anon
-using (
-  bucket_id = 'stream-submissions'
-  and exists (
-    select 1
-    from public.media_submission_files file
-    join public.media_submissions submission on submission.id = file.submission_id
-    where file.storage_path = name
-      and submission.status = 'published'
-  )
-);
-
 create policy "Media bucket admin read"
 on storage.objects
 for select
 to authenticated
 using (
   bucket_id = 'stream-submissions'
-  and (
-    (select public.is_site_admin())
-    or exists (
-      select 1
-      from public.media_submission_files file
-      join public.media_submissions submission on submission.id = file.submission_id
-      where file.storage_path = name
-        and submission.status = 'published'
-    )
-  )
+  and (select public.is_site_admin())
 );
 
 create policy "Media bucket admin upload"
@@ -322,11 +315,12 @@ to authenticated
 with check (
   bucket_id = 'stream-submissions'
   and (select public.is_site_admin())
-  and (storage.foldername(name))[1] = (select auth.uid())::text
+  and name ~ '^objects/[A-Za-z0-9-]{16,100}\.(jpg|jpeg|png|webp|gif|mp4|webm|mov)$'
   and exists (
     select 1
-    from public.media_submissions submission
-    where submission.id::text = (storage.foldername(name))[2]
+    from public.media_submission_files file
+    join public.media_submissions submission on submission.id = file.submission_id
+    where file.storage_path = name
       and submission.created_by = (select auth.uid())
       and submission.status = 'pending'
   )

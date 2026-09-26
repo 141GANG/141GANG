@@ -50,6 +50,16 @@
     return Boolean(user && !user.is_anonymous);
   }
 
+  function isTwitchUser(user) {
+    if (window.CR7_SITE_AUTH?.hasTwitchIdentity) return window.CR7_SITE_AUTH.hasTwitchIdentity(user);
+    const providers = [
+      ...(Array.isArray(user?.identities) ? user.identities.map(identity => identity?.provider) : []),
+      ...(Array.isArray(user?.app_metadata?.providers) ? user.app_metadata.providers : []),
+      user?.app_metadata?.provider
+    ].map(provider => String(provider || '').toLowerCase());
+    return isRealUser(user) && providers.includes('twitch');
+  }
+
   async function refreshAccess() {
     state.client = configuredClient();
     state.session = null;
@@ -80,18 +90,25 @@
 
   async function requireSignedInUser(notice) {
     await refreshAccess();
-    const user = state.session?.user;
-    if (!isRealUser(user)) {
-      showNotice(notice, 'Войди в аккаунт, чтобы отправить предложение.', 'error');
-      document.getElementById('siteAuthOpen')?.focus?.();
+    let user = state.session?.user;
+    if (window.CR7_SITE_AUTH?.requireTwitchUser) {
+      try {
+        user = await window.CR7_SITE_AUTH.requireTwitchUser(state.client);
+      } catch {
+        showNotice(notice, 'Войди через Twitch, чтобы отправить предложение.', 'error');
+        return null;
+      }
+    }
+    if (!isTwitchUser(user)) {
+      showNotice(notice, 'Войди через Twitch, чтобы отправить предложение.', 'error');
+      window.CR7_SITE_AUTH?.open?.();
       return null;
     }
     return user;
   }
 
   function shouldOverride() {
-    const localPreview = window.location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(window.location.hostname);
-    return state.accessReady && !state.isAdmin && !localPreview;
+    return state.accessReady && !state.isAdmin;
   }
 
   function parseSteamAppId(value) {
@@ -268,6 +285,17 @@
     return normalized || 'file';
   }
 
+  function privateStoragePath(file) {
+    const extension = String(file?.name || '').match(/\.(?:jpe?g|png|webp|gif|mp4|webm|mov)$/i)?.[0]?.toLowerCase()
+      || ({
+        'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif',
+        'video/mp4': '.mp4', 'video/webm': '.webm', 'video/quicktime': '.mov'
+      })[String(file?.type || '').toLowerCase()]
+      || '.bin';
+    const unique = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    return `objects/${unique}${extension}`;
+  }
+
   function formatBytes(bytes) {
     const value = Number(bytes) || 0;
     if (value < 1024 * 1024) return `${Math.max(1, Math.round(value / 1024))} КБ`;
@@ -296,7 +324,7 @@
     const hasTitle = Boolean(title?.value.trim());
     if (selected) selected.hidden = count === 0;
     dropzone?.classList.toggle('has-file', count > 0);
-    if (submit) submit.disabled = state.mediaSubmitting || !isRealUser(state.session?.user) || count === 0 || !hasTitle;
+    if (submit) submit.disabled = state.mediaSubmitting || !isTwitchUser(state.session?.user) || count === 0 || !hasTitle;
     if (hint) {
       hint.textContent = count === 0
         ? 'Сначала выбери файлы и добавь название.'
@@ -427,30 +455,32 @@
       if (submissionError) throw submissionError;
       submissionId = submission.id;
 
-      const rows = [];
+      const rows = state.mediaFiles.map((item, index) => {
+        const file = item.file;
+        return {
+          submission_id: submissionId,
+          storage_path: privateStoragePath(file),
+          file_name: file.name,
+          mime_type: file.type || 'application/octet-stream',
+          file_size: file.size,
+          sort_order: index,
+          created_by: user.id
+        };
+      });
+
+      const { error: filesError } = await state.client.from('media_submission_files').insert(rows);
+      if (filesError) throw filesError;
+
       for (let index = 0; index < state.mediaFiles.length; index += 1) {
         const file = state.mediaFiles[index].file;
-        const unique = window.crypto?.randomUUID?.() || `${Date.now()}-${index}-${Math.random().toString(16).slice(2)}`;
-        const path = `${user.id}/${submissionId}/${unique}-${safeFileName(file.name)}`;
+        const path = rows[index].storage_path;
         if (submit) submit.textContent = `Загружаем ${index + 1} из ${state.mediaFiles.length}…`;
         const { error: uploadError } = await state.client.storage.from('stream-submissions').upload(path, file, {
           cacheControl: '3600', contentType: file.type || undefined, upsert: false
         });
         if (uploadError) throw uploadError;
         uploadedPaths.push(path);
-        rows.push({
-          submission_id: submissionId,
-          storage_path: path,
-          file_name: file.name,
-          mime_type: file.type || 'application/octet-stream',
-          file_size: file.size,
-          sort_order: index,
-          created_by: user.id
-        });
       }
-
-      const { error: filesError } = await state.client.from('media_submission_files').insert(rows);
-      if (filesError) throw filesError;
       document.getElementById('mediaForm')?.reset();
       clearMediaFiles();
       showNotice(notice, 'Материал отправлен в очередь управления.', 'success');
@@ -466,15 +496,27 @@
 
   function syncNonAdminControls() {
     if (!shouldOverride()) return;
-    const signedIn = isRealUser(state.session?.user);
+    const signedIn = isTwitchUser(state.session?.user);
     const suggestionSubmit = document.getElementById('suggestionSubmitButton');
     if (suggestionSubmit && state.suggestionPreview) suggestionSubmit.disabled = !signedIn;
     renderMediaFiles();
   }
 
+  function guardProposalEntry(event) {
+    const trigger = event.target instanceof Element
+      ? event.target.closest('.proposal-desk-trigger')
+      : null;
+    if (!trigger || isTwitchUser(state.session?.user)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.CR7_SITE_AUTH?.open?.();
+  }
+
   function bind() {
     if (state.bound) return;
     state.bound = true;
+
+    document.addEventListener('click', guardProposalEntry, true);
 
     document.getElementById('suggestionPreviewButton')?.addEventListener('click', previewSuggestion, true);
     document.getElementById('suggestionForm')?.addEventListener('submit', submitSuggestion, true);

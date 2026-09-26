@@ -63,10 +63,20 @@
       document.querySelectorAll('.game-card[data-game-id]').forEach(card => {
         const gameId = String(card.dataset.gameId || '');
         const score = Number(state.reputationScores?.[gameId] || 0);
+        const stats = state.reputationStats?.[gameId] || {};
+        const likes = Number(stats.likes) || 0;
+        const dislikes = Number(stats.dislikes) || 0;
         const element = card.querySelector('.game-reputation');
-        if (!element) return;
-        element.textContent = String(score);
-        element.setAttribute('aria-label', `Голосов за игру: ${score}`);
+        if (element) {
+          element.textContent = String(score);
+          element.setAttribute('aria-label', `Голосов за игру: ${score}`);
+        }
+        const likeCount = card.querySelector('.card-like-count');
+        const dislikeCount = card.querySelector('.card-dislike-count');
+        const reactions = card.querySelector('.card-reactions');
+        if (likeCount) likeCount.textContent = String(likes);
+        if (dislikeCount) dislikeCount.textContent = String(dislikes);
+        if (reactions) reactions.setAttribute('aria-label', `Лайков: ${likes}, дизлайков: ${dislikes}`);
       });
     }
 

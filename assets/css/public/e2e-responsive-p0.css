@@ -12,7 +12,7 @@
   }
 
   .nav-center > .gang-trigger,
-  .nav-center > a[href="#catalog"],
+  .nav-center > a[href$="#catalog"],
   .nav-center > #adminPortalOpen {
     width: auto !important;
     min-width: 0 !important;

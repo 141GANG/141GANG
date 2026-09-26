@@ -427,6 +427,16 @@
     return normalized || 'file';
   }
 
+  function privateStoragePath(file) {
+    const extension = String(file?.name || '').match(/\.(?:jpe?g|png|webp|gif|mp4|webm|mov)$/i)?.[0]?.toLowerCase()
+      || ({
+        'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif',
+        'video/mp4': '.mp4', 'video/webm': '.webm', 'video/quicktime': '.mov'
+      })[String(file?.type || '').toLowerCase()]
+      || '.bin';
+    return `objects/${uniqueId()}${extension}`;
+  }
+
   async function usableSession() {
     if (!state.client) return { data: { session: null }, error: null };
     if (window.CR7_AUTH?.getUsableSession) {
@@ -1134,10 +1144,22 @@
         authorName: userDisplayName(user)
       });
 
-      const fileRows = [];
+      const fileRows = state.selectedFiles.map((selected, index) => ({
+        submission_id: submissionId,
+        storage_path: privateStoragePath(selected.file),
+        file_name: selected.file.name,
+        mime_type: selected.file.type || 'application/octet-stream',
+        file_size: selected.file.size,
+        sort_order: index,
+        created_by: user.id
+      }));
+
+      const { error: fileError } = await state.client.from('media_submission_files').insert(fileRows);
+      if (fileError) throw fileError;
+
       for (let index = 0; index < state.selectedFiles.length; index += 1) {
         const file = state.selectedFiles[index].file;
-        const uploadedPath = `${user.id}/${submissionId}/${uniqueId()}-${safeFileName(file.name)}`;
+        const uploadedPath = fileRows[index].storage_path;
         setBusy(elements.submitButton, true, `Загружаем ${index + 1} из ${state.selectedFiles.length}…`);
         const { error: uploadError } = await state.client.storage
           .from(BUCKET)
@@ -1148,19 +1170,7 @@
           });
         if (uploadError) throw uploadError;
         uploadedPaths.push(uploadedPath);
-        fileRows.push({
-          submission_id: submissionId,
-          storage_path: uploadedPath,
-          file_name: file.name,
-          mime_type: file.type || 'application/octet-stream',
-          file_size: file.size,
-          sort_order: index,
-          created_by: user.id
-        });
       }
-
-      const { error: fileError } = await state.client.from('media_submission_files').insert(fileRows);
-      if (fileError) throw fileError;
 
       elements.form.reset();
       clearSelectedFiles();
@@ -1186,6 +1196,27 @@
       file.signed_url = error ? '' : data?.signedUrl || '';
     }));
     return submissions;
+  }
+
+  async function fetchPublicMediaFeed() {
+    const config = window.CR7_CONFIG || {};
+    const baseUrl = String(config.supabaseUrl || '').replace(/\/$/, '');
+    const publishableKey = String(config.supabasePublishableKey || '');
+    if (!baseUrl.startsWith('https://') || !publishableKey) {
+      throw new Error('Supabase не настроен.');
+    }
+    const response = await fetch(`${baseUrl}/functions/v1/public-media`, {
+      method: 'GET',
+      headers: {
+        apikey: publishableKey,
+        Accept: 'application/json'
+      },
+      credentials: 'omit',
+      referrerPolicy: 'no-referrer'
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(payload?.error || 'Не удалось загрузить материалы.');
+    return Array.isArray(payload?.items) ? payload.items : [];
   }
 
   function itemFiles(item) {
@@ -1252,13 +1283,7 @@
     elements.publicList.innerHTML = '<div class="media-empty">Загружаем опубликованные материалы…</div>';
     setBusy(elements.refreshButton, true, '…');
     try {
-      const { data, error } = await state.client
-        .from('media_submissions')
-        .select('id,title,comment,status,media_type,updated_at,moderated_at,published_at,media_submission_files(id,storage_path,file_name,mime_type,file_size,sort_order)')
-        .eq('status', 'published')
-        .order('published_at', { ascending: false, nullsFirst: false });
-      if (error) throw error;
-      state.published = await addSignedUrls(Array.isArray(data) ? data : []);
+      state.published = await fetchPublicMediaFeed();
       renderPublished();
     } catch (error) {
       console.error(error);

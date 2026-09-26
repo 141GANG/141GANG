@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.yandex-userinfo]
 verify_jwt = false
+
+[functions.public-media]
+verify_jwt = false

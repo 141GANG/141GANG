@@ -771,7 +771,9 @@
   rulesEditor.innerHTML = state.rules || defaultRules;
   form.hidden = !isAdmin;
 
-  openButton.addEventListener('click', openAuction);
+  // The main navigation now points to the dedicated auction page. Keep the
+  // legacy overlay trigger working only when it is still rendered as a button.
+  if (openButton.matches('button')) openButton.addEventListener('click', openAuction);
   closeButton.addEventListener('click', closeAuction);
   panel.addEventListener('click', event => {
     if (event.target.matches('[data-auction-close]')) closeAuction();

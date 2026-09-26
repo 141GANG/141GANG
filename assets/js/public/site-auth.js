@@ -85,7 +85,15 @@
       .filter(Boolean);
     const appProvider = String(user?.app_metadata?.provider || '').trim().toLowerCase();
     if (appProvider) providers.push(appProvider);
+    const appProviders = Array.isArray(user?.app_metadata?.providers)
+      ? user.app_metadata.providers
+      : [];
+    appProviders.forEach(provider => providers.push(String(provider || '').trim().toLowerCase()));
     return new Set(providers);
+  }
+
+  function hasTwitchIdentity(user) {
+    return Boolean(user && !user.is_anonymous && identityProviders(user).has('twitch'));
   }
 
   function needsTwitchLink(user) {
@@ -224,6 +232,9 @@
       avatar.removeAttribute('src');
       name.textContent = '';
       email.textContent = '';
+      window.dispatchEvent(new CustomEvent('cr7:site-auth-session', {
+        detail: { user: null, hasTwitch: false }
+      }));
       return;
     }
 
@@ -236,6 +247,9 @@
     avatar.hidden = !userAvatar;
     if (userAvatar) avatar.src = userAvatar;
     else avatar.removeAttribute('src');
+    window.dispatchEvent(new CustomEvent('cr7:site-auth-session', {
+      detail: { user, hasTwitch: hasTwitchIdentity(user) }
+    }));
   }
 
   function openPanel() {
@@ -259,10 +273,6 @@
   async function signIn(provider) {
     if (!client) {
       setNotice('Авторизация временно недоступна: Supabase не подключён.','error');
-      return;
-    }
-    if (provider === 'twitch' && !hasGoogleOrYandexIdentity(currentUser)) {
-      showToast('Сначала нужно войти через Google или Яндекс ID, затем можно привязать Twitch.');
       return;
     }
     const label = providerLabels[provider] || 'сервис авторизации';
@@ -317,6 +327,35 @@
     setNotice('Вы вышли из профиля.','success');
     renderSession(null);
   }
+
+  async function requireTwitchUser(authClient = client) {
+    if (!authClient?.auth) throw new Error('Авторизация временно недоступна.');
+    const sessionResult = window.CR7_AUTH?.getUsableSession
+      ? await window.CR7_AUTH.getUsableSession(authClient)
+      : await authClient.auth.getSession();
+    if (sessionResult?.error) throw sessionResult.error;
+    let user = sessionResult?.data?.session?.user || null;
+    if (user && !user.is_anonymous && authClient.auth.getUser) {
+      try {
+        const { data, error } = await authClient.auth.getUser();
+        if (!error && data?.user) user = data.user;
+      } catch {
+        // The session claims below still provide the OAuth provider list.
+      }
+    }
+    if (!hasTwitchIdentity(user)) {
+      openPanel();
+      showToast('Войди через Twitch, чтобы выполнить это действие.','error');
+      throw new Error('Требуется авторизация через Twitch.');
+    }
+    return user;
+  }
+
+  window.CR7_SITE_AUTH = Object.freeze({
+    hasTwitchIdentity,
+    requireTwitchUser,
+    open: openPanel
+  });
 
   async function initialize() {
     if (initialized) return;

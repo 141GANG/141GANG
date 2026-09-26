@@ -122,9 +122,7 @@ body.site-auth-open { overflow: hidden; }
   border-radius: 12px;
   color: #f0f0f0;
   background: #121212;
-  background-image:
-    radial-gradient(circle at 15% 0, rgba(220,44,31,.12), transparent 544px),
-    linear-gradient(145deg, #171515, #090909 58%, #120c0b);
+  background-image: none;
   box-shadow: none;
   scrollbar-width: none;
 }

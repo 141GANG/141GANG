@@ -143,6 +143,23 @@ html.premium-motion-enabled .premium-window.premium-open .premium-window-piece {
   to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
+/* The media proposal is intentionally static: its staggered motion made the
+   two-column upload layout feel visually unstable. */
+.media-panel.is-figma-proposal *,
+.media-panel.is-figma-proposal *::before,
+.media-panel.is-figma-proposal *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+html.premium-motion-enabled .media-panel.is-figma-proposal .premium-window-surface,
+html.premium-motion-enabled .media-panel.is-figma-proposal .premium-window-piece {
+  animation: none !important;
+  opacity: 1 !important;
+  transition: none !important;
+  transform: none !important;
+}
+
 /* The media proposal uses a translated positioning shell. Animate its safe
    inner workspace, never the positioning transform of .media-dialog. */
 html.premium-motion-enabled .media-panel.premium-window .media-dialog {

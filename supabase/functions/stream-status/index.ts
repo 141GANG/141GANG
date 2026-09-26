@@ -18,6 +18,14 @@ type StreamStatus = Streamer & {
 let twitchToken = "";
 let twitchTokenExpiresAt = 0;
 
+const allowedStreamerKeys = new Set([
+  "twitch:rostikfacekid", "twitch:tankzor", "twitch:sasavot",
+  "twitch:yurapivo", "twitch:r4dom1r", "twitch:iceicell",
+  "twitch:poisonika", "twitch:formixyouknow", "twitch:narek_cr",
+  "kick:helin139ban", "twitch:timaevvv", "twitch:gagik",
+  "twitch:kennethonline",
+]);
+
 const clean = (value: unknown, max = 300) => String(value ?? "").trim().slice(0,max);
 const unavailable = (streamer: Streamer): StreamStatus => ({ ...streamer, available: false, live: false, title: "", category: "", thumbnailUrl: "", avatarUrl: "", startedAt: "" });
 const imageUrl = (value: unknown): string => {
@@ -48,7 +56,7 @@ function requestedStreamers(body: unknown): Streamer[] {
     const provider = clean((item as Streamer)?.provider,10).toLowerCase();
     const channel = clean((item as Streamer)?.channel,40).toLowerCase();
     const key = `${provider}:${channel}`;
-    if (!['twitch','kick'].includes(provider) || !/^[a-z0-9_]{2,40}$/.test(channel) || seen.has(key)) return [];
+    if (!allowedStreamerKeys.has(key) || seen.has(key)) return [];
     seen.add(key);
     return [{ provider,channel } as Streamer];
   }).slice(0,30);

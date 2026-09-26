@@ -222,11 +222,12 @@ with check (
   bucket_id = 'stream-submissions'
   and auth.uid() is not null
   and not coalesce((auth.jwt() ->> 'is_anonymous')::boolean, false)
-  and (storage.foldername(name))[1] = auth.uid()::text
+  and name ~ '^objects/[A-Za-z0-9-]{16,100}\.(jpg|jpeg|png|webp|gif|mp4|webm|mov)$'
   and exists (
     select 1
-    from public.media_submissions submission
-    where submission.id::text = (storage.foldername(name))[2]
+    from public.media_submission_files file
+    join public.media_submissions submission on submission.id = file.submission_id
+    where file.storage_path = name
       and submission.created_by = auth.uid()
       and submission.status = 'pending'
   )
@@ -241,11 +242,11 @@ using (
   bucket_id = 'stream-submissions'
   and auth.uid() is not null
   and not coalesce((auth.jwt() ->> 'is_anonymous')::boolean, false)
-  and (storage.foldername(name))[1] = auth.uid()::text
   and exists (
     select 1
-    from public.media_submissions submission
-    where submission.id::text = (storage.foldername(name))[2]
+    from public.media_submission_files file
+    join public.media_submissions submission on submission.id = file.submission_id
+    where file.storage_path = name
       and submission.created_by = auth.uid()
       and submission.status = 'pending'
   )
@@ -260,11 +261,11 @@ using (
   bucket_id = 'stream-submissions'
   and auth.uid() is not null
   and not coalesce((auth.jwt() ->> 'is_anonymous')::boolean, false)
-  and (storage.foldername(name))[1] = auth.uid()::text
   and exists (
     select 1
-    from public.media_submissions submission
-    where submission.id::text = (storage.foldername(name))[2]
+    from public.media_submission_files file
+    join public.media_submissions submission on submission.id = file.submission_id
+    where file.storage_path = name
       and submission.created_by = auth.uid()
       and submission.status = 'pending'
   )

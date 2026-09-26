@@ -145,14 +145,13 @@
     const config = window.CR7_CONFIG || {};
     const supabaseUrl = String(config.supabaseUrl || '').replace(/\/$/, '');
     const publishableKey = String(config.supabasePublishableKey || '');
-    const publicPreview = body?.action === 'suggestion-preview';
 
     if (!supabaseUrl || !publishableKey) {
       throw new Error('Steam backend не настроен.');
     }
 
     let accessToken = window.CR7_AUTH?.getCachedAccessToken?.() || '';
-    if (!accessToken && suggestionState.client && !(publicPreview && suggestionState.localMode)) {
+    if (!accessToken && suggestionState.client) {
       try {
         const sessionResult = await Promise.race([
           window.CR7_AUTH?.getUsableSession
@@ -160,23 +159,19 @@
             : suggestionState.client.auth.getSession(),
           new Promise((_, reject) => window.setTimeout(
             () => reject(new Error('Не удалось проверить сессию.')),
-            publicPreview ? 2500 : 5000
+            5000
           ))
         ]);
         if (!sessionResult?.error) {
           accessToken = sessionResult?.data?.session?.access_token || '';
           window.CR7_AUTH?.cacheSession?.(sessionResult?.data?.session || null);
-        } else if (!publicPreview) {
-          throw sessionResult.error;
-        }
+        } else throw sessionResult.error;
       } catch (error) {
-        if (!publicPreview) throw error;
+        throw error;
       }
     }
 
-    if (!accessToken && !publicPreview) {
-      throw new Error('Сессия истекла. Войди в аккаунт заново.');
-    }
+    if (!accessToken) throw new Error('Войди в аккаунт, чтобы проверить игру в Steam.');
 
     const headers = {
       apikey: publishableKey,
@@ -302,13 +297,14 @@
 
   async function ensureViewerSession() {
     if (!suggestionState.client) throw new Error('Supabase не настроен.');
-    const { data, error } = await suggestionState.client.auth.getSession();
-    if (error) throw error;
-    if (data?.session?.user) return data.session;
-    const result = await suggestionState.client.auth.signInAnonymously();
-    if (result.error) throw result.error;
-    if (!result.data?.session) throw new Error('Не удалось создать анонимную сессию.');
-    return result.data.session;
+    if (window.CR7_SITE_AUTH?.requireTwitchUser) {
+      const user = await window.CR7_SITE_AUTH.requireTwitchUser(suggestionState.client);
+      const { data, error } = await suggestionState.client.auth.getSession();
+      if (error) throw error;
+      if (!data?.session || data.session.user?.id !== user.id) throw new Error('Требуется авторизация через Twitch.');
+      return data.session;
+    }
+    throw new Error('Требуется авторизация через Twitch.');
   }
 
   async function requireAdminSession() {

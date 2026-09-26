@@ -59,6 +59,9 @@ function catalogReleaseLabel(game, meta) {
       const favorite = Boolean(game.is_favorite);
       const libraryStatus = String(game.library_status || '');
       const reputation = Number(state.reputationScores?.[String(game.id)] || 0);
+      const reactionStats = state.reputationStats?.[String(game.id)] || {};
+      const likes = Number(reactionStats.likes) || 0;
+      const dislikes = Number(reactionStats.dislikes) || 0;
       const stamp = libraryStamp(libraryStatus);
       const playerRange = catalogPlayerRange(game);
       const playersLabel = playerRange.min === playerRange.max
@@ -76,6 +79,10 @@ function catalogReleaseLabel(game, meta) {
           </div>
           <div class="card-bottom">
             <h3 class="card-title">${escapeHtml(game.title)}</h3>
+            <div class="card-reactions" aria-label="Лайков: ${likes}, дизлайков: ${dislikes}">
+              <span class="card-reaction" title="Лайков"><img src="./assets/images/figma/like.png" alt="" aria-hidden="true"><b class="card-like-count">${likes}</b></span>
+              <span class="card-reaction" title="Дизлайков"><img class="thumb-down" src="./assets/images/figma/dislike.png" alt="" aria-hidden="true"><b class="card-dislike-count">${dislikes}</b></span>
+            </div>
             <span class="card-open-hint">Подробнее</span>
           </div>
           ${favorite ? '<span class="card-favorite" aria-label="Избранная игра">★</span>' : ''}

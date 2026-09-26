@@ -1,32 +1,262 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<meta content="#040404" name="theme-color"/>
-<title>Аукцион — ПРЕДЛОЖКА141</title>
-<style>
-html,body{min-height:100%;margin:0;background:#151515}
-.page-bootstrap{position:fixed;inset:0;display:grid;place-items:center;color:#777;font:14px Arial,sans-serif}
-</style>
+  <meta charset="utf-8">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b0b">
+  <meta name="description" content="Аукцион 141GANG — лоты, ставки, таймер и колесо победителей.">
+  <title>Аукцион — 141GANG</title>
+  <link rel="icon" href="./favicon.ico" sizes="any">
+  <link rel="stylesheet" href="./assets/css/public/fonts.css?v=3.1">
+  <link rel="stylesheet" href="./assets/css/public/variables.css?v=3.2">
+  <link rel="stylesheet" href="./assets/css/public/base.css?v=3.0">
+  <link rel="stylesheet" href="./assets/css/public/header-hero.css">
+  <link rel="stylesheet" href="./assets/css/public/figma-refresh.css?v=3.19-stream-center">
+  <link rel="stylesheet" href="./assets/css/public/site-auth.css?v=1.8">
+  <link rel="stylesheet" href="./assets/css/public/standalone-header-consistency.css?v=1.3-index-match">
+  <link rel="stylesheet" href="./assets/css/public/auction-page.css?v=1.8-rule-input-only">
+  <style>
+    /* Keep the empty-list message from covering the toolbar's real hit areas. */
+    .lot-toolbar {
+      position: relative;
+      z-index: 2;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(120px, .58fr) 57px;
+    }
+
+    .lot-toolbar > input,
+    .lot-toolbar > input:focus,
+    .lot-toolbar > input:focus-visible,
+    .lot-toolbar > input:user-invalid,
+    .auction-search input,
+    .auction-search input:focus,
+    .auction-search input:focus-visible {
+      border: 0 !important;
+      outline: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .lot-toolbar .add-lot-button {
+      min-width: 57px;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .lot-toolbar .add-lot-button img {
+      width: 22px;
+      height: 22px;
+      flex-basis: 22px;
+    }
+
+    .lots-panel > .empty-state {
+      position: relative;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Large catalog-style modal with the compact auction editor nested inside. */
+    #ruleDialog {
+      box-sizing: border-box;
+      width: min(620px, calc(100vw - 96px));
+      height: fit-content;
+      max-width: 620px;
+      max-height: calc(100dvh - 96px);
+      padding: 0;
+      border: 0;
+      border-radius: 12px !important;
+      background: #121212 !important;
+      background-image:
+        radial-gradient(circle at 15% 0, rgba(220, 44, 31, .12), transparent 544px),
+        linear-gradient(145deg, #171515, #090909 58%, #120c0b) !important;
+      box-shadow: none !important;
+    }
+
+    #ruleDialog::backdrop {
+      background: rgba(2, 2, 2, .84);
+      backdrop-filter: blur(10px);
+    }
+
+    #ruleDialog form {
+      box-sizing: border-box;
+      width: 100%;
+      height: auto;
+      align-content: start;
+      gap: 24px;
+      padding: 40px;
+    }
+
+    #ruleDialog h2 {
+      min-height: 60px;
+      margin: 0 0 12px;
+      color: #f0f0f0;
+      font-family: Druk, Impact, sans-serif;
+      font-size: 52px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -.02em;
+      text-transform: uppercase;
+    }
+
+    #ruleDialog textarea {
+      width: 100%;
+      min-height: 146px;
+      padding: 14px 20px;
+      border: 1px solid #393939;
+      border-radius: 0;
+      background: #202020;
+      font-size: 18px;
+      line-height: 29px;
+      resize: vertical;
+    }
+
+    #ruleDialog .auction-primary-button {
+      width: 379px;
+      min-height: 73px;
+      margin-top: 7px;
+      padding: 0 24px;
+      border-radius: 7px;
+      font-size: 28px;
+    }
+
+    #ruleDialog .auction-primary-button img {
+      width: 41px;
+      height: 41px;
+      flex-basis: 41px;
+    }
+
+    @media (max-width: 900px) {
+      #ruleDialog {
+        width: calc(100vw - 32px);
+        height: fit-content;
+        max-width: calc(100vw - 32px);
+        max-height: calc(100dvh - 32px);
+        border-radius: 8px !important;
+      }
+
+      #ruleDialog form {
+        height: auto;
+        padding: 24px 18px;
+      }
+
+      #ruleDialog h2 {
+        min-height: 0;
+        margin-bottom: 28px;
+        font-size: 32px;
+      }
+
+      #ruleDialog .auction-primary-button {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .lot-toolbar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .auction-search,
+      .lot-toolbar .add-lot-button {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="./assets/css/public/popup-solid-backgrounds.css?v=1.0">
 </head>
-<body>
-<div aria-live="polite" class="page-bootstrap">Загрузка аукциона…</div>
-<script>
-fetch('./index.html', { cache: 'no-cache' })
-  .then(response => {
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.text();
-  })
-  .then(html => {
-    document.open();
-    document.write(html);
-    document.close();
-  })
-  .catch(error => {
-    console.warn('Не удалось открыть страницу аукциона:', error);
-    location.replace('./index.html?view=auction');
-  });
-</script>
+<body class="standalone-view standalone-auction is-ready">
+  <header class="site-header">
+    <div class="shell nav">
+      <a class="brand" href="./index.html" target="_top" aria-label="141 Gang — на главную"><img class="brand-logo" src="./assets/images/figma/141gang.svg" alt="141 Gang"></a>
+      <nav class="nav-center" aria-label="Основная навигация">
+        <a class="nav-link" href="./index.html#catalog">Каталог</a>
+        <a class="nav-link nav-service-link tier-list-trigger" href="./tier-list.html">Тир-лист</a>
+        <a class="nav-link nav-service-link auction-trigger is-current" data-admin-nav href="./auction.html" hidden>Аукцион</a>
+        <button class="nav-link nav-service-link appeals-trigger" data-admin-nav type="button" data-toast="Апелляции появятся в следующем обновлении" hidden>Апелляции</button>
+        <a class="nav-link admin-portal-trigger" id="adminPortalOpen" href="./admin.html" hidden>Управление</a>
+      </nav>
+      <button class="account-auth-trigger" id="siteAuthOpen" type="button" aria-controls="siteAuthPanel" aria-expanded="false">Войти</button>
+    </div>
+  </header>
+
+  <main class="auction-page">
+    <section class="auction-subnav" aria-label="Разделы аукциона">
+      <div class="auction-view-tabs" role="tablist">
+        <button class="is-active" id="lotsTab" type="button" role="tab" aria-selected="true" aria-controls="lotsView">Список лотов</button>
+        <button id="wheelTab" type="button" role="tab" aria-selected="false" aria-controls="wheelView">Колесо</button>
+      </div>
+      <button class="auction-primary-button" id="newAuctionButton" type="button">Начать новый аукцион <img src="./assets/images/figma/arrow-circle-white.svg" alt=""></button>
+    </section>
+
+    <section class="auction-view is-active" id="lotsView" role="tabpanel" aria-labelledby="lotsTab">
+      <aside class="rules-panel">
+        <span class="panel-eyebrow">Правила</span><ol class="rules-list" id="rulesList"></ol>
+        <button class="auction-primary-button rules-add" id="addRuleButton" type="button">Добавить правило <img src="./assets/images/figma/arrow-circle-white.svg" alt=""></button>
+      </aside>
+      <section class="lots-panel" aria-label="Список лотов">
+        <form class="lot-toolbar" id="lotForm" novalidate>
+          <label class="auction-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path></svg><input id="lotSearch" type="search" placeholder="Поиск" autocomplete="off" aria-label="Поиск лота"></label>
+          <input id="lotName" maxlength="80" placeholder="Название нового лота" aria-label="Название нового лота">
+          <input id="lotAmount" type="number" inputmode="numeric" min="1" step="1" placeholder="Сумма" aria-label="Начальная сумма">
+          <button class="add-lot-button" type="submit" aria-label="Добавить лот" title="Добавить лот"><img src="./assets/images/figma/arrow-circle-white.svg" alt="" aria-hidden="true"></button>
+        </form>
+        <div class="lots-list" id="lotsList" aria-live="polite"></div>
+        <div class="empty-state" id="lotsEmpty" hidden><strong>Лоты не найдены</strong><span>Добавьте первый лот с помощью формы выше.</span></div>
+      </section>
+      <aside class="auction-side">
+        <section class="timer-card" aria-label="Таймер аукциона">
+          <strong id="timerDisplay">10:00:00</strong>
+          <div class="timer-actions"><button id="timerToggle" type="button" aria-label="Запустить таймер" title="Запустить / поставить на паузу"><img src="./assets/images/figma/timer-play.png" alt=""></button><button id="timerAdd" type="button" aria-label="Прибавить пять минут" title="Прибавить 5 минут"><img src="./assets/images/figma/timer-add.png" alt=""></button><button id="timerSubtract" type="button" aria-label="Убавить пять минут" title="Убавить 5 минут"><img src="./assets/images/figma/timer-subtract.png" alt=""></button><button id="timerReset" type="button" aria-label="Сбросить таймер" title="Сбросить таймер"><img src="./assets/images/figma/timer-stop.png" alt=""></button></div>
+        </section>
+        <button class="donation-connect" id="donationConnect" type="button">Подключить DonationAlerts <img src="./assets/images/figma/arrow-circle-white.svg" alt=""></button>
+        <section class="donations-feed" id="donationsFeed" aria-label="Входящие донаты"></section>
+      </aside>
+    </section>
+
+    <section class="auction-view wheel-view" id="wheelView" role="tabpanel" aria-labelledby="wheelTab" hidden>
+      <section class="wheel-roster">
+        <div class="wheel-section-head"><div><span>Участники</span><strong id="wheelCount">0</strong></div><small>Шанс зависит от суммы лота</small></div><div id="wheelRosterList"></div>
+      </section>
+      <section class="wheel-stage"><span class="wheel-kicker">141GANG AUCTION</span><h1 id="wheelHeadline">Колесо лотов</h1><div class="wheel-wrap"><i class="wheel-pointer"></i><div class="auction-wheel" id="auctionWheel"><div><img src="./assets/images/figma/141gang.svg" alt=""><span id="wheelBank">0 ₽</span></div></div></div><button class="auction-primary-button wheel-spin" id="wheelSpin" type="button">Крутить колесо <img src="./assets/images/figma/arrow-circle-white.svg" alt=""></button></section>
+      <aside class="wheel-summary"><span class="panel-eyebrow">Аукцион</span><article><span>Лотов</span><strong id="summaryLots">0</strong></article><article><span>Общий банк</span><strong id="summaryBank">0 ₽</strong></article><article><span>Лидер</span><strong id="summaryLeader">—</strong></article><button id="backToLots" type="button">Вернуться к списку</button></aside>
+    </section>
+  </main>
+
+  <dialog class="auction-dialog" id="ruleDialog" aria-labelledby="ruleDialogTitle"><form method="dialog" id="ruleForm" novalidate><h2 id="ruleDialogTitle">Добавить правило</h2><textarea id="ruleText" maxlength="240" rows="4" placeholder="Например: игры только в Steam" aria-label="Текст правила"></textarea><button class="auction-primary-button" value="default">Добавить правило <img src="./assets/images/figma/arrow-circle-white.svg" alt=""></button></form></dialog>
+  <dialog class="auction-dialog winner-dialog" id="winnerDialog"><form method="dialog"><button class="dialog-close" value="cancel" aria-label="Закрыть">×</button><span class="panel-eyebrow">Победитель</span><h2 id="winnerName">—</h2><p id="winnerMeta">—</p><button class="auction-primary-button" value="default">Готово <img src="./assets/images/figma/arrow-circle-white.svg" alt=""></button></form></dialog>
+  <div class="auction-toast" id="auctionToast" role="status" aria-live="polite" hidden></div>
+
+  <div class="site-auth-panel" id="siteAuthPanel" aria-hidden="true" hidden>
+    <div class="site-auth-backdrop" data-site-auth-close></div>
+    <section class="site-auth-dialog" role="dialog" aria-modal="true" aria-labelledby="siteAuthTitle">
+      <button class="site-auth-close" id="siteAuthClose" type="button" aria-label="Закрыть окно входа">×</button><span class="site-auth-kicker">Личный профиль</span><h2 id="siteAuthTitle">Войти на сайт</h2><p class="site-auth-description">Войди через Twitch, чтобы предлагать игры и медиа, а также ставить лайки и дизлайки.</p>
+      <div class="site-auth-providers" id="siteAuthProviders"><button class="site-auth-provider is-twitch" data-auth-provider="twitch" type="button"><span><img src="./assets/images/figma/twitch-icon.webp" alt=""></span><strong>Войти через Twitch</strong></button><a class="site-auth-provider is-admin" href="./admin.html"><span><img src="./assets/images/figma/cheloveck.png" alt=""></span><strong>Войти как администратор</strong></a></div>
+      <div class="site-auth-account" id="siteAuthAccount" hidden><img class="site-auth-avatar" id="siteAuthAvatar" alt=""><div><strong id="siteAuthName"></strong><span id="siteAuthEmail"></span></div><button class="site-auth-logout" id="siteAuthLogout" type="button">Выйти</button></div>
+      <section class="site-auth-twitch-prompt" id="siteAuthTwitchPrompt" hidden aria-labelledby="siteAuthTwitchPromptTitle"><div class="site-auth-twitch-prompt-head"><span class="site-auth-twitch-badge"><img src="./assets/images/figma/twitch-icon.webp" alt=""></span><div><h3 id="siteAuthTwitchPromptTitle">Подключить Twitch</h3><p>Привяжи Twitch, чтобы предлагать контент и ставить оценки.</p></div></div><div class="site-auth-twitch-prompt-actions"><button class="site-auth-twitch-connect" id="siteAuthTwitchConnect" type="button">Привязать Twitch</button><button class="site-auth-twitch-later" id="siteAuthTwitchLater" type="button">Позже</button></div></section>
+      <p class="site-auth-notice" id="siteAuthNotice" role="status" aria-live="polite"></p>
+    </section>
+  </div>
+  <div class="site-auth-panel donation-auth-panel" id="donationAuthPanel" aria-hidden="true" hidden>
+    <div class="site-auth-backdrop" data-donation-auth-close></div>
+    <section class="site-auth-dialog" role="dialog" aria-modal="true" aria-labelledby="donationAuthTitle">
+      <button class="site-auth-close" id="donationAuthClose" type="button" aria-label="Закрыть окно подключения">×</button>
+      <span class="site-auth-kicker">Интеграция донатов</span>
+      <h2 id="donationAuthTitle">Подключить DonationAlerts</h2>
+      <p class="site-auth-description">Подключи аккаунт DonationAlerts, чтобы донаты автоматически появлялись в истории аукциона.</p>
+      <div class="site-auth-providers">
+        <button class="site-auth-provider is-donationalerts" id="donationAlertsProvider" type="button"><span><img src="./assets/images/figma/da-icon.png" alt=""></span><strong>Подключить DonationAlerts</strong></button>
+      </div>
+      <p class="site-auth-notice" id="donationAuthNotice" role="status" aria-live="polite"></p>
+    </section>
+  </div>
+  <div class="site-auth-toast" id="siteAuthToast" role="status" aria-live="polite" hidden></div>
+  <script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.8-twitch-actions"></script><script src="./assets/js/public/auction-page.js?v=1.10-admin-nav"></script>
+  <script>
+    (() => {
+      const ruleDialog = document.getElementById('ruleDialog');
+      ruleDialog?.addEventListener('click', event => {
+        if (event.target === ruleDialog) ruleDialog.close('cancel');
+      });
+    })();
+  </script>
 </body>
 </html>

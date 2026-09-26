@@ -1,0 +1,109 @@
+/* Stage 5: every transient window uses one neutral surface. */
+:is(
+  .game-modal .modal-panel,
+  .gang-dialog,
+  .auction-dialog,
+  .feature-dialog,
+  .suggestions-dialog,
+  .suggestion-comments-dialog,
+  .media-dialog,
+  .media-file-preview-dialog,
+  .site-auth-dialog,
+  .admin-portal-dialog,
+  .duplicate-dialog,
+  .tier-dialog,
+  .tier-row-dialog,
+  .tier-row-dialog form,
+  .tier-confirm-dialog,
+  #ruleDialog,
+  .content-menu-panel,
+  .nav-dropdown,
+  .catalog-dropdown,
+  .modal-comment-sort-menu,
+  .tier-list-menu,
+  .tier-list-menu-options,
+  .site-auth-toast,
+  .auction-toast
+) {
+  background: #121212 !important;
+  background-color: #121212 !important;
+  background-image: none !important;
+}
+
+:is(
+  .game-modal .modal-panel,
+  .gang-dialog,
+  .auction-dialog,
+  .feature-dialog,
+  .suggestions-dialog,
+  .suggestion-comments-dialog,
+  .media-dialog,
+  .media-file-preview-dialog,
+  .site-auth-dialog,
+  .admin-portal-dialog,
+  .duplicate-dialog,
+  .tier-dialog,
+  .tier-row-dialog,
+  .tier-confirm-dialog,
+  #ruleDialog,
+  .content-menu-panel,
+  .nav-dropdown,
+  .catalog-dropdown,
+  .modal-comment-sort-menu,
+  .tier-list-menu,
+  .tier-list-menu-options,
+  .site-auth-toast,
+  .auction-toast
+)::before,
+:is(
+  .game-modal .modal-panel,
+  .gang-dialog,
+  .auction-dialog,
+  .feature-dialog,
+  .suggestions-dialog,
+  .suggestion-comments-dialog,
+  .media-dialog,
+  .media-file-preview-dialog,
+  .site-auth-dialog,
+  .admin-portal-dialog,
+  .duplicate-dialog,
+  .tier-dialog,
+  .tier-row-dialog,
+  .tier-confirm-dialog,
+  #ruleDialog,
+  .content-menu-panel,
+  .nav-dropdown,
+  .catalog-dropdown,
+  .modal-comment-sort-menu,
+  .tier-list-menu,
+  .tier-list-menu-options,
+  .site-auth-toast,
+  .auction-toast
+)::after {
+  background-image: none !important;
+}
+
+/* Beat legacy ID- and state-specific surfaces that also used !important. */
+html body #gameModal .modal-panel,
+html body #gangPanel .gang-dialog,
+html body #auctionPanel .auction-dialog,
+html body #suggestionsPanel .suggestions-dialog,
+html body #suggestionCommentsPanel .suggestion-comments-dialog,
+html body #mediaPanel .media-dialog,
+html body #siteAuthPanel .site-auth-dialog,
+html body #adminPortal .admin-portal-dialog,
+html body #duplicateModal .duplicate-dialog,
+html body #tierListPanel .tier-dialog,
+html body #tierRowDialog,
+html body #tierRowDialog form,
+html body #tierResetDialog,
+html body .media-file-preview .media-file-preview-dialog,
+html body .feature-panel .feature-dialog,
+html body #ruleDialog,
+html body #contentMenuPanel,
+html body #siteAuthToast,
+html body #auctionToast {
+  background: #121212 !important;
+  background-color: #121212 !important;
+  background-image: none !important;
+}

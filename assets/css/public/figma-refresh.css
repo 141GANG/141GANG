@@ -202,7 +202,9 @@ body.is-ready .site-header {
 }
 
 .nav-center > .gang-trigger { width: 113rem; }
-.nav-center > a[href="#catalog"] { width: 113rem; }
+.site-header .gang-trigger { justify-content: center; }
+.nav-center > a[href$="#catalog"] { width: 113rem; }
+.nav-center > .nav-service-link { width: 118rem; }
 .nav-center > .nav-menu-wrap > .nav-menu-toggle { width: 145rem; }
 .nav-center > #adminPortalOpen { width: 149rem; }
 
@@ -353,10 +355,12 @@ body.is-ready .site-header {
   pointer-events: none;
 }
 
-/* Services and Tier list are available, solid controls. */
+/* Available service links are solid controls. */
 #servicesToggle,
-#servicesMenu > .tier-list-trigger {
+#servicesMenu > .tier-list-trigger,
+#servicesMenu > .auction-trigger {
   background: #202020;
+  color: #f0f0f0;
   opacity: 1;
 }
 
@@ -364,15 +368,40 @@ body.is-ready .site-header {
 #servicesToggle:focus-visible,
 #servicesToggle[aria-expanded="true"],
 #servicesMenu > .tier-list-trigger:hover,
-#servicesMenu > .tier-list-trigger:focus-visible {
+#servicesMenu > .tier-list-trigger:focus-visible,
+#servicesMenu > .auction-trigger:hover,
+#servicesMenu > .auction-trigger:focus-visible {
   background: #292929;
   opacity: 1;
 }
 
-/* Auction and Appeals are visual placeholders: translucent until hovered,
-   then they look active while remaining actionless. */
-#servicesMenu > :is(.auction-trigger, .appeals-trigger),
-#servicesMenu > :is(.auction-trigger, .appeals-trigger)[aria-disabled="true"] {
+/* The paused auction is a quiet placeholder, not an interactive control. */
+#servicesMenu > .auction-trigger.is-unavailable,
+#servicesMenu > .auction-trigger.is-unavailable:hover,
+#servicesMenu > .auction-trigger.is-unavailable:focus-visible {
+  color: rgba(240, 240, 240, .62);
+  background: #202020;
+  box-shadow: none;
+  opacity: .62;
+  pointer-events: none;
+  cursor: default;
+}
+
+.site-header .auction-trigger[aria-disabled="true"],
+.site-header .auction-trigger[aria-disabled="true"]:hover,
+.site-header .auction-trigger[aria-disabled="true"]:focus-visible {
+  color: rgba(240, 240, 240, .62);
+  background: #202020;
+  box-shadow: none;
+  opacity: .62;
+  pointer-events: none;
+  cursor: default;
+  transform: none;
+}
+
+/* Appeals remains a visual placeholder until the section is available. */
+#servicesMenu > .appeals-trigger,
+#servicesMenu > .appeals-trigger[aria-disabled="true"] {
   color: rgba(240, 240, 240, .68);
   background: rgba(32, 32, 32, .55);
   opacity: 1;
@@ -380,10 +409,10 @@ body.is-ready .site-header {
   cursor: pointer;
 }
 
-#servicesMenu > :is(.auction-trigger, .appeals-trigger):hover,
-#servicesMenu > :is(.auction-trigger, .appeals-trigger):focus-visible,
-#servicesMenu > :is(.auction-trigger, .appeals-trigger)[aria-disabled="true"]:hover,
-#servicesMenu > :is(.auction-trigger, .appeals-trigger)[aria-disabled="true"]:focus-visible {
+#servicesMenu > .appeals-trigger:hover,
+#servicesMenu > .appeals-trigger:focus-visible,
+#servicesMenu > .appeals-trigger[aria-disabled="true"]:hover,
+#servicesMenu > .appeals-trigger[aria-disabled="true"]:focus-visible {
   color: #fff;
   background: #292929;
   opacity: 1;

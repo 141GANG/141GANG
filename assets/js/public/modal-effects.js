@@ -1,6 +1,6 @@
 function modalInteractionError(error) {
   const message = String(error?.message || error || 'Не удалось выполнить действие.');
-  if (/auth|jwt|session|авторизац/i.test(message)) return 'Войдите в аккаунт, чтобы оценивать игры и писать комментарии.';
+  if (/auth|jwt|session|авторизац|twitch/i.test(message)) return 'Войдите через Twitch, чтобы оценивать игры и писать комментарии.';
   if (/get_game_interactions|set_game_reaction|set_game_comment_reaction|add_game_comment|update_game_comment|delete_game_comment|PGRST202|42883|schema cache/i.test(message)) {
     return 'Новая система комментариев ещё не подключена к базе. Выполните supabase/game_comment_reactions.sql.';
   }
@@ -172,10 +172,18 @@ function beginModalCommentEdit(article) {
 }
 
 async function getSignedInUser(client) {
+  if (window.CR7_SITE_AUTH?.requireTwitchUser) {
+    return window.CR7_SITE_AUTH.requireTwitchUser(client);
+  }
   const { data, error } = await client.auth.getSession();
   if (error) throw error;
   const user = data?.session?.user;
-  if (!user || user.is_anonymous) throw new Error('Требуется авторизация.');
+  const providers = new Set([
+    ...(Array.isArray(user?.identities) ? user.identities.map(identity => identity?.provider) : []),
+    ...(Array.isArray(user?.app_metadata?.providers) ? user.app_metadata.providers : []),
+    user?.app_metadata?.provider
+  ].map(provider => String(provider || '').toLowerCase()));
+  if (!user || user.is_anonymous || !providers.has('twitch')) throw new Error('Требуется авторизация через Twitch.');
   return user;
 }
 
@@ -185,7 +193,12 @@ async function loadGameInteractions(gameId) {
   try {
     const { data: sessionData } = await client.auth.getSession();
     const signedUser = sessionData?.session?.user;
-    const signedIn = Boolean(signedUser && !signedUser.is_anonymous);
+    const signedIn = window.CR7_SITE_AUTH?.hasTwitchIdentity
+      ? window.CR7_SITE_AUTH.hasTwitchIdentity(signedUser)
+      : Boolean(signedUser && !signedUser.is_anonymous && (
+        signedUser.app_metadata?.provider === 'twitch'
+        || signedUser.app_metadata?.providers?.includes?.('twitch')
+      ));
     modalViewerSignedIn = signedIn;
     if (signedIn && elements.modalCommentComposerAvatar) {
       const metadata = signedUser.user_metadata || {};
@@ -314,7 +327,7 @@ function openGameModal(gameId, gameOverride = null, options = {}) {
   resetModalCommentComposer();
   modalOwnComment = null;
   if (elements.modalCommentForm) elements.modalCommentForm.hidden = true;
-  setModalCommentsOpen(false);
+  setModalCommentsOpen(true);
   renderModalReactionState(game.id);
   fitGameModalToViewport();
   elements.modal.classList.remove('is-closing');
@@ -371,16 +384,14 @@ async function voteForGame(direction) {
   } finally {
     const client = getConfiguredClient();
     const { data } = client ? await client.auth.getSession() : { data: null };
-    const enabled = Boolean(data?.session?.user && !data.session.user.is_anonymous);
+    const enabled = window.CR7_SITE_AUTH?.hasTwitchIdentity
+      ? window.CR7_SITE_AUTH.hasTwitchIdentity(data?.session?.user)
+      : Boolean(data?.session?.user?.app_metadata?.provider === 'twitch');
     elements.modalVoteActions.forEach(button => { button.disabled = !enabled; });
   }
 }
 
 elements.modalVoteActions.forEach(button => button.addEventListener('click', () => voteForGame(Number(button.dataset.vote))));
-
-elements.modalCommentsToggle?.addEventListener('click', () => {
-  setModalCommentsOpen(!elements.modal.classList.contains('comments-open'));
-});
 
 document.getElementById('modalCommentSort')?.addEventListener('click', event => {
   const target = event.target instanceof Element ? event.target : null;
