@@ -9,14 +9,13 @@
 <meta content="#040404" name="theme-color"/>
 <meta content="ПРЕДЛОЖКА141 — каталог игр для будущих стримов Глеба Орлова (Sasavot) с данными из Steam." name="description"/>
 <title>ПРЕДЛОЖКА141 — SASAVOT</title>
-<style>[hidden]{display:none!important}body.standalone-view{min-height:100vh;overflow:auto}body.standalone-view .tier-panel,body.standalone-view .auction-panel,body.standalone-view .admin-portal{position:relative;inset:auto;min-height:100vh}</style>
 <link href="./favicon.ico?v=141gang-1" rel="icon" sizes="any" type="image/x-icon"/>
 <link href="./assets/images/figma/favicon-141.png?v=141gang-1" rel="icon" sizes="512x512" type="image/png"/>
 <link href="./assets/vendor/lenis.css?v=2.0-hidden-track" rel="stylesheet"/>
 <script defer src="./assets/vendor/lenis.min.js"></script>
 <script defer src="./assets/js/public/smooth-scroll.js?v=4.4-admin-catalog-content"></script>
 <link href="./assets/css/public/fonts.css?v=3.1" rel="stylesheet"/>
-<link href="./assets/css/public/variables.css?v=3.2" rel="stylesheet"/>
+<link href="./assets/css/public/variables.css?v=3.3-shared-page-bg" rel="stylesheet"/>
 <link href="./assets/css/public/base.css?v=3.0" rel="stylesheet"/>
 <link href="./assets/css/public/header-hero.css" rel="stylesheet"/>
 <link href="./assets/css/public/catalog.css" rel="stylesheet"/>
@@ -30,12 +29,12 @@
 <link href="./assets/css/public/figma-refresh.css?v=3.21-auction-disabled" rel="stylesheet"/>
 <link href="./assets/css/public/site-auth.css?v=1.9-solid-dialog" rel="stylesheet"/>
 <link href="./assets/css/public/figma-redesign.css?v=2.4" rel="stylesheet"/>
-<link href="./assets/css/public/figma-main-final.css?v=3.0-smaller-hero" id="figmaMainFinalStyles" rel="stylesheet"/>
+<link href="./assets/css/public/figma-main-final.css?v=3.1-shared-page-bg" id="figmaMainFinalStyles" rel="stylesheet"/>
 <link href="./assets/css/public/admin-figma-final.css?v=1.0" id="adminFigmaFinalStyles" rel="stylesheet"/>
 <link href="./assets/css/public/proposal-windows-figma.css?v=5.0-direct-add" id="proposalWindowsFigmaStyles" rel="stylesheet"/>
 <link href="./assets/css/public/proposal-media-figma-exact.css?v=4.2-no-fouc" id="proposalMediaFigmaExactStyles" rel="stylesheet"/>
 <link href="./assets/css/public/proposal-media-upload-v2.css?v=2.2-admin-close" id="proposalMediaUploadV2Styles" rel="stylesheet"/>
-<link href="./assets/css/public/admin-card-icons.css?v=1.1" id="adminCardIconsStyles" rel="stylesheet"/>
+<link href="./assets/css/public/admin-card-icons.css?v=1.7-comments-parity" id="adminCardIconsStyles" rel="stylesheet"/>
 <link href="./assets/css/public/figma-typography-final.css?v=4.7" id="figmaTypographyFinalStyles" rel="stylesheet"/>
 <link href="./assets/css/public/e2e-responsive-p0.css?v=1.2-nav-center" id="e2eResponsiveP0Styles" rel="stylesheet"/>
 <link href="./assets/css/public/game-comment-management.css?v=2.17-comment-avatars" id="gameCommentManagementStyles" rel="stylesheet"/>
@@ -44,17 +43,22 @@
 <link href="./assets/css/public/premium-motion.css?v=1.2-static-media" id="premiumMotionStyles" rel="stylesheet"/>
 <link href="./assets/css/public/footer-developers.css?v=1.0" id="footerDevelopersStyles" rel="stylesheet"/>
 <link href="./assets/css/public/game-comments-drawer.css?v=2.0-vertical-comments" id="gameCommentsDrawerStyles" rel="stylesheet"/>
-<link href="./assets/css/public/tier-list-figma.css?v=3.2-reference-header" id="tierListFigmaStyles" rel="stylesheet"/>
-<link href="./assets/css/public/standalone-header-consistency.css?v=1.3-index-match" id="standaloneHeaderConsistencyStyles" rel="stylesheet"/>
+<link href="./assets/css/public/tier-list-figma.css?v=3.3-shared-page-bg" id="tierListFigmaStyles" rel="stylesheet"/>
+<link href="./assets/css/public/standalone-header-consistency.css?v=1.4-admin-parity" id="standaloneHeaderConsistencyStyles" rel="stylesheet"/>
 <link href="./assets/css/public/hero-recent-game.css?v=1.2-supabase-black-state" id="heroRecentGameStyles" rel="stylesheet"/>
 <link href="./assets/css/public/admin-druk-title-final.css?v=2.0-fixed-header" rel="stylesheet"/>
 <link href="./assets/css/public/admin-direct-add.css?v=1.8-three-line-description" rel="stylesheet"/>
 <link href="./assets/css/public/popup-solid-backgrounds.css?v=1.0" id="popupSolidBackgroundsStyles" rel="stylesheet"/>
 <link href="./assets/css/public/responsive-layout-fixes.css?v=1.1" id="responsiveLayoutFixesStyles" rel="stylesheet"/>
+<link href="./assets/css/public/admin-figma-tabs-fix.css?v=1.0" rel="stylesheet"/>
+<link href="./assets/css/public/admin-figma-template-v3.css?v=1.1-assets-only" rel="stylesheet"/>
+<link href="./assets/css/public/admin-games-tabs-v4.css?v=1.9-icon-transparency" rel="stylesheet"/>
+<link href="./assets/css/public/admin-moderator-layout-v5.css?v=1.2" rel="stylesheet"/>
+<link href="./assets/css/public/admin-interface-refinement-v8.css?v=1.18-shared-page-bg" rel="stylesheet"/>
+<link href="./assets/css/public/admin-media-layout-v6.css?v=2.5-status-gap-parity" rel="stylesheet"/>
 <script defer id="premiumMotionScript" src="./assets/js/public/premium-motion.js?v=1.5-independent-game-modal"></script>
 <noscript><style>.premium-motion-pending *{opacity:1!important;filter:none!important;transform:none!important}</style></noscript>
 </head>
-<style>body.standalone-view> :not(.site-header):not(.tier-panel):not(.auction-panel):not(.admin-portal):not(.gang-panel):not(.suggestions-panel):not(.suggestion-comments-panel):not(.media-panel):not(.media-file-preview):not(.site-auth-panel){display:none!important}body.standalone-view{min-height:100vh;overflow:auto}body.standalone-view .site-header{position:relative;display:block}body.standalone-view .tier-panel,body.standalone-view .auction-panel,body.standalone-view .admin-portal{position:relative;inset:auto;min-height:100vh}body.standalone-view .tier-panel,body.standalone-view .auction-panel,body.standalone-view .gang-panel,body.standalone-view .suggestions-panel,body.standalone-view .suggestion-comments-panel,body.standalone-view .media-panel,body.standalone-view .site-auth-panel{position:fixed}body.standalone-view .tier-panel[hidden],body.standalone-view .auction-panel[hidden],body.standalone-view .admin-portal[hidden]{display:block!important}</style>
 <body><a class="skip-link" href="#catalog">Перейти к каталогу</a><div aria-label="Загрузка сайта" aria-live="polite" class="site-loader" id="siteLoader" role="status">
 <div class="loader-content">
 <div aria-hidden="true" class="loader-visual">
@@ -572,7 +576,32 @@
 </div>
 </div>
 <footer class="site-footer" id="siteFooter"><div class="shell footer-developers-inner"><div aria-live="polite" class="footer-developers" id="footerDevelopers"><button aria-expanded="false" class="footer-developers-trigger" id="footerDevelopersTrigger" type="button"><img alt="" aria-hidden="true" src="./assets/images/figma/inf-icon.png"/><span>О разработчиках</span></button><p aria-hidden="true" class="footer-developers-credits" id="footerDevelopersCredits">@tankzor, @archivebtw, @max_vopros, @OBWECTBO141</p></div></div></footer>
-<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script><script>document.body.classList.add('is-ready');</script><script src="./assets/js/public/supabase-loader.js"></script><script src="./config.js"></script><script src="./assets/js/public/auth-recovery.js?v=3.2"></script><script src="./assets/js/public/site-auth.js?v=1.9-admin-access"></script><script src="./assets/js/public/state.js?v=4.4-unlimited-games"></script><script src="./assets/js/public/ticker.js"></script><script src="./assets/js/public/release-utils.js?v=4.0"></script><script src="./assets/js/public/hero.js?v=3.3-supabase-black-state"></script><script src="./assets/js/public/catalog.js?v=4.3-no-index"></script><script src="./assets/js/public/modal-effects.js?v=5.9-comment-avatars"></script><script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script><script src="./assets/js/public/suggestions.js?v=4.22-comment-avatars"></script><script src="./assets/js/public/media-submissions.js?v=5.17-private-delivery"></script><script src="./assets/js/public/auction.js?v=5.3-page-link"></script><script src="./assets/js/public/admin-portal.js?v=3.4-unlimited-games"></script><script src="./assets/js/public/admin-portal-shell.js?v=6.1-unlimited-games"></script><script src="./assets/js/public/experience.js?v=3.3"></script><script src="./assets/js/public/app.js?v=4.6-unlimited-games"></script><script src="./assets/js/public/figma-ui.js?v=10.20-admin-access"></script><script src="./assets/js/public/footer-developers.js?v=1.0"></script><script>
+<script src="./assets/js/public/loading.js?v=20260915-no-fouc"></script>
+<script src="./assets/js/public/supabase-loader.js"></script>
+<script src="./config.js"></script>
+<script src="./assets/js/public/authenticated-submissions-fix.js?v=1.7-admin-feature-access"></script>
+<script src="./assets/js/public/auth-recovery.js?v=3.2"></script>
+<script src="./assets/js/public/site-auth.js?v=1.9-admin-access"></script>
+<script src="./assets/js/public/state.js?v=4.4-unlimited-games"></script>
+<script src="./assets/js/public/ticker.js"></script>
+<script src="./assets/js/public/release-utils.js?v=4.0"></script>
+<script src="./assets/js/public/hero.js?v=3.3-supabase-black-state"></script>
+<script src="./assets/js/public/catalog.js?v=4.3-no-index"></script>
+<script src="./assets/js/public/modal-effects.js?v=5.9-comment-avatars"></script>
+<script src="./assets/js/public/tier-list.js?v=5.6-direct-page"></script>
+<script src="./assets/js/public/suggestions.js?v=4.22-comment-avatars"></script>
+<script src="./assets/js/public/media-submissions.js?v=5.17-private-delivery"></script>
+<script src="./assets/js/public/auction.js?v=5.3-page-link"></script>
+<script src="./assets/js/public/admin-portal.js?v=3.4-unlimited-games"></script>
+<script src="./assets/js/public/admin-portal-shell.js?v=6.1-unlimited-games"></script>
+<script src="./assets/js/public/admin-games-tabs-v4.js?v=2.5-unlimited-published"></script>
+<script src="./assets/js/public/experience.js?v=3.3"></script>
+<script src="./assets/js/public/app.js?v=4.6-unlimited-games"></script>
+<script src="./assets/js/public/proposal-windows-figma.js?v=3.7-flat-media"></script>
+<script src="./assets/js/public/catalog-live-refresh.js?v=1.1-safe-unsubscribe"></script>
+<script src="./assets/js/public/figma-ui.js?v=10.20-admin-access"></script>
+<script src="./assets/js/public/footer-developers.js?v=1.0"></script>
+<script>
 (() => {
   const pageView = /\/tier-list(?:\.html)?\/?$/i.test(location.pathname) ? 'tier'
     : /\/auction(?:\.html)?\/?$/i.test(location.pathname) ? 'auction'
@@ -599,7 +628,7 @@
   }
   if (view === 'auction') document.title = 'Аукцион — ПРЕДЛОЖКА141';
   [...document.body.children].forEach(element => {
-    const standaloneInteractive = ['site-header', 'gang-panel', 'suggestions-panel', 'suggestion-comments-panel', 'media-panel', 'site-auth-panel'].some(className => element.classList.contains(className));
+    const standaloneInteractive = ['site-header', 'suggestions-panel', 'suggestion-comments-panel', 'media-panel', 'site-auth-panel'].some(className => element.classList.contains(className));
     const keepTierHeader = view === 'tier' && element.classList.contains('site-header');
     const keepStandaloneInteractive = ['admin', 'tier'].includes(view) && standaloneInteractive;
     if (element !== target && element.tagName !== 'SCRIPT' && element.tagName !== 'STYLE' && !keepStandaloneInteractive && !keepTierHeader) {

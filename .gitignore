@@ -3,6 +3,9 @@
 .env.*
 !.env.example
 *.log
+*.pyc
+__pycache__/
+chat-preview/
 supabase/.temp/
 
 # Editor and operating-system files
