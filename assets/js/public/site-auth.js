@@ -6,6 +6,7 @@
   const closeButton = document.getElementById('siteAuthClose');
   const providers = document.getElementById('siteAuthProviders');
   const account = document.getElementById('siteAuthAccount');
+  const description = document.getElementById('siteAuthDescription');
   const avatar = document.getElementById('siteAuthAvatar');
   const name = document.getElementById('siteAuthName');
   const email = document.getElementById('siteAuthEmail');
@@ -25,6 +26,7 @@
   let authSubscription = null;
   let initialized = false;
   let currentUser = null;
+  let currentUserIsAdmin = false;
   let dismissedTwitchPromptUser = '';
   let twitchPromptUser = '';
   let twitchPromptSyncToken = 0;
@@ -75,7 +77,17 @@
 
   function avatarUrl(user) {
     const metadata = user?.user_metadata || {};
-    return String(metadata.avatar_url || metadata.picture || '').trim();
+    const twitchIdentity = (Array.isArray(user?.identities) ? user.identities : [])
+      .find(identity => String(identity?.provider || '').toLowerCase() === 'twitch');
+    const twitchMetadata = twitchIdentity?.identity_data || {};
+    return String(
+      twitchMetadata.avatar_url
+      || twitchMetadata.picture
+      || twitchMetadata.profile_image_url
+      || metadata.avatar_url
+      || metadata.picture
+      || ''
+    ).trim();
   }
 
   function identityProviders(user) {
@@ -94,6 +106,41 @@
 
   function hasTwitchIdentity(user) {
     return Boolean(user && !user.is_anonymous && identityProviders(user).has('twitch'));
+  }
+
+  function hasFeatureAccess(user) {
+    return Boolean(
+      user
+      && !user.is_anonymous
+      && (hasTwitchIdentity(user) || (currentUserIsAdmin && user.id === currentUser?.id))
+    );
+  }
+
+  function syncDescription(user) {
+    if (!description) return;
+    if (!user || user.is_anonymous) {
+      description.textContent = 'Войди через Яндекс ID, Google или Twitch, чтобы предлагать игры и медиа, а также ставить лайки и дизлайки.';
+      return;
+    }
+    description.textContent = hasFeatureAccess(user)
+      ? 'Все возможности сайта доступны.'
+      : 'Авторизуйся через Twitch, чтобы открыть все возможности сайта.';
+  }
+
+  async function syncAdminAccess(user) {
+    currentUserIsAdmin = false;
+    if (user && !user.is_anonymous && client) {
+      try {
+        const { data, error } = await client.rpc('is_site_admin');
+        if (!error) currentUserIsAdmin = data === true;
+      } catch {
+        currentUserIsAdmin = false;
+      }
+    }
+    syncDescription(user);
+    window.dispatchEvent(new CustomEvent('cr7:site-auth-access', {
+      detail: { user: user || null, isAdmin: currentUserIsAdmin, hasAccess: hasFeatureAccess(user) }
+    }));
   }
 
   function needsTwitchLink(user) {
@@ -151,6 +198,7 @@
       user
       && !user.is_anonymous
       && needsTwitchLink(user)
+      && !currentUserIsAdmin
       && dismissedTwitchPromptUser !== userKey
       && !twitchPromptDismissed(userKey)
     );
@@ -232,6 +280,7 @@
       avatar.removeAttribute('src');
       name.textContent = '';
       email.textContent = '';
+      syncDescription(null);
       window.dispatchEvent(new CustomEvent('cr7:site-auth-session', {
         detail: { user: null, hasTwitch: false }
       }));
@@ -247,6 +296,7 @@
     avatar.hidden = !userAvatar;
     if (userAvatar) avatar.src = userAvatar;
     else avatar.removeAttribute('src');
+    syncDescription(user);
     window.dispatchEvent(new CustomEvent('cr7:site-auth-session', {
       detail: { user, hasTwitch: hasTwitchIdentity(user) }
     }));
@@ -344,6 +394,17 @@
       }
     }
     if (!hasTwitchIdentity(user)) {
+      try {
+        const { data: isAdmin, error: adminError } = await authClient.rpc('is_site_admin');
+        if (!adminError && isAdmin === true) {
+          currentUserIsAdmin = true;
+          currentUser = user;
+          syncDescription(user);
+          return user;
+        }
+      } catch {
+        // Fall through to the Twitch prompt when the admin check is unavailable.
+      }
       openPanel();
       showToast('Войди через Twitch, чтобы выполнить это действие.','error');
       throw new Error('Требуется авторизация через Twitch.');
@@ -353,6 +414,7 @@
 
   window.CR7_SITE_AUTH = Object.freeze({
     hasTwitchIdentity,
+    hasFeatureAccess,
     requireTwitchUser,
     open: openPanel
   });
@@ -376,12 +438,14 @@
     }
     window.CR7_AUTH?.cacheSession?.(sessionResult.data?.session || null);
     renderSession(sessionResult.data?.session || null);
+    await syncAdminAccess(sessionResult.data?.session?.user || null);
     await syncTwitchPrompt(sessionResult.data?.session || null,true);
 
     const { data } = client.auth.onAuthStateChange((event,session) => {
       window.setTimeout(async () => {
         window.CR7_AUTH?.cacheSession?.(session);
         renderSession(session);
+        await syncAdminAccess(session?.user || null);
         await syncTwitchPrompt(session,event === 'SIGNED_IN');
         setBusy(false);
       },0);

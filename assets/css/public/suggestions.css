@@ -613,6 +613,33 @@ html.suggestions-open {
   font-size: 11.2rem;
 }
 
+.suggestion-comment-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rem;
+}
+
+.suggestion-comment-avatar {
+  width: 28rem;
+  height: 28rem;
+  display: grid;
+  overflow: hidden;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: #f0f0f0;
+  background: #202020;
+  font-weight: 800;
+}
+
+.suggestion-comment-avatar img,
+.admin-supporter-comment-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
 .suggestion-comment.is-mine header strong {
   color: #ef4a36;
 }
@@ -1227,6 +1254,7 @@ html.suggestions-open {
   width: 66rem;
   height: 66rem;
   display: grid;
+  overflow: hidden;
   place-items: center;
   border-radius: 50%;
   color: #f0f0f0;

@@ -765,7 +765,7 @@ body.standalone-admin .site-header {
   z-index: 1500;
 }
 
-body.standalone-admin :is(.gang-panel, .suggestions-panel, .suggestion-comments-panel, .media-panel, .site-auth-panel, .auction-panel, .tier-panel) {
+body.standalone-admin :is(.suggestions-panel, .suggestion-comments-panel, .media-panel, .site-auth-panel, .auction-panel, .tier-panel) {
   z-index: 2000;
 }
 

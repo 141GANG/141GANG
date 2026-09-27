@@ -187,16 +187,6 @@
     return window.CR7_SUPABASE_CLIENT;
   }
 
-  function escapeHtml(value) {
-    return String(value ?? '').replace(/[&<>'"]/g, character => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    })[character]);
-  }
-
   function errorMessage(error, fallback = 'Не удалось выполнить действие.') {
     const message = String(error?.message || error?.error_description || fallback);
     if (/media_submissions|media_submission_files|schema cache|PGRST205|42P01/i.test(message)) {

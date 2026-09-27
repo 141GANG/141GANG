@@ -25,7 +25,7 @@ body.standalone-tier.modal-scroll-locked {
      overflow-y:visible makes browsers compute body overflow-y as auto. */
   overflow: visible !important;
   overscroll-behavior-y: auto;
-  background: #0f0f0f !important;
+  background: var(--page-bg, #0b0b0b) !important;
 }
 
 body.standalone-tier::before {
@@ -33,7 +33,7 @@ body.standalone-tier::before {
   opacity: 1 !important;
   background:
     radial-gradient(circle at -3% 70%, rgba(230, 61, 61, .8) 0, rgba(230, 61, 61, .26) 12%, transparent 27%),
-    #0f0f0f !important;
+    var(--page-bg, #0b0b0b) !important;
   filter: none !important;
   animation: none !important;
 }
@@ -59,7 +59,7 @@ body.standalone-tier > .site-header {
   display: block;
   overflow-x: hidden;
   overflow-y: auto;
-  background: #0f0f0f;
+  background: var(--page-bg, #0b0b0b);
 }
 
 body.standalone-tier .tier-panel {

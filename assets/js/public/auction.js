@@ -96,16 +96,6 @@
     localStorage.setItem(storageKey, JSON.stringify(state));
   }
 
-  function escapeHtml(value) {
-    return String(value ?? '').replace(/[&<>"']/g, character => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    })[character]);
-  }
-
   function uid(prefix = 'lot') {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   }

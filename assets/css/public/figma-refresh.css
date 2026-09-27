@@ -201,8 +201,6 @@ body.is-ready .site-header {
   transform: translateX(-50%);
 }
 
-.nav-center > .gang-trigger { width: 113rem; }
-.site-header .gang-trigger { justify-content: center; }
 .nav-center > a[href$="#catalog"] { width: 113rem; }
 .nav-center > .nav-service-link { width: 118rem; }
 .nav-center > .nav-menu-wrap > .nav-menu-toggle { width: 145rem; }
@@ -245,14 +243,6 @@ body.is-ready .site-header {
   color: #fff;
   background: #292929;
   transform: none;
-}
-
-.site-header .gang-trigger i {
-  width: 10rem;
-  height: 10rem;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: #e63d3d;
 }
 
 .site-header .nav-menu-toggle img {
@@ -1153,7 +1143,7 @@ body.is-ready .site-header {
 }
 
 /* Сервисные окна используют ту же чёрно-серую систему поверхностей. */
-:is(.gang-dialog, .auction-dialog, .tier-dialog, .suggestions-dialog, .media-dialog, .admin-portal-dialog, .feature-dialog, .modal-panel) {
+:is(.auction-dialog, .tier-dialog, .suggestions-dialog, .media-dialog, .admin-portal-dialog, .modal-panel) {
   border-color: rgba(240, 240, 240, .1) !important;
   border-radius: 6rem !important;
   color: #f0f0f0;
@@ -1162,19 +1152,18 @@ body.is-ready .site-header {
   box-shadow: none !important;
 }
 
-:is(.gang-backdrop, .auction-backdrop, .tier-backdrop, .suggestions-backdrop, .media-backdrop, .admin-portal-backdrop, .feature-backdrop, .modal-backdrop) {
+:is(.auction-backdrop, .tier-backdrop, .suggestions-backdrop, .media-backdrop, .admin-portal-backdrop, .modal-backdrop) {
   background: rgba(4, 4, 4, .86) !important;
   backdrop-filter: blur(12rem);
 }
 
-:is(.gang-head h2, .auction-head h2, .tier-head h2, .suggestions-head h2, .media-head h2, .admin-portal-head h2, .feature-dialog h2, .modal-title) {
+:is(.auction-head h2, .tier-head h2, .suggestions-head h2, .media-head h2, .admin-portal-head h2, .modal-title) {
   font-family: var(--font-display) !important;
   letter-spacing: 0 !important;
   text-transform: uppercase;
 }
 
 :is(
-  .gang-dialog::before,
   .auction-dialog::before,
   .tier-dialog::before,
   .suggestions-dialog::before,
@@ -1182,14 +1171,13 @@ body.is-ready .site-header {
   .media-dialog::before,
   .media-dialog::after,
   .admin-portal-dialog::before,
-  .feature-dialog::before,
   .modal-panel::before
 ) {
   display: none !important;
   content: none !important;
 }
 
-:is(.gang-head, .suggestions-head, .media-head, .admin-portal-head, .tier-dialog > header) {
+:is(.suggestions-head, .media-head, .admin-portal-head, .tier-dialog > header) {
   border-color: #202020 !important;
   background: #121212 !important;
   background-image: none !important;
@@ -1198,13 +1186,11 @@ body.is-ready .site-header {
 }
 
 :is(
-  .gang-close,
   .auction-close,
   .tier-close,
   .suggestions-close,
   .media-close,
   .admin-portal-close,
-  .feature-close,
   .modal-close,
   .tier-row-dialog-close
 ) {
@@ -1218,13 +1204,11 @@ body.is-ready .site-header {
 }
 
 :is(
-  .gang-close,
   .auction-close,
   .tier-close,
   .suggestions-close,
   .media-close,
   .admin-portal-close,
-  .feature-close,
   .modal-close
 ):hover {
   border-color: #f0f0f0 !important;
@@ -1245,16 +1229,14 @@ body.is-ready .site-header {
 .tier-dialog > header > span,
 .suggestions-head > div > span,
 .media-head > div > span,
-.admin-portal-head > div > span,
-.gang-kicker {
+.admin-portal-head > div > span {
   color: #e63d3d !important;
 }
 
 .tier-dialog header p,
 .suggestions-head p,
 .media-head p,
-.admin-portal-head p,
-.gang-head p {
+.admin-portal-head p {
   color: rgba(240, 240, 240, .48) !important;
 }
 
@@ -1349,8 +1331,7 @@ body.is-ready .site-header {
   .media-form,
   .media-locked,
   .media-queue-item,
-  .admin-portal .panel,
-  .feature-dialog
+  .admin-portal .panel
 ) {
   border-color: rgba(240, 240, 240, .12) !important;
   border-radius: 6rem !important;
@@ -1838,24 +1819,5 @@ footer {
 
 .game-modal .modal-steam {
   font-size: 28rem !important;
-}
-
-/* Keep the streams dialog typography ahead of the shared display rules. */
-.gang-head h2,
-.gang-card h3 {
-  font-family: 'DrukCyr-Heavy', 'Druk Cyr', sans-serif !important;
-  letter-spacing: 0 !important;
-  text-transform: none !important;
-}
-
-.gang-dialog,
-.gang-card,
-.gang-card p,
-.gang-card small,
-.gang-live,
-.gang-provider,
-.gang-category,
-.gang-uptime {
-  font-family: 'Manrope', sans-serif !important;
 }
 

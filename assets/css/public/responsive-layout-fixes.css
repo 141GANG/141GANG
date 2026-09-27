@@ -1,0 +1,140 @@
+/* Final responsive corrections for the public catalog and its dialogs. */
+
+/* The administrator sign-in card uses the same solid surface as a game card. */
+html body .admin-portal #loginSection.login-panel {
+  background: #121212 !important;
+  background-color: #121212 !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Creator names always keep their complete label. On a narrow viewport the
+   row scrolls horizontally, while its scrollbar remains hidden. */
+.tier-creators {
+  max-width: calc(100% - 24px);
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none !important;
+}
+
+.tier-creators::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.tier-creators > button:not(.tier-add-owner) {
+  width: max-content !important;
+  min-width: max-content !important;
+  max-width: none !important;
+  flex: 0 0 auto !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
+.tier-creators > .tier-add-owner {
+  flex: 0 0 76px !important;
+}
+
+@media (max-width: 720px) {
+  /* Keep navigation readable instead of scaling its labels down with the viewport. */
+  body.standalone-view .site-header :is(.nav-link, .nav-menu-toggle, .account-auth-trigger, #adminPortalOpen),
+  body:not(.standalone-view) .site-header :is(.nav-link, .nav-menu-toggle, .account-auth-trigger, #adminPortalOpen),
+  body.standalone-view .site-header .nav-dropdown > :is(a, button),
+  body:not(.standalone-view) .site-header .nav-dropdown > :is(a, button) {
+    font-size: 14px !important;
+  }
+
+  /* Keep all release filters aligned and at a stable, readable text size. */
+  #catalog .release-filters,
+  #catalog .catalog-toolbar.is-compact .release-filters {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    overflow: visible !important;
+  }
+
+  #catalog .release-filters .filter-btn,
+  #catalog .catalog-toolbar.is-compact .release-filters .filter-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 50px !important;
+    justify-content: center;
+    gap: 3px !important;
+    padding: 9px 5px !important;
+    font-size: 15px !important;
+  }
+
+  #catalog .catalog-menu-wrap {
+    position: relative;
+  }
+
+  /* Anchor each menu to its own control so it cannot drift off-screen. */
+  #libraryFiltersMenu {
+    right: auto !important;
+    left: 0 !important;
+    width: min(340px, calc(100vw - 48px)) !important;
+    max-width: calc(100vw - 48px) !important;
+  }
+
+  #catalogSortMenu {
+    right: 0 !important;
+    left: auto !important;
+    width: min(230px, calc(100vw - 48px)) !important;
+    max-width: calc(100vw - 48px) !important;
+  }
+
+  /* A selected game becomes a true full-screen, internally scrolling view. */
+  .game-modal {
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+
+  .game-modal .modal-panel,
+  .game-modal.is-open .modal-panel {
+    position: relative !important;
+    inset: auto !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    border-radius: 0 !important;
+    transform: none !important;
+    overscroll-behavior: contain;
+  }
+
+  /* Compact close control, fixed to the upper-right corner while scrolling. */
+  .game-modal .modal-close {
+    position: fixed !important;
+    top: max(10px, env(safe-area-inset-top)) !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+  }
+}
+
+@media (max-width: 380px) {
+  body.standalone-view .site-header :is(.nav-link, .nav-menu-toggle, .account-auth-trigger, #adminPortalOpen),
+  body:not(.standalone-view) .site-header :is(.nav-link, .nav-menu-toggle, .account-auth-trigger, #adminPortalOpen) {
+    padding-inline: 7px !important;
+  }
+
+  #catalog .release-filters .filter-btn,
+  #catalog .catalog-toolbar.is-compact .release-filters .filter-btn {
+    padding-inline: 3px !important;
+  }
+}

@@ -51,6 +51,7 @@
   }
 
   function isTwitchUser(user) {
+    if (window.CR7_SITE_AUTH?.hasFeatureAccess) return window.CR7_SITE_AUTH.hasFeatureAccess(user);
     if (window.CR7_SITE_AUTH?.hasTwitchIdentity) return window.CR7_SITE_AUTH.hasTwitchIdentity(user);
     const providers = [
       ...(Array.isArray(user?.identities) ? user.identities.map(identity => identity?.provider) : []),
@@ -99,7 +100,7 @@
         return null;
       }
     }
-    if (!isTwitchUser(user)) {
+    if (!state.isAdmin && !isTwitchUser(user)) {
       showNotice(notice, 'Войди через Twitch, чтобы отправить предложение.', 'error');
       window.CR7_SITE_AUTH?.open?.();
       return null;
@@ -324,7 +325,7 @@
     const hasTitle = Boolean(title?.value.trim());
     if (selected) selected.hidden = count === 0;
     dropzone?.classList.toggle('has-file', count > 0);
-    if (submit) submit.disabled = state.mediaSubmitting || !isTwitchUser(state.session?.user) || count === 0 || !hasTitle;
+    if (submit) submit.disabled = state.mediaSubmitting || !(state.isAdmin || isTwitchUser(state.session?.user)) || count === 0 || !hasTitle;
     if (hint) {
       hint.textContent = count === 0
         ? 'Сначала выбери файлы и добавь название.'
@@ -496,7 +497,7 @@
 
   function syncNonAdminControls() {
     if (!shouldOverride()) return;
-    const signedIn = isTwitchUser(state.session?.user);
+    const signedIn = state.isAdmin || isTwitchUser(state.session?.user);
     const suggestionSubmit = document.getElementById('suggestionSubmitButton');
     if (suggestionSubmit && state.suggestionPreview) suggestionSubmit.disabled = !signedIn;
     renderMediaFiles();
@@ -506,7 +507,7 @@
     const trigger = event.target instanceof Element
       ? event.target.closest('.proposal-desk-trigger')
       : null;
-    if (!trigger || isTwitchUser(state.session?.user)) return;
+    if (!trigger || state.isAdmin || isTwitchUser(state.session?.user)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     window.CR7_SITE_AUTH?.open?.();

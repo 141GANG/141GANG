@@ -10,7 +10,8 @@
     inset: 0 0 auto !important;
     z-index: 1900 !important;
     height: 92rem !important;
-    background: #101010 !important;
+    background: rgba(16, 16, 16, .78) !important;
+    backdrop-filter: blur(16rem);
   }
 
   body.admin-portal-open .site-header .header-inner,
@@ -18,15 +19,6 @@
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-  }
-
-  body.admin-portal-open .admin-portal {
-    inset: 92rem 0 0 !important;
-    height: calc(100dvh - 92rem) !important;
-  }
-
-  body.admin-portal-open .admin-portal-body {
-    padding-top: 26rem !important;
   }
 
   .admin-portal .suggestion-moderation-filters button[data-suggestion-status="approved"]::after {
@@ -65,7 +57,7 @@
     padding: 16rem 0 16rem 16rem;
   }
 
-  .admin-catalog-card-side img {
+  .admin-catalog-card-side > img {
     width: 189rem;
     height: 71rem;
     display: block;
@@ -87,15 +79,6 @@
     align-items: center;
     gap: 7rem;
   }
-
-  .admin-catalog-facts span::before {
-    color: #ef3d3f;
-    font-size: 13rem;
-  }
-
-  .admin-catalog-players::before { content: '♙'; }
-  .admin-catalog-release::before { content: '▣'; }
-  .admin-catalog-reactions::before { content: '♧'; }
 
   .admin-catalog-card-copy {
     min-width: 0;
@@ -240,7 +223,7 @@
     background: #202020;
   }
 
-  .admin-catalog-card-side img { width: 100%; height: 80rem; object-fit: cover; }
+  .admin-catalog-card-side > img { width: 100%; height: 80rem; object-fit: cover; }
   .admin-catalog-statuses,
   .admin-catalog-actions { display: flex; flex-wrap: wrap; gap: 7rem; }
 }

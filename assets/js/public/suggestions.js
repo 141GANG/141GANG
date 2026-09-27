@@ -100,16 +100,6 @@
     };
   }
 
-  function escapeHtml(value) {
-    return String(value ?? '').replace(/[&<>'"]/g, character => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    })[character]);
-  }
-
   function safeUrl(value, allowedHosts = []) {
     try {
       const url = new URL(String(value || ''));
@@ -768,11 +758,27 @@
     return first.toLocaleUpperCase('ru-RU');
   }
 
+  function safeCommentAvatarUrl(value) {
+    try {
+      const url = new URL(String(value || ''), window.location.href);
+      return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+    } catch {
+      return '';
+    }
+  }
+
+  function commentAvatarMarkup(comment, username) {
+    const avatarUrl = safeCommentAvatarUrl(comment?.avatar_url);
+    return avatarUrl
+      ? `<img alt="" loading="lazy" referrerpolicy="no-referrer" src="${escapeHtml(avatarUrl)}">`
+      : escapeHtml(commentAuthorInitial(username));
+  }
+
   function adminSupporterCommentMarkup(comment, index, allowModeration = true) {
     const username = String(comment?.username || `Пользователь ${index + 1}`).trim() || `Пользователь ${index + 1}`;
     return `
       <article class="modal-comment-item admin-supporter-comment${comment.is_hidden ? ' is-hidden' : ''}">
-        <span class="modal-comment-avatar admin-supporter-comment-avatar" aria-hidden="true">${escapeHtml(commentAuthorInitial(username))}</span>
+        <span class="modal-comment-avatar admin-supporter-comment-avatar" aria-hidden="true">${commentAvatarMarkup(comment, username)}</span>
         <div class="modal-comment-body admin-supporter-comment-content">
           <div class="modal-comment-head admin-supporter-comment-head">
             <strong>${escapeHtml(username)}</strong>
@@ -824,7 +830,7 @@
       elements.commentsList.innerHTML = comments.length
         ? comments.map(comment => `
           <article class="suggestion-comment${comment.is_mine ? ' is-mine' : ''}">
-            <header><strong>${comment.is_mine ? 'Вы' : 'Зритель'}</strong><time>${escapeHtml(formatDate(comment.created_at))}</time></header>
+            <header><span class="suggestion-comment-author"><span class="suggestion-comment-avatar" aria-hidden="true">${commentAvatarMarkup(comment, comment.username || 'Зритель')}</span><strong>${comment.is_mine ? 'Вы' : escapeHtml(comment.username || 'Зритель')}</strong></span><time>${escapeHtml(formatDate(comment.created_at))}</time></header>
             <p>${escapeHtml(comment.body)}</p>
           </article>`).join('')
         : '<div class="suggestions-empty">Комментариев пока нет. Начни обсуждение.</div>';

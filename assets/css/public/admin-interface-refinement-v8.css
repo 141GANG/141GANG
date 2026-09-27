@@ -1,10 +1,10 @@
 /* Moderator workspace refinement for Figma frames 626/627/628. */
 
 .admin-portal {
-  --admin-panel: #181818;
-  --admin-control: #202020;
-  --admin-control-hover: #292929;
-  --admin-card: #202020;
+  --admin-panel: rgba(24, 24, 24, .84);
+  --admin-control: rgba(32, 32, 32, .84);
+  --admin-control-hover: rgba(41, 41, 41, .9);
+  --admin-card: rgba(32, 32, 32, .86);
   --admin-red: #ef3d3f;
   --admin-text: #f0f0f0;
   --admin-muted: rgba(240, 240, 240, .55);
@@ -941,22 +941,10 @@
   }
 }
 
-/* Management background artwork: decorative red glow from Figma. */
+/* One translucent surface is enough: stacked dark layers made the header black. */
 .admin-portal {
-  isolation: isolate;
-  background: #101010 !important;
-}
-
-.admin-portal::before {
-  content: '';
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  z-index: 0;
-  width: min(524rem, 42vw);
-  height: min(856rem, calc(100vh - 64rem));
-  background: url('../../images/figma/background_settings/background_settings.png') left bottom / contain no-repeat;
-  pointer-events: none;
+  background: transparent !important;
+  backdrop-filter: none;
 }
 
 .admin-portal > .admin-portal-dialog {
@@ -964,22 +952,38 @@
   z-index: 1;
 }
 
-@media (max-width: 900px) {
-  .admin-portal::before {
-    width: min(430rem, 72vw);
-    height: min(702rem, 82vh);
-  }
+/* Unified management workspace canvas: the dialog is the only tinted layer. */
+body.standalone-admin {
+  background: var(--page-bg, #0b0b0b) !important;
 }
 
-/* Unified management workspace canvas: header and content use one background tone. */
-body.admin-portal-open,
-body.admin-portal-open .site-header,
-.admin-portal {
-  background-color: #0b0b0b !important;
+body:is(.admin-portal-open, .standalone-admin) .site-header,
+html body #adminPortal.admin-portal {
+  background: transparent !important;
+  backdrop-filter: none;
 }
 
-body.admin-portal-open .site-header {
+html body #adminPortal > .admin-portal-dialog {
+  background: rgba(11, 11, 11, .72) !important;
+  backdrop-filter: blur(10rem);
+}
+
+body:is(.admin-portal-open, .standalone-admin) .site-header {
   background-image: none !important;
+}
+
+@media (min-width: 1101px) {
+  body.standalone-admin #adminPortal.admin-portal {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+  }
+
+  body.standalone-admin #adminPortal .admin-portal-body {
+    padding-top: 118rem !important;
+  }
 }
 
 /* Published game actions: match the typography/vertical alignment of

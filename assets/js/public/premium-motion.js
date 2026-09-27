@@ -4,7 +4,6 @@
   const root = document.documentElement;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const panelSelector = [
-    '.gang-panel',
     '.auction-panel',
     '.tier-panel',
     '.suggestions-panel',
@@ -12,7 +11,6 @@
     '.media-panel',
     '.media-file-preview',
     '.site-auth-panel',
-    '.feature-panel',
     '.admin-portal',
     '.duplicate-modal'
   ].join(',');
@@ -20,20 +18,17 @@
   const surfaceSelectors = [
     ['.media-panel', '.media-workspace'],
     ['.media-file-preview', '.media-file-preview-dialog'],
-    ['.gang-panel', '.gang-dialog'],
     ['.auction-panel', '.auction-dialog'],
     ['.tier-panel', '.tier-dialog'],
     ['.suggestions-panel', '.suggestions-dialog'],
     ['.suggestion-comments-panel', '.suggestion-comments-dialog'],
     ['.site-auth-panel', '.site-auth-dialog'],
-    ['.feature-panel', '.feature-dialog'],
     ['.admin-portal', '.admin-portal-dialog'],
     ['.duplicate-modal', '.duplicate-dialog']
   ];
 
   const backdropSelector = [
     '.modal-backdrop',
-    '.gang-backdrop',
     '.auction-backdrop',
     '.tier-backdrop',
     '.suggestions-backdrop',
@@ -41,7 +36,6 @@
     '.media-backdrop',
     '.media-file-preview-backdrop',
     '.site-auth-backdrop',
-    '.feature-backdrop',
     '.admin-portal-backdrop',
     '.duplicate-backdrop'
   ].join(',');
@@ -58,9 +52,6 @@
     '.modal-title',
     '.modal-description',
     '.modal-actions',
-    '.gang-head',
-    '.gang-status',
-    '.gang-grid',
     '.auction-sidebar',
     '.auction-content',
     '.tier-dialog > header',
@@ -162,7 +153,7 @@
     if (!preparedPanels.has(panel)) {
       preparedPanels.add(panel);
       panel.classList.add('premium-window');
-      panel.classList.toggle('premium-window-side', panel.matches('.gang-panel, .admin-portal'));
+      panel.classList.toggle('premium-window-side', panel.matches('.admin-portal'));
       panel.querySelector(backdropSelector)?.classList.add('premium-window-backdrop');
       panelSurface(panel)?.classList.add('premium-window-surface');
     }

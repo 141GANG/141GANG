@@ -377,14 +377,6 @@
     gap: 6rem;
   }
 
-  .admin-portal .moderation-card-facts span::before {
-    color: #ef3d3f;
-    font-size: 12rem;
-  }
-
-  .admin-portal .moderation-players::before { content: '♙'; }
-  .admin-portal .moderation-release::before { content: '▣'; }
-
   .admin-portal .moderation-card-copy {
     min-width: 0;
     display: flex;

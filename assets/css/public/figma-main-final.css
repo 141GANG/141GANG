@@ -2,7 +2,7 @@
    This file only overrides presentation. Existing Supabase/auth/CRUD/Realtime logic stays untouched. */
 
 :root {
-  --figma-page: #0b0b0b;
+  --figma-page: var(--page-bg, #0b0b0b);
   --figma-section: #121212;
   --figma-surface: #202020;
   --figma-text: #f0f0f0;

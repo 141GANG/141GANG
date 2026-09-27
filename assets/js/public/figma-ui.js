@@ -1,30 +1,4 @@
 (() => {
-  const FIGMA_UI_BUILD = '9.9-static-styles';
-  const assets = [
-    ['style','figmaMainFinalStyles','./assets/css/public/figma-main-final.css?v=2.3-management-sync'],
-    ['style','adminFigmaFinalStyles','./assets/css/public/admin-figma-final.css?v=1.0'],
-    ['style','proposalWindowsFigmaStyles','./assets/css/public/proposal-windows-figma.css?v=4.9-safe-area'],
-    ['style','proposalMediaFigmaExactStyles','./assets/css/public/proposal-media-figma-exact.css?v=4.2-no-fouc'],
-    ['style','proposalMediaUploadV2Styles','./assets/css/public/proposal-media-upload-v2.css?v=2.1-centered-delete'],
-    ['style','adminCardIconsStyles','./assets/css/public/admin-card-icons.css?v=1.1'],
-    ['style','figmaTypographyFinalStyles','./assets/css/public/figma-typography-final.css?v=4.7'],
-    ['style','e2eResponsiveP0Styles','./assets/css/public/e2e-responsive-p0.css?v=1.2-nav-center'],
-    ['style','gameCommentManagementStyles','./assets/css/public/game-comment-management.css?v=2.14-compact-comment-sort'],
-    ['style','adminLoginFinalStyles','./assets/css/public/admin-login-final.css?v=1.2-fit-no-border'],
-    ['script','proposalWindowsFigmaScript','./assets/js/public/proposal-windows-figma.js?v=3.7-flat-media'],
-    ['script','adminCardIconsScriptV2','./assets/js/public/admin-card-icons-v2.js?v=2.0'],
-    ['script','catalogLiveRefreshScript','./assets/js/public/catalog-live-refresh.js?v=1.1-safe-unsubscribe'],
-    ['script','mediaAuthenticatedSubmitBridge','./assets/js/public/media-authenticated-submit-bridge.js?v=1.5-twitch-actions']
-  ];
-  assets.forEach(([type,id,src]) => {
-    if (document.getElementById(id)) return;
-    const node = document.createElement(type === 'style' ? 'link' : 'script');
-    node.id = id;
-    if (type === 'style') { node.rel = 'stylesheet'; node.href = src; }
-    else { node.src = src; node.defer = true; }
-    document.head.appendChild(node);
-  });
-
   document.addEventListener('dragstart', event => {
     if (!(event.target instanceof Element)) return;
     // Tier-list cards deliberately use native drag-and-drop. Do not let the

@@ -43,6 +43,23 @@ let modalCommentsCache = [];
 let modalViewerSignedIn = false;
 let modalCommentSortMode = 'popular';
 
+function safeModalAvatarUrl(value) {
+  try {
+    const url = new URL(String(value || ''), window.location.href);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
+function modalAvatarMarkup(avatarUrl, username) {
+  const safeUrl = safeModalAvatarUrl(avatarUrl);
+  const initial = String(username || 'Пользователь').trim().charAt(0).toLocaleUpperCase('ru-RU') || 'П';
+  return safeUrl
+    ? `<img alt="" loading="lazy" referrerpolicy="no-referrer" src="${escapeHtml(safeUrl)}">`
+    : escapeHtml(initial);
+}
+
 function setModalCommentsOpen(open) {
   const nextOpen = Boolean(open);
   elements.modal?.classList.toggle('comments-open', nextOpen);
@@ -82,7 +99,6 @@ function renderModalComments(comments = modalCommentsCache) {
   elements.modalCommentsList.innerHTML = sortedComments.length ? sortedComments.map(comment => {
     const pendingSuggestionComment = comment.is_pending_suggestion === true;
     const username = String(comment.username || 'Пользователь').trim();
-    const initial = username.charAt(0).toLocaleUpperCase('ru-RU') || 'U';
     const actions = !pendingSuggestionComment && (comment.is_mine || comment.can_delete)
       ? `<div class="modal-comment-actions" aria-label="Управление комментарием">
           ${comment.is_mine ? '<button type="button" class="modal-comment-action" data-comment-action="edit">Изменить</button>' : ''}
@@ -103,7 +119,7 @@ function renderModalComments(comments = modalCommentsCache) {
       ? '<small>Комментарий скрыт из публичного обсуждения.</small>'
       : '';
     return `<article class="modal-comment-item${comment.is_mine ? ' is-own' : ''}${pendingSuggestionComment ? ' is-pending-suggestion' : ''}${comment.is_hidden ? ' is-hidden' : ''}" data-comment-id="${escapeHtml(String(comment.id))}">
-      <span class="modal-comment-avatar" aria-hidden="true">${escapeHtml(initial)}</span>
+      <span class="modal-comment-avatar" aria-hidden="true">${modalAvatarMarkup(comment.avatar_url, username)}</span>
       <div class="modal-comment-body">
         <div class="modal-comment-head"><strong>${escapeHtml(username)}</strong>${actions}</div>
         <p data-comment-text>${escapeHtml(comment.body)}</p>
@@ -193,7 +209,9 @@ async function loadGameInteractions(gameId) {
   try {
     const { data: sessionData } = await client.auth.getSession();
     const signedUser = sessionData?.session?.user;
-    const signedIn = window.CR7_SITE_AUTH?.hasTwitchIdentity
+    const signedIn = window.CR7_SITE_AUTH?.hasFeatureAccess
+      ? window.CR7_SITE_AUTH.hasFeatureAccess(signedUser)
+      : window.CR7_SITE_AUTH?.hasTwitchIdentity
       ? window.CR7_SITE_AUTH.hasTwitchIdentity(signedUser)
       : Boolean(signedUser && !signedUser.is_anonymous && (
         signedUser.app_metadata?.provider === 'twitch'
@@ -203,7 +221,11 @@ async function loadGameInteractions(gameId) {
     if (signedIn && elements.modalCommentComposerAvatar) {
       const metadata = signedUser.user_metadata || {};
       const username = String(metadata.preferred_username || metadata.full_name || metadata.name || signedUser.email || 'Пользователь').trim();
-      elements.modalCommentComposerAvatar.textContent = username.charAt(0).toLocaleUpperCase('ru-RU') || 'П';
+      const twitchIdentity = (Array.isArray(signedUser.identities) ? signedUser.identities : [])
+        .find(identity => String(identity?.provider || '').toLowerCase() === 'twitch');
+      const twitchMetadata = twitchIdentity?.identity_data || {};
+      const avatarUrl = twitchMetadata.avatar_url || twitchMetadata.picture || twitchMetadata.profile_image_url || metadata.avatar_url || metadata.picture;
+      elements.modalCommentComposerAvatar.innerHTML = modalAvatarMarkup(avatarUrl, username);
     }
     elements.modalAuthHint.hidden = signedIn;
     elements.modalVoteActions.forEach(button => { button.disabled = !signedIn; });
@@ -222,6 +244,7 @@ async function loadGameInteractions(gameId) {
     const comments = rows.filter(row => row.comment_id).map(row => ({
       id: row.comment_id,
       username: row.username,
+      avatar_url: row.comment_avatar_url,
       body: row.comment_body,
       created_at: row.comment_created_at,
       updated_at: row.comment_updated_at,
@@ -256,6 +279,7 @@ async function loadPendingSuggestionComments(game) {
   const normalize = (comment, index) => ({
     id: `suggestion-${comment.comment_id ?? comment.id ?? index}`,
     username: comment.username || `Пользователь ${index + 1}`,
+    avatar_url: comment.avatar_url || '',
     body: comment.body || '',
     created_at: comment.created_at,
     updated_at: comment.updated_at,
@@ -384,7 +408,9 @@ async function voteForGame(direction) {
   } finally {
     const client = getConfiguredClient();
     const { data } = client ? await client.auth.getSession() : { data: null };
-    const enabled = window.CR7_SITE_AUTH?.hasTwitchIdentity
+    const enabled = window.CR7_SITE_AUTH?.hasFeatureAccess
+      ? window.CR7_SITE_AUTH.hasFeatureAccess(data?.session?.user)
+      : window.CR7_SITE_AUTH?.hasTwitchIdentity
       ? window.CR7_SITE_AUTH.hasTwitchIdentity(data?.session?.user)
       : Boolean(data?.session?.user?.app_metadata?.provider === 'twitch');
     elements.modalVoteActions.forEach(button => { button.disabled = !enabled; });

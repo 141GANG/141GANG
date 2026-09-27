@@ -414,7 +414,16 @@
 .game-modal .modal-comment-composer-avatar {
   width: 44rem !important;
   height: 44rem !important;
+  overflow: hidden;
   font-size: 19rem !important;
+}
+
+.game-modal .modal-comment-avatar img,
+.game-modal .modal-comment-composer-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .game-modal .modal-comment-item strong {

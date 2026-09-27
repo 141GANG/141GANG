@@ -33,11 +33,11 @@ body.standalone-view .site-header .brand {
 
   /* Match the authenticated management tab on index.html as well. */
   body.standalone-view .site-header #adminPortalOpen.is-admin {
-    padding: 11rem 21rem !important;
+    padding: 8rem 15rem !important;
     color: #f0f0f0 !important;
     background: rgba(32, 32, 32, .72) !important;
     font-family: var(--font-ui) !important;
-    font-size: 20rem !important;
+    font-size: 18rem !important;
     font-weight: 500 !important;
     letter-spacing: 0 !important;
     opacity: 1 !important;
@@ -294,3 +294,36 @@ body.standalone-view .site-header .brand {
     font-size: 8rem !important;
   }
 }
+/* Shared layout for the index content reused by standalone routes. */
+[hidden] {
+  display: none !important;
+}
+
+body.standalone-view {
+  min-height: 100vh;
+  overflow: auto;
+}
+
+body.standalone-view:not(.standalone-auction) > :not(.site-header):not(.tier-panel):not(.auction-panel):not(.admin-portal):not(.suggestions-panel):not(.suggestion-comments-panel):not(.media-panel):not(.media-file-preview):not(.site-auth-panel) {
+  display: none !important;
+}
+
+body.standalone-view .site-header {
+  position: relative;
+  display: block;
+}
+
+body.standalone-view :is(.tier-panel, .auction-panel, .admin-portal) {
+  position: relative;
+  inset: auto;
+  min-height: 100vh;
+}
+
+body.standalone-view :is(.tier-panel, .auction-panel, .suggestions-panel, .suggestion-comments-panel, .media-panel, .site-auth-panel) {
+  position: fixed;
+}
+
+body.standalone-view :is(.tier-panel, .auction-panel, .admin-portal)[hidden] {
+  display: block !important;
+}
+

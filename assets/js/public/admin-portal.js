@@ -78,13 +78,6 @@
     // Совместимость с базами, где старый CHECK всё ещё требует хотя бы один символ.
     const EMPTY_AUTHOR_COMMENT = '\u2063';
 
-/* utils.js */
-function escapeHtml(value) {
-      return String(value ?? '').replace(/[&<>'"]/g, char => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-      })[char]);
-    }
-
     function showNotice(message, type = 'info', sticky = false) {
       clearTimeout(state.noticeTimer);
       elements.notice.className = `notice show ${type}`;
@@ -123,21 +116,6 @@ function escapeHtml(value) {
       return url.href;
     }
 
-    function parseDate(value) {
-      if (!value) return null;
-      const date = new Date(`${value}T12:00:00`);
-      return Number.isNaN(date.getTime()) ? null : date;
-    }
-
-    function daysUntil(value) {
-      const date = parseDate(value);
-      if (!date) return null;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      date.setHours(0, 0, 0, 0);
-      return Math.ceil((date - today) / 86400000);
-    }
-
     function isUpcomingByLocalDate(releaseDate, steamFallback = false) {
       const date = parseDate(releaseDate);
       if (!date) return Boolean(steamFallback);
@@ -171,31 +149,6 @@ function escapeHtml(value) {
         elements.releaseStatusHint.textContent = 'Добавь Steam-ссылку или дату релиза.';
       }
       return upcoming;
-    }
-
-    function playerWord(number) {
-      const value = Math.abs(Number(number) || 0) % 100;
-      const last = value % 10;
-      if (value > 10 && value < 20) return 'игроков';
-      if (last === 1) return 'игрок';
-      if (last >= 2 && last <= 4) return 'игрока';
-      return 'игроков';
-    }
-
-    function coopLabel(game) {
-      if (!game?.is_coop) return '';
-      const typeLabels = {
-        mixed: 'Онлайн и локальный кооп',
-        online: 'Онлайн-кооп',
-        local: 'Локальный кооп',
-        generic: 'Кооператив'
-      };
-      const prefix = typeLabels[String(game.coop_type || '')] || 'Кооператив';
-      const min = Number(game.coop_min_players) || null;
-      const max = Number(game.coop_max_players) || null;
-      if (min && max && min < max) return `${prefix} · ${min}–${max} ${playerWord(max)}`;
-      if (max) return `${prefix} · до ${max} ${playerWord(max)}`;
-      return prefix;
     }
 
     function releaseLabel(game) {

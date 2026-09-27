@@ -31,10 +31,6 @@
   // left behind by an older/cached script instance.
   const boundFilterBoxes = new WeakSet();
 
-  const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-  })[char]);
-
   const CATALOG_ICONS = {
     player: '<img class="admin-catalog-fact-icon admin-catalog-player-icon" src="./assets/images/figma/cheloveck.png" alt="" aria-hidden="true">',
     day: '<img class="admin-catalog-fact-icon admin-catalog-day-icon" src="./assets/images/figma/calendar.png" alt="" aria-hidden="true">',
@@ -52,15 +48,6 @@
     if (window.CR7_SUPABASE_CLIENT) return window.CR7_SUPABASE_CLIENT;
     if (typeof getConfiguredClient === 'function') return getConfiguredClient();
     return null;
-  }
-
-  function playerWord(number) {
-    const value = Math.abs(Number(number) || 0) % 100;
-    const last = value % 10;
-    if (value > 10 && value < 20) return 'игроков';
-    if (last === 1) return 'игрок';
-    if (last >= 2 && last <= 4) return 'игрока';
-    return 'игроков';
   }
 
   function playerRange(game) {

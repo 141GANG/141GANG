@@ -47,13 +47,11 @@ body.auction-open {
 }
 
 .auction-panel[hidden],
-.feature-panel[hidden],
 [hidden] {
   display: none !important;
 }
 
-.auction-panel,
-.feature-panel {
+.auction-panel {
   position: fixed;
   inset: 0;
   z-index: 1250;
@@ -61,8 +59,7 @@ body.auction-open {
   place-items: center;
 }
 
-.auction-backdrop,
-.feature-backdrop {
+.auction-backdrop {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, .92);
@@ -97,8 +94,7 @@ body.auction-open {
   transform: none;
 }
 
-.auction-close,
-.feature-close {
+.auction-close {
   position: absolute;
   z-index: 20;
   display: grid;
@@ -118,8 +114,7 @@ body.auction-open {
   font-size: 22rem;
 }
 
-.auction-close:hover,
-.feature-close:hover {
+.auction-close:hover {
   border-color: color-mix(in srgb, var(--auction-accent, #e33b28) 72%, white);
   background: color-mix(in srgb, var(--auction-accent, #e33b28) 20%, #171717);
   transform: rotate(4deg);
@@ -1446,44 +1441,6 @@ body.auction-open {
   min-height: 100%;
   border: 0;
   border-radius: 0;
-}
-
-.feature-backdrop {
-  opacity: 1;
-}
-
-.feature-dialog {
-  position: relative;
-  width: min(520rem, calc(100% - 28rem));
-  padding: 48rem;
-  border: 1rem solid rgba(230, 57, 39, .28);
-  border-radius: 22rem 22rem 22rem 7rem;
-  color: #fff;
-  background: linear-gradient(145deg, #200807, #080202);
-  box-shadow: 0 40rem 110rem rgba(0, 0, 0, .7);
-  text-align: center;
-}
-
-.feature-dialog > span {
-  color: #dc6b59;
-  font-size: 8rem;
-  font-weight: 900;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-}
-
-.feature-dialog h2 {
-  margin: 12rem 0 0;
-  font-family: var(--font-display);
-  font-size: 54rem;
-  text-transform: uppercase;
-}
-
-.feature-dialog p {
-  margin: 16rem 0 0;
-  color: #a08e89;
-  font-size: 11rem;
-  line-height: 1.6;
 }
 
 @media (max-width: 900px) {
