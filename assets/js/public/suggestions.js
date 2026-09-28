@@ -444,7 +444,7 @@
     const payload = {
       steam_app_id: steamAppId,
       steam_url: `https://store.steampowered.com/app/${steamAppId}/`,
-      title: String(preview.title || '').trim().slice(0, 120),
+      title: cleanSteamGameTitle(preview.title).slice(0, 120),
       cover_url: String(preview.coverUrl || '').slice(0, 1000),
       description: String(preview.description || 'Описание не указано.').trim().slice(0, 2000),
       author_comment: 'Добавлено администратором',
@@ -517,7 +517,7 @@
           id: existingIndex >= 0 ? localItems[existingIndex].id : -Date.now(),
           steam_app_id: Number(preview.appId),
           steam_url: steamUrl,
-          title: preview.title,
+          title: cleanSteamGameTitle(preview.title),
           cover_url: preview.coverUrl || '',
           description: preview.description || '',
           status: suggestionState.directAdd ? 'approved' : 'pending',
@@ -581,7 +581,7 @@
       await requireAdminSession();
       const { data, error } = await suggestionState.client.rpc('submit_game_suggestion', {
         p_steam_app_id: Number(preview.appId),
-        p_title: preview.title,
+        p_title: cleanSteamGameTitle(preview.title),
         p_cover_url: preview.coverUrl || '',
         p_description: preview.description || '',
         p_comment: elements.comment.value.trim(),
@@ -1034,15 +1034,15 @@
       return `
         <article class="moderation-card" data-figma-real-icons="1" data-suggestion-id="${Number(item.id)}">
           <div class="moderation-card-side">
-            <img src="${escapeHtml(cover || './assets/images/figma/game-placeholder.svg')}" alt="Обложка ${escapeHtml(item.title)}">
+            <img src="${escapeHtml(cover || './assets/images/figma/game-placeholder.svg')}" alt="Обложка ${escapeHtml(cleanSteamGameTitle(item.title))}">
             <div class="moderation-card-facts">
               <span class="moderation-players"><img class="moderation-fact-icon" src="./assets/images/figma/cheloveck.png" alt="" aria-hidden="true"><span>${escapeHtml(moderationPlayersLabel(item))}</span></span>
               <span class="moderation-release"><img class="moderation-fact-icon" src="./assets/images/figma/calendar.png" alt="" aria-hidden="true"><span>${escapeHtml(moderationReleaseLabel(item))}</span></span>
-              <span class="moderation-support-count">Голосов за игру: <strong>${supportCount}</strong></span>
+              <span class="moderation-support-count" aria-label="Голосов за игру: ${supportCount}"><img class="moderation-fact-icon" src="./assets/images/figma/like.png" alt="" aria-hidden="true"><strong>${supportCount}</strong></span>
             </div>
           </div>
           <div class="moderation-card-copy">
-            <h3><button class="moderation-title-open" data-supporter-comments data-suggestion-id="${Number(item.id)}" type="button">${escapeHtml(item.title)}</button></h3>
+            <h3><button class="moderation-title-open" data-supporter-comments data-suggestion-id="${Number(item.id)}" type="button">${escapeHtml(cleanSteamGameTitle(item.title))}</button></h3>
             <p class="moderation-description">${escapeHtml(item.description || 'Описание не указано.')}</p>
             <div class="moderation-card-meta"><span>Steam ID ${Number(item.steam_app_id)}</span><span>👍 ${reactions.likes}</span><span>👎 ${reactions.dislikes}</span><span>${reactions.likes + reactions.dislikes ? `${reactions.percent}% лайков` : 'Нет оценок'}</span><span>${escapeHtml(formatDate(item.created_at))}</span></div>
             ${item.rejection_reason ? `<p><strong>Причина:</strong> ${escapeHtml(item.rejection_reason)}</p>` : ''}
@@ -1162,7 +1162,7 @@
         const snapshot = snapshotPayloadFromSteam(steam);
         Object.assign(item, snapshot, {
           steam_url: steam.steamUrl || item.steam_url || `https://store.steampowered.com/app/${Number(item.steam_app_id)}/`,
-          title: steam.title || item.title,
+          title: cleanSteamGameTitle(steam.title || item.title),
           cover_url: steam.coverUrl || item.cover_url || '',
           description: steam.description || item.description || '',
           updated_at: new Date().toISOString()

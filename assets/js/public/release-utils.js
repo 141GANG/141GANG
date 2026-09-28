@@ -4,6 +4,14 @@ function escapeHtml(value) {
       })[char]);
     }
 
+    function cleanSteamGameTitle(value) {
+      return String(value || '').trim()
+        .replace(/^(?:Сэкономьте|Экономьте)\s+\d+\s*%\s+при покупке\s+(.+?)\s+в Steam$/i, '$1')
+        .replace(/^Save\s+\d+\s*%\s+(?:when you buy|on)\s+(.+?)\s+on Steam$/i, '$1')
+        .replace(/\s+(?:в Steam|on Steam)$/i, '')
+        .trim();
+    }
+
     function safeExternalUrl(value, allowedHosts = []) {
       try {
         const url = new URL(String(value || '').trim());

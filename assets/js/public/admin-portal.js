@@ -61,6 +61,9 @@
       duplicateConfirm: document.getElementById('duplicateConfirm')
     };
 
+    // Keep admin feedback outside the scrollable workspace and its layout flow.
+    if (elements.notice) document.body.append(elements.notice);
+
     const state = {
       client: null,
       games: [],

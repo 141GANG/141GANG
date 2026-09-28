@@ -45,7 +45,9 @@ let modalCommentSortMode = 'popular';
 
 function safeModalAvatarUrl(value) {
   try {
-    const url = new URL(String(value || ''), window.location.href);
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    const url = new URL(raw);
     return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
   } catch {
     return '';
@@ -58,6 +60,26 @@ function modalAvatarMarkup(avatarUrl, username) {
   return safeUrl
     ? `<img alt="" loading="lazy" referrerpolicy="no-referrer" src="${escapeHtml(safeUrl)}">`
     : escapeHtml(initial);
+}
+
+function setModalComposerAvatar(avatarUrl, username) {
+  const target = elements.modalCommentComposerAvatar;
+  if (!target) return;
+  const safeUrl = safeModalAvatarUrl(avatarUrl);
+  target.innerHTML = '<img alt="" src="./assets/images/figma/twitch-icon.webp" loading="eager">';
+  target.dataset.avatarUrl = safeUrl;
+  if (!safeUrl) return;
+
+  const image = new Image();
+  image.alt = '';
+  image.loading = 'eager';
+  image.referrerPolicy = 'no-referrer';
+  image.src = safeUrl;
+  const showLoadedImage = () => {
+    if (image.naturalWidth > 0 && target.dataset.avatarUrl === safeUrl) target.replaceChildren(image);
+  };
+  if (image.complete) showLoadedImage();
+  else image.addEventListener('load', showLoadedImage, { once: true });
 }
 
 function setModalCommentsOpen(open) {
@@ -225,7 +247,7 @@ async function loadGameInteractions(gameId) {
         .find(identity => String(identity?.provider || '').toLowerCase() === 'twitch');
       const twitchMetadata = twitchIdentity?.identity_data || {};
       const avatarUrl = twitchMetadata.avatar_url || twitchMetadata.picture || twitchMetadata.profile_image_url || metadata.avatar_url || metadata.picture;
-      elements.modalCommentComposerAvatar.innerHTML = modalAvatarMarkup(avatarUrl, username);
+      setModalComposerAvatar(avatarUrl, username);
     }
     elements.modalAuthHint.hidden = signedIn;
     elements.modalVoteActions.forEach(button => { button.disabled = !signedIn; });
@@ -333,12 +355,13 @@ function openGameModal(gameId, gameOverride = null, options = {}) {
 
   state.activeGameId = String(game.id);
   lastFocusedElement = document.activeElement;
+  const displayTitle = cleanSteamGameTitle(game.title);
   elements.modalMedia.innerHTML = coverUrl
-    ? `<img src="${escapeHtml(coverUrl)}" alt="Обложка ${escapeHtml(game.title)}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='./assets/images/figma/game-placeholder.svg'">`
+    ? `<img src="${escapeHtml(coverUrl)}" alt="Обложка ${escapeHtml(displayTitle)}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='./assets/images/figma/game-placeholder.svg'">`
     : `<div class="cover-fallback"><img src="${TWITCH_LOGO_DATA}" alt="" aria-hidden="true"></div>`;
   elements.modalMedia.style.removeProperty('background-image');
   elements.modalBadges.innerHTML = `<span class="coop-badge"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"></circle><path d="M6 20c0-4 2.4-7 6-7s6 3 6 7"></path></svg>${escapeHtml(playersLabel)}</span><span class="release-badge ${meta.badgeClass}"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14" rx="2"></rect><path d="M8 3v6M16 3v6M4 10h16"></path></svg>${escapeHtml(catalogReleaseLabel(game, meta))}</span>`;
-  elements.modalTitle.textContent = game.title || 'Без названия';
+  elements.modalTitle.textContent = displayTitle || 'Без названия';
   elements.modalRelease.textContent = `Добавлено: ${formatDate(game.created_at)}`;
   elements.modalDescription.textContent = game.description || 'Описание не указано.';
   elements.modalAdded.textContent = `Добавлено: ${formatDate(game.created_at)}`;

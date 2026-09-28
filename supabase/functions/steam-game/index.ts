@@ -415,6 +415,14 @@ function steamPageData(appId: string, html: string): SteamGame | null {
   };
 }
 
+function cleanSteamGameTitle(value: unknown): string {
+  return cleanText(value)
+    .replace(/^(?:Сэкономьте|Экономьте)\s+\d+\s*%\s+при покупке\s+(.+?)\s+в Steam$/i, "$1")
+    .replace(/^Save\s+\d+\s*%\s+(?:when you buy|on)\s+(.+?)\s+on Steam$/i, "$1")
+    .replace(/\s+(?:в Steam|on Steam)$/i, "")
+    .trim();
+}
+
 async function fetchSteamPageGame(appId: string, language: "russian" | "english") {
   const regions = ["us", "gb", "de", "ru", ""];
   let lastError = "";
@@ -491,7 +499,7 @@ async function getSteamData(appId: string) {
   const parsedDate = parseSteamDate(releaseDateText);
   return {
     appId: Number(appId),
-    title: cleanText(game.name),
+    title: cleanSteamGameTitle(game.name),
     description: cleanText(game.short_description),
     coverUrl: String(game.header_image ?? game.capsule_image ?? "").trim(),
     comingSoon: Boolean(game.release_date?.coming_soon),
@@ -538,7 +546,7 @@ async function publishSuggestion(
     console.warn("Steam enrichment failed during publication:", readableError(error));
     steam = {
       appId: Number(suggestion.steam_app_id),
-      title: cleanText(suggestion.title),
+      title: cleanSteamGameTitle(suggestion.title),
       description: cleanText(suggestion.description),
       coverUrl: String(suggestion.cover_url || ""),
       comingSoon: false,
@@ -589,7 +597,7 @@ async function publishSuggestion(
   const corePayload = {
     steam_app_id: Number(suggestion.steam_app_id),
     steam_url: String(steam.steamUrl || suggestion.steam_url).slice(0, 500),
-    title: cleanText(steam.title || suggestion.title).slice(0, 120),
+    title: cleanSteamGameTitle(steam.title || suggestion.title).slice(0, 120),
     cover_url: String(steam.coverUrl || suggestion.cover_url || "").slice(0, 1000),
     description: cleanText(steam.description || suggestion.description || "Описание не указано.").slice(0, 2000),
     published: true,
@@ -746,7 +754,7 @@ async function syncStaleGames(supabase: ReturnType<typeof createClient>) {
         manualCoop ? record.coop_max_players : steam.coopMaxPlayers,
       );
       const payload = {
-        title: steam.title || record.title,
+        title: cleanSteamGameTitle(steam.title || record.title),
         cover_url: steam.coverUrl || record.cover_url,
         description: steam.description || record.description,
         release_date: steam.releaseDate || null,

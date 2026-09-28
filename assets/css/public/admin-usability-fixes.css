@@ -1,0 +1,65 @@
+/* Match the compact account feedback and spacing used elsewhere on the site. */
+body > #notice {
+  display: none;
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  left: 50%;
+  z-index: 2500;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(760px, calc(100vw - 32px));
+  margin: 0;
+  padding: 12px 20px;
+  border-radius: 6px;
+  color: #f0f0f0;
+  background: #202020;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .28);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+body > #notice.show { display: block; }
+body > #notice.success { color: #78d99a; }
+body > #notice.error { color: #ff7b68; }
+
+.admin-portal .proposal-search input:focus,
+.admin-portal .proposal-search input:focus-visible {
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.admin-portal .moderation-support-count .moderation-fact-icon {
+  filter: brightness(0) saturate(100%) invert(35%) sepia(84%) saturate(1749%) hue-rotate(333deg) brightness(104%) contrast(94%);
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-card-facts > .moderation-support-count {
+  gap: 10px !important;
+  color: rgba(240, 240, 240, .55) !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+}
+
+.admin-portal[data-portal-mode="proposal"] .moderation-support-count strong {
+  color: inherit !important;
+  font: inherit !important;
+}
+
+@media (min-width: 1101px) {
+  body.standalone-admin #adminPortal .admin-portal-body {
+    padding-top: 98rem !important;
+  }
+
+  .admin-portal #adminSection[data-admin-view="games"] .suggestion-moderation {
+    grid-template-rows: 130rem 110rem minmax(0, 1fr) !important;
+  }
+
+  .admin-portal #adminSection[data-admin-view="games"] .suggestion-moderation-filters {
+    align-self: start;
+  }
+}

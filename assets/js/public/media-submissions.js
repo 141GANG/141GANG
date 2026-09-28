@@ -717,7 +717,9 @@
       ? '<button class="media-selected-collapse" data-media-collapse type="button">Свернуть подборку</button>'
       : '';
 
-    elements.selected.innerHTML = `${fileTiles}${emptyTile}${moreTile}${collapseButton}`;
+    elements.selected.innerHTML = collapseButton
+      ? `<div class="media-selected-scroll"><div class="media-selected-grid">${fileTiles}${emptyTile}${moreTile}</div>${collapseButton}</div>`
+      : `${fileTiles}${emptyTile}${moreTile}`;
   }
 
   function ensureFilePreview() {
@@ -771,7 +773,7 @@
           </div>
         </div>
         <footer class="media-file-preview-footer">
-          <span class="media-file-preview-counter" id="mediaFilePreviewCounter"></span>
+          <div class="media-file-preview-thumbnails" id="mediaFilePreviewThumbnails" role="group" aria-label="Файлы подборки"></div>
           <strong class="media-file-preview-author" id="mediaFilePreviewAuthor"></strong>
         </footer>
       </section>`;
@@ -784,6 +786,17 @@
       }
       if (event.target === viewer.querySelector('#mediaFilePreviewStage')) {
         closeFilePreview();
+        return;
+      }
+      const thumbnail = event.target.closest('[data-media-preview-index]');
+      if (thumbnail) {
+        const index = Number(thumbnail.dataset.mediaPreviewIndex);
+        if (Number.isInteger(index) && index >= 0 && index < state.previewItems.length && index !== state.previewIndex) {
+          viewer.querySelector('#mediaFilePreviewStage video')?.pause?.();
+          state.previewIndex = index;
+          renderFilePreview();
+          viewer.querySelector(`[data-media-preview-index="${index}"]`)?.focus({ preventScroll: true });
+        }
         return;
       }
       const navigation = event.target.closest('[data-media-preview-nav]');
@@ -867,7 +880,21 @@
     stage.innerHTML = video
       ? `<video controls playsinline preload="metadata" src="${escapeHtml(selected.previewUrl)}"><p>Это видео не поддерживается браузером. Открой оригинал по ссылке ниже.</p></video>`
       : `<img alt="${escapeHtml(file.name)}" src="${escapeHtml(selected.previewUrl)}">`;
-    viewer.querySelector('#mediaFilePreviewCounter').textContent = `Файл ${state.previewIndex + 1} из ${count}`;
+    const thumbnails = viewer.querySelector('#mediaFilePreviewThumbnails');
+    if (state.previewDetails) {
+      thumbnails.replaceChildren();
+    } else {
+      thumbnails.innerHTML = state.previewItems.map((item, index) => {
+        const isClip = isVideo(item.file);
+        const name = item.file?.name || `Файл ${index + 1}`;
+        const thumb = isClip
+          ? `<video src="${escapeHtml(item.previewUrl)}" muted playsinline preload="metadata" aria-hidden="true"></video><span class="media-file-preview-thumb-play" aria-hidden="true">▶</span>`
+          : `<img src="${escapeHtml(item.previewUrl)}" alt="" loading="eager">`;
+        return `<button class="media-file-preview-thumb${index === state.previewIndex ? ' is-active' : ''}" data-media-preview-index="${index}" type="button" aria-label="Открыть ${isClip ? 'видео' : 'файл'} ${index + 1} из ${count}: ${escapeHtml(name)}"${index === state.previewIndex ? ' aria-current="true"' : ''}>${thumb}</button>`;
+      }).join('');
+      thumbnails.setAttribute('aria-label', `Файлы подборки, выбран ${state.previewIndex + 1} из ${count}`);
+      if (!viewer.hidden) thumbnails.querySelector('.is-active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
     viewer.querySelector('#mediaFilePreviewAuthor').textContent = `Предполагаемый автор · ${state.previewAuthor || 'Не указан'}`;
     const details = state.previewDetails;
     const detailsPanel = viewer.querySelector('#mediaFilePreviewDetails');
@@ -921,6 +948,7 @@
     if (adminPortal) adminPortal.inert = true;
     document.documentElement.classList.add('media-file-preview-open');
     viewer.querySelector('.media-file-preview-dialog')?.focus();
+    viewer.querySelector('.media-file-preview-thumb.is-active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }
 
   function openFilePreview(id, trigger) {

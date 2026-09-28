@@ -51,9 +51,10 @@ function catalogReleaseLabel(game, meta) {
     }
 
     function buildCard(game, index) {
+      const displayTitle = cleanSteamGameTitle(game.title);
       const coverUrl = safeExternalUrl(game.cover_url);
       const cover = coverUrl
-        ? `<img src="${escapeHtml(coverUrl)}" alt="Обложка ${escapeHtml(game.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='./assets/images/figma/game-placeholder.svg'">`
+        ? `<img src="${escapeHtml(coverUrl)}" alt="Обложка ${escapeHtml(displayTitle)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='./assets/images/figma/game-placeholder.svg'">`
         : `<div class="cover-fallback"><img src="${TWITCH_LOGO_DATA}" alt="" aria-hidden="true"></div>`;
       const meta = getReleaseMeta(game);
       const favorite = Boolean(game.is_favorite);
@@ -69,7 +70,7 @@ function catalogReleaseLabel(game, meta) {
         : `${playerRange.min}–${playerRange.max} ${playerWord(playerRange.max)}`;
 
       return `
-        <article class="game-card${favorite ? ' is-favorite' : ''}${libraryStatus ? ` is-${escapeHtml(libraryStatus)}` : ''}" data-game-id="${escapeHtml(game.id)}" tabindex="0" role="button" aria-label="Открыть подробности игры ${escapeHtml(game.title)}" style="--delay:${Math.min(index * 45, 260)}ms">
+        <article class="game-card${favorite ? ' is-favorite' : ''}${libraryStatus ? ` is-${escapeHtml(libraryStatus)}` : ''}" data-game-id="${escapeHtml(game.id)}" tabindex="0" role="button" aria-label="Открыть подробности игры ${escapeHtml(displayTitle)}" style="--delay:${Math.min(index * 45, 260)}ms">
           <div class="card-visual">${cover}</div>
           <div class="card-shade" aria-hidden="true"></div>
           <span class="game-reputation visually-hidden" aria-label="Голосов за игру: ${reputation}">${reputation}</span>
@@ -78,7 +79,7 @@ function catalogReleaseLabel(game, meta) {
             <span class="release-badge ${meta.badgeClass}"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14" rx="2"></rect><path d="M8 3v6M16 3v6M4 10h16"></path></svg>${escapeHtml(catalogReleaseLabel(game, meta))}</span>
           </div>
           <div class="card-bottom">
-            <h3 class="card-title">${escapeHtml(game.title)}</h3>
+            <h3 class="card-title">${escapeHtml(displayTitle)}</h3>
             <div class="card-reactions" aria-label="Лайков: ${likes}, дизлайков: ${dislikes}">
               <span class="card-reaction" title="Лайков"><img src="./assets/images/figma/like.png" alt="" aria-hidden="true"><b class="card-like-count">${likes}</b></span>
               <span class="card-reaction" title="Дизлайков"><img class="thumb-down" src="./assets/images/figma/dislike.png" alt="" aria-hidden="true"><b class="card-dislike-count">${dislikes}</b></span>
